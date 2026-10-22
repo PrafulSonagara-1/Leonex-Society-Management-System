@@ -78,10 +78,15 @@ app.get('*', (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log('==========================================================');
-  console.log(` Smart Society Management System Express Server Started!`);
-  console.log(` Server listening at: http://localhost:${PORT}/`);
-  console.log(` Access Role Dashboards at http://localhost:${PORT}/index.html`);
-  console.log('==========================================================');
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log('==========================================================');
+    console.log(` Smart Society Management System Express Server Started!`);
+    console.log(` Server listening at: http://localhost:${PORT}/`);
+    console.log(` Access Role Dashboards at http://localhost:${PORT}/index.html`);
+    console.log('==========================================================');
+  });
+}
+
+module.exports = app;
+
