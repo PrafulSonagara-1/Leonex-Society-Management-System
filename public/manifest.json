@@ -1,0 +1,24 @@
+{
+  "name": "Leonex – Smart Society Management System",
+  "short_name": "Leonex SSMS",
+  "description": "Next-Generation Smart Residential & Society Management Platform",
+  "start_url": "/login.html",
+  "display": "standalone",
+  "background_color": "#0B0F19",
+  "theme_color": "#6366F1",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='42' fill='%236366F1'/%3E%3Cpath d='M48 48h24v72h64v24H48V48z' fill='%23ffffff'/%3E%3Ccircle cx='140' cy='60' r='14' fill='%2310B981'/%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%236366F1'/%3E%3Cpath d='M128 128h64v192h164v64H128V128z' fill='%23ffffff'/%3E%3Ccircle cx='370' cy='160' r='36' fill='%2310B981'/%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leonex SSMS | Smart Society Management System</title>
+  <meta name="description"
+    content="Leonex SSMS is a premium smart housing society management platform with automated billing, gate security, amenity reservations, and committee administration.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/cosmic.css?v=3.0">
+  <link rel="stylesheet" href="css/style.css?v=3.0">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f0e0e">
+  <script src="js/theme.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
+</head>
+
+<body>
+  <div class="offb" id="offlineBanner" style="display:none;"><i class="fa-solid fa-wifi"></i> Offline &mdash; Actions
+    will sync when connection returns.</div>
+
+  <!-- HYPERION-INSPIRED NAVIGATION HEADER -->
+  <header class="cosmic-header-wrap">
+    <div class="container mx-auto">
+      <div class="cosmic-nav-pill">
+        <a class="cosmic-brand" href="index.html">
+          <span class="cosmic-brand-badge">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="4"></circle>
+              <path
+                d="M12 4h.01M20 12h.01M12 20h.01M4 12h.01M17.657 6.343h.01M17.657 17.657h.01M6.343 17.657h.01M6.343 6.343h.01">
+              </path>
+            </svg>
+          </span>
+          <span class="cosmic-brand-name">Leo<span>nex</span></span>
+        </a>
+
+        <nav class="cosmic-nav-links" id="cosmicNavLinks">
+          <a href="index.html" class="cosmic-nav-link active">Home</a>
+          <a href="#about" class="cosmic-nav-link">About</a>
+          <a href="#features" class="cosmic-nav-link">Feature</a>
+          <a href="#contact" class="cosmic-nav-link">Contact</a>
+        </nav>
+
+        <div class="cosmic-nav-actions">
+          <button class="btn-theme-toggle" onclick="toggleTheme(event)" aria-label="Toggle theme" title="Switch Theme">
+            <i class="fa-solid fa-sun" id="themeIcon"></i>
+          </button>
+          <a href="login.html" class="cosmic-nav-btn-ghost">Log in</a>
+          <a href="demo.html" class="cosmic-nav-btn-primary">
+            See Demo
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m9 18 6-6-6-6" />
+            </svg>
+          </a>
+          <button class="cosmic-nav-toggle" id="navHamburger" aria-label="Toggle mobile menu">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Drawer -->
+      <div class="cosmic-mobile-drawer" id="navMobileDrawer">
+        <a href="index.html" class="cosmic-mobile-link active">Home</a>
+        <a href="#about" class="cosmic-mobile-link">About</a>
+        <a href="#features" class="cosmic-mobile-link">Feature</a>
+        <a href="#contact" class="cosmic-mobile-link">Contact</a>
+        <div class="cosmic-mobile-btns">
+          <a href="login.html" class="cosmic-nav-btn-ghost" style="text-align:center;">Log in</a>
+          <a href="demo.html" class="cosmic-nav-btn-primary" style="justify-content:center;">See Demo</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- COSMIC HERO (Shooting Stars to Picture Surface Line) -->
+  <section class="cosmic-hero" id="home">
+    <!-- Shooting Star Meteors & Picture Surface Collision Canvas -->
+    <canvas id="cosmicRainCanvas" aria-hidden="true"></canvas>
+
+    <div class="cosmic-hero__content">
+      <!-- Eyebrow Badge -->
+      <div class="cosmic-eyebrow">
+        <span class="cosmic-eyebrow__badge">New</span>
+        <span>Smart Society Management</span>
+      </div>
+
+      <!-- Title -->
+      <h1 class="cosmic-hero__title">
+        Optimize Your Society<br>with <span class="cosmic-accent">Smart Automation</span>
+      </h1>
+
+      <!-- Subtitle -->
+      <p class="cosmic-hero__sub">
+        Meet our intelligent SaaS platform to lighten your workload, increase efficiency, automate maintenance billing,
+        and make more accurate decisions.
+      </p>
+
+
+    </div>
+
+    <!-- DASHBOARD PREVIEW (Picture Surface with Ambient Glowing Aura & Falling Stars) -->
+    <div class="cosmic-dash-wrap" id="cosmicDashboard">
+      <div class="cosmic-dash-glow" aria-hidden="true"></div>
+      <div class="cosmic-dash-frame">
+        <!-- Titlebar -->
+        <div class="cosmic-dash-titlebar">
+          <div class="cosmic-dash-titlebar-left">
+            <div class="cosmic-dash-dots">
+              <span class="cosmic-dash-dot cosmic-dash-dot--red"></span>
+              <span class="cosmic-dash-dot cosmic-dash-dot--yellow"></span>
+              <span class="cosmic-dash-dot cosmic-dash-dot--green"></span>
+            </div>
+            <div class="cosmic-dash-url-pill">
+              <i class="fa-solid fa-lock text-success me-1"></i> https://leonex.io/admin.html
+            </div>
+          </div>
+          <div class="cosmic-dash-titlebar-right">
+            <span class="cosmic-dash-live-badge">
+              <span class="cosmic-dash-pulse-dot"></span> Live Admin Dashboard
+            </span>
+          </div>
+        </div>
+
+        <!-- Real Admin Dashboard Picture in Black Theme -->
+        <div class="cosmic-dash-image-wrap">
+          <img src="hero.png" alt="Leonex SSMS Admin Dashboard in Black Theme" class="cosmic-dash-hero-img" id="heroProjectImage" />
+          <div class="cosmic-dash-img-overlay">
+            <a href="demo.html?role=Admin" class="btn btn-primary rounded-pill px-4 py-2 shadow-lg fw-bold d-inline-flex align-items-center gap-2">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i> Explore Live Admin Portal
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOGO MARQUEE TICKER (Project-Related Residential Societies) -->
+  <div class="cosmic-ticker">
+    <div class="cosmic-ticker__label">Trusted by leading residential societies & gated communities</div>
+    <div class="cosmic-ticker__track" aria-hidden="true">
+      <span class="cosmic-ticker__item"><i class="fa-solid fa-building"></i> Sunrise Heights Residency</span>
+      <span class="cosmic-ticker__item"><i class="fa-solid fa-city"></i> Silver Oak Enclave</span>
+      <span class="cosmic-ticker__item"><i class="fa-solid fa-tree-city"></i> Palm Grove Society</span>
+      <span class="cosmic-ticker__item"><i class="fa-solid fa-building-columns"></i> Royal Heritage Towers</span>
+      <span class="cosmic-ticker__item"><i class="fa-solid fa-house-chimney-window"></i> Green Valley Villas</span>
+      <span class="cosmic-ticker__item"><i class="fa-solid fa-seedling"></i> Harmony Gardens</span>
+      <span class="cosmic-ticker__item"><i class="fa-solid fa-gem"></i> Emerald Crest Society</span>
+      <span class="cosmic-ticker__item"><i class="fa-solid fa-shield-halved"></i> Skyline Urban Homes</span>
+      <!-- Duplicate for seamless infinite loop -->
+      <span class="cosmic-ticker__item"><i class="fa-solid fa-building"></i> Sunrise Heights Residency</span>
+      <span class="cosmic-ticker__item"><i class="fa-solid fa-city"></i> Silver Oak Enclave</span>
+      <span class="cosmic-ticker__item"><i class="fa-solid fa-tree-city"></i> Palm Grove Society</span>
+      <span class="cosmic-ticker__item"><i class="fa-solid fa-building-columns"></i> Royal Heritage Towers</span>
+      <span class="cosmic-ticker__item"><i class="fa-solid fa-house-chimney-window"></i> Green Valley Villas</span>
+      <span class="cosmic-ticker__item"><i class="fa-solid fa-seedling"></i> Harmony Gardens</span>
+      <span class="cosmic-ticker__item"><i class="fa-solid fa-gem"></i> Emerald Crest Society</span>
+      <span class="cosmic-ticker__item"><i class="fa-solid fa-shield-halved"></i> Skyline Urban Homes</span>
+    </div>
+  </div>
+
+  <!-- ABOUT SECTION -->
+  <section class="cosmic-section cosmic-benefits-section" id="about">
+    <span id="benefits" style="position:relative; top:-80px; display:block; visibility:hidden;" aria-hidden="true"></span>
+    <div class="container mx-auto px-6 max-w-6xl">
+      <div class="cosmic-benefits-layout">
+        <!-- Left Sticky Header -->
+        <div class="cosmic-benefits-left">
+          <span class="cosmic-eyebrow--section">About Us</span>
+          <h2 class="cosmic-section-title">What Do We Bring to You?</h2>
+          <p class="cosmic-section-sub">
+            All the innovative solutions you need to manage and grow your residential community are here! We add value
+            with features that simplify your workflow, increase efficiency, and strengthen governance.
+          </p>
+        </div>
+
+        <!-- Right Stacked Cards -->
+        <div class="cosmic-benefits-right">
+          <!-- Card 01 -->
+          <div class="cosmic-bcard">
+            <div class="cosmic-bcard__header">
+              <div class="cosmic-bcard__icon">
+                <i class="fa-solid fa-cubes"></i>
+              </div>
+              <span class="cosmic-bcard__num">01</span>
+            </div>
+            <h3 class="cosmic-bcard__title">Intelligent Automation</h3>
+            <p class="cosmic-bcard__text">Save time and increase your efficiency by automating recurring maintenance
+              bills, visitor validation, and receipt generation.</p>
+          </div>
+
+          <!-- Card 02 -->
+          <div class="cosmic-bcard">
+            <div class="cosmic-bcard__header">
+              <div class="cosmic-bcard__icon">
+                <i class="fa-solid fa-chart-line"></i>
+              </div>
+              <span class="cosmic-bcard__num">02</span>
+            </div>
+            <h3 class="cosmic-bcard__title">Real Time Data Analytics</h3>
+            <p class="cosmic-bcard__text">We help you make more informed and strategic committee decisions by instantly
+              tracking maintenance collections and visitor footfalls.</p>
+          </div>
+
+          <!-- Card 03 -->
+          <div class="cosmic-bcard">
+            <div class="cosmic-bcard__header">
+              <div class="cosmic-bcard__icon">
+                <i class="fa-solid fa-wallet"></i>
+              </div>
+              <span class="cosmic-bcard__num">03</span>
+            </div>
+            <h3 class="cosmic-bcard__title">Personalized Experience</h3>
+            <p class="cosmic-bcard__text">Tailored role-based dashboards for residents, committee members, security
+              guards, and administrators for seamless interaction.</p>
+          </div>
+
+          <!-- Card 04 -->
+          <div class="cosmic-bcard">
+            <div class="cosmic-bcard__header">
+              <div class="cosmic-bcard__icon">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+              </div>
+              <span class="cosmic-bcard__num">04</span>
+            </div>
+            <h3 class="cosmic-bcard__title">Scalable Structure</h3>
+            <p class="cosmic-bcard__text">Move forward into the future with confidence, with a secure cloud
+              infrastructure that easily scales from 20 flats to 2,000+ units.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES GRID (3-Column Layout) -->
+  <section class="cosmic-section cosmic-section--alt" id="features">
+    <span id="feature" style="position:relative; top:-80px; display:block; visibility:hidden;" aria-hidden="true"></span>
+    <div class="container mx-auto px-6 max-w-6xl">
+      <div class="cosmic-section-head">
+        <span class="cosmic-eyebrow--section">Features</span>
+        <h2 class="cosmic-section-title">Everything You Need to Succeed</h2>
+        <p class="cosmic-section-sub">Our comprehensive platform provides all the tools you need to optimize society
+          operations, boost transparency, and enhance community living.</p>
+      </div>
+
+      <div class="cosmic-feat-grid" id="cosmicFeatGrid">
+        <!-- Shared Moving Hover Spotlight Background (Inspired by cosmic.shadcnuikit.com) -->
+        <div class="cosmic-feat-shared-bg" id="cosmicFeatSharedBg" aria-hidden="true"></div>
+
+        <!-- Card 1 -->
+        <div class="cosmic-feat-grid-card" tabindex="0" role="article" aria-label="Automated Billing">
+          <div class="cosmic-feat-grid-inner">
+            <div class="cosmic-feat-grid-content">
+              <h3 class="cosmic-feat-grid-title">Automated Billing</h3>
+              <p class="cosmic-feat-grid-text">Automated monthly maintenance invoicing, UPI payment QR codes, and
+                instant digital receipts.</p>
+            </div>
+            <div class="cosmic-feat-grid-icon">
+              <i class="fa-solid fa-receipt"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="cosmic-feat-grid-card" tabindex="0" role="article" aria-label="Real-Time Analytics">
+          <div class="cosmic-feat-grid-inner">
+            <div class="cosmic-feat-grid-content">
+              <h3 class="cosmic-feat-grid-title">Real-Time Analytics</h3>
+              <p class="cosmic-feat-grid-text">Monitor collection rates, open complaints, and amenity booking trends
+                with visual dashboards.</p>
+            </div>
+            <div class="cosmic-feat-grid-icon">
+              <i class="fa-solid fa-chart-pie"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="cosmic-feat-grid-card" tabindex="0" role="article" aria-label="Gate Pass Security">
+          <div class="cosmic-feat-grid-inner">
+            <div class="cosmic-feat-grid-content">
+              <h3 class="cosmic-feat-grid-title">Gate Pass Security</h3>
+              <p class="cosmic-feat-grid-text">Pre-register visitors, verify delivery executives via OTP, and keep
+                comprehensive digital logs.</p>
+            </div>
+            <div class="cosmic-feat-grid-icon">
+              <i class="fa-solid fa-shield-halved"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="cosmic-feat-grid-card" tabindex="0" role="article" aria-label="Amenity Booking">
+          <div class="cosmic-feat-grid-inner">
+            <div class="cosmic-feat-grid-content">
+              <h3 class="cosmic-feat-grid-title">Amenity Booking</h3>
+              <p class="cosmic-feat-grid-text">Reserve clubhouse, swimming pool, tennis court, and banquet hall with
+                clash-free slot management.</p>
+            </div>
+            <div class="cosmic-feat-grid-icon">
+              <i class="fa-solid fa-calendar-check"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 5 -->
+        <div class="cosmic-feat-grid-card" tabindex="0" role="article" aria-label="Smart Notices & Polls">
+          <div class="cosmic-feat-grid-inner">
+            <div class="cosmic-feat-grid-content">
+              <h3 class="cosmic-feat-grid-title">Smart Notices & Polls</h3>
+              <p class="cosmic-feat-grid-text">Publish emergency broadcasts, AGM agendas, and digital opinion polls with
+                instant push alerts.</p>
+            </div>
+            <div class="cosmic-feat-grid-icon">
+              <i class="fa-solid fa-bullhorn"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 6 -->
+        <div class="cosmic-feat-grid-card" tabindex="0" role="article" aria-label="24/7 Monitoring & Helpdesk">
+          <div class="cosmic-feat-grid-inner">
+            <div class="cosmic-feat-grid-content">
+              <h3 class="cosmic-feat-grid-title">24/7 Monitoring & Helpdesk</h3>
+              <p class="cosmic-feat-grid-text">Track maintenance complaints from ticket submission to verified vendor
+                resolution in real time.</p>
+            </div>
+            <div class="cosmic-feat-grid-icon">
+              <i class="fa-solid fa-headset"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES / SOLUTIONS SECTION -->
+  <section class="cosmic-section" id="solutions">
+    <div class="container mx-auto px-6 max-w-5xl">
+      <div class="cosmic-section-head">
+        <span class="cosmic-eyebrow--section">Services</span>
+        <h2 class="cosmic-section-title">Empower Your Community</h2>
+        <p class="cosmic-section-sub">From financial auditing to smart hardware integration, we have the expertise to
+          help your society thrive.</p>
+      </div>
+
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+        <div class="cosmic-feat-card">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <h3 class="cosmic-feat-title">Accounting & Auditing Services</h3>
+            <span
+              style="background:var(--cosmic-amber); color:#fff; font-size:10px; font-weight:700; padding:2px 8px; border-radius:6px;">PRO</span>
+          </div>
+          <p class="cosmic-feat-text">Automated balance sheets, income-expense statements, and exportable ledger reports
+            for yearly auditing.</p>
+        </div>
+
+        <div class="cosmic-feat-card">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <h3 class="cosmic-feat-title">Custom Society Domain Integration</h3>
+            <span
+              style="background:var(--cosmic-amber); color:#fff; font-size:10px; font-weight:700; padding:2px 8px; border-radius:6px;">PRO</span>
+          </div>
+          <p class="cosmic-feat-text">Run your resident portal on your society's custom domain (e.g.
+            resident.sunriseresidency.com).</p>
+        </div>
+
+        <div class="cosmic-feat-card">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <h3 class="cosmic-feat-title">WhatsApp & SMS Gate Notifications</h3>
+            <span
+              style="background:var(--cosmic-amber); color:#fff; font-size:10px; font-weight:700; padding:2px 8px; border-radius:6px;">PRO</span>
+          </div>
+          <p class="cosmic-feat-text">Instant automated WhatsApp alerts to flat owners whenever a visitor, cab, or
+            delivery boy checks in.</p>
+        </div>
+
+        <div class="cosmic-feat-card">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <h3 class="cosmic-feat-title">UPI & Payment Gateway Integration</h3>
+            <span
+              style="background:var(--cosmic-amber); color:#fff; font-size:10px; font-weight:700; padding:2px 8px; border-radius:6px;">PRO</span>
+          </div>
+          <p class="cosmic-feat-text">Direct society bank account settlements with zero friction and automated instant
+            receipt reconciliation.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROLE PORTALS -->
+  <section class="cosmic-section cosmic-section--alt" id="roles">
+    <div class="container mx-auto px-6 max-w-6xl">
+      <div class="cosmic-section-head">
+        <span class="cosmic-eyebrow--section">Role-Based Access</span>
+        <h2 class="cosmic-section-title">Tailored Portals for Every Member</h2>
+        <p class="cosmic-section-sub">Purpose-built views designed for maximum speed and simplicity.</p>
+      </div>
+
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
+        <div class="cosmic-role-card">
+          <div class="cosmic-feat-icon"><i class="fa-solid fa-crown"></i></div>
+          <h3 class="cosmic-role-title">Society Admin</h3>
+          <ul class="cosmic-role-list">
+            <li><i class="fa-solid fa-check"></i> Manage flats & member approvals</li>
+            <li><i class="fa-solid fa-check"></i> Generate maintenance dues & invoices</li>
+            <li><i class="fa-solid fa-check"></i> Financial ledger & expense tracking</li>
+          </ul>
+          <a href="demo.html?role=Admin" class="cosmic-role-cta">Admin Demo <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+        <div class="cosmic-role-card">
+          <div class="cosmic-feat-icon"><i class="fa-solid fa-house-user"></i></div>
+          <h3 class="cosmic-role-title">Resident</h3>
+          <ul class="cosmic-role-list">
+            <li><i class="fa-solid fa-check"></i> Pay maintenance via UPI with receipt</li>
+            <li><i class="fa-solid fa-check"></i> Pre-approve guests & delivery passes</li>
+            <li><i class="fa-solid fa-check"></i> Book amenities & raise complaints</li>
+          </ul>
+          <a href="demo.html?role=Resident" class="cosmic-role-cta">Resident Demo <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+        <div class="cosmic-role-card">
+          <div class="cosmic-feat-icon"><i class="fa-solid fa-shield-halved"></i></div>
+          <h3 class="cosmic-role-title">Security Guard</h3>
+          <ul class="cosmic-role-list">
+            <li><i class="fa-solid fa-check"></i> High-speed 1-tap visitor check-in</li>
+            <li><i class="fa-solid fa-check"></i> Verify pre-approved guest QR/passcodes</li>
+            <li><i class="fa-solid fa-check"></i> Emergency alarm & gate log sync</li>
+          </ul>
+          <a href="demo.html?role=Security%20Guard" class="cosmic-role-cta">Guard Demo <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+        <div class="cosmic-role-card">
+          <div class="cosmic-feat-icon"><i class="fa-solid fa-users-gear"></i></div>
+          <h3 class="cosmic-role-title">Committee</h3>
+          <ul class="cosmic-role-list">
+            <li><i class="fa-solid fa-check"></i> Society notice board broadcasts</li>
+            <li><i class="fa-solid fa-check"></i> Create voting polls & AGM surveys</li>
+            <li><i class="fa-solid fa-check"></i> Review pending vendor payments</li>
+          </ul>
+          <a href="demo.html?role=Committee%20Member" class="cosmic-role-cta">Committee Demo <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ SECTION (7 General FAQs with Smooth + to Ã— Animation) -->
+  <section class="cosmic-section" id="faq">
+    <div class="container mx-auto px-6 max-w-4xl">
+      <div class="cosmic-section-head">
+        <span class="cosmic-eyebrow--section"><i class="fa-solid fa-circle-question mr-1.5"></i> Knowledge Base</span>
+        <h2 class="cosmic-section-title">Frequently Asked Questions</h2>
+        <p class="cosmic-section-sub">Have questions? Everything you need to know about onboarding, security, billing,
+          and using Leonex.</p>
+      </div>
+
+      <div class="faq-section-wrapper">
+        <!-- Accordion List (5 Curated FAQs) -->
+        <div class="faq-accordion-list" id="faqAccordionList">
+
+          <!-- FAQ 1 -->
+          <div class="faq-item" id="faq-item-1">
+            <button class="faq-trigger" onclick="toggleFaqItem('faq-item-1')" aria-expanded="false">
+              <div class="faq-trigger-left">
+                <span class="faq-number-pill">01</span>
+                <span class="faq-question-title">How fast can our society get started with Leonex?</span>
+              </div>
+              <div class="faq-indicator" aria-hidden="true">
+                <span class="faq-morph-icon">
+                  <span class="faq-bar-horizontal"></span>
+                  <span class="faq-bar-vertical"></span>
+                </span>
+              </div>
+            </button>
+            <div class="faq-content-wrapper">
+              <div class="faq-content-inner">
+                <div class="faq-body">
+                  <p>You can register your society in under 2 minutes. The platform allows instant digital setup of
+                    wings, flats, and members, with full CSV data import capabilities.</p>
+                  <ul class="faq-feature-list">
+                    <li><i class="fa-solid fa-circle-check"></i> 1-click wing & flat structure generator</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Bulk member CSV import with auto-validation</li>
+                    <li><i class="fa-solid fa-circle-check"></i> No hardware or servers required â€” 100% cloud-ready</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- FAQ 2 -->
+          <div class="faq-item" id="faq-item-2">
+            <button class="faq-trigger" onclick="toggleFaqItem('faq-item-2')" aria-expanded="false">
+              <div class="faq-trigger-left">
+                <span class="faq-number-pill">02</span>
+                <span class="faq-question-title">Is Leonex available as an installable mobile app?</span>
+              </div>
+              <div class="faq-indicator" aria-hidden="true">
+                <span class="faq-morph-icon">
+                  <span class="faq-bar-horizontal"></span>
+                  <span class="faq-bar-vertical"></span>
+                </span>
+              </div>
+            </button>
+            <div class="faq-content-wrapper">
+              <div class="faq-content-inner">
+                <div class="faq-body">
+                  <p>Yes! Leonex is designed as a high-performance Progressive Web App (PWA). It works seamlessly
+                    across Android, iOS, Windows, and macOS without requiring app store downloads.</p>
+                  <ul class="faq-feature-list">
+                    <li><i class="fa-solid fa-circle-check"></i> Instant home screen installation with custom society
+                      icon</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Offline-first data caching with Service Worker support
+                    </li>
+                    <li><i class="fa-solid fa-circle-check"></i> Real-time push notifications for gate approvals and
+                      emergency alerts</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- FAQ 3 -->
+          <div class="faq-item" id="faq-item-3">
+            <button class="faq-trigger" onclick="toggleFaqItem('faq-item-3')" aria-expanded="false">
+              <div class="faq-trigger-left">
+                <span class="faq-number-pill">03</span>
+                <span class="faq-question-title">Can security guards operate the gate system without technical
+                  training?</span>
+              </div>
+              <div class="faq-indicator" aria-hidden="true">
+                <span class="faq-morph-icon">
+                  <span class="faq-bar-horizontal"></span>
+                  <span class="faq-bar-vertical"></span>
+                </span>
+              </div>
+            </button>
+            <div class="faq-content-wrapper">
+              <div class="faq-content-inner">
+                <div class="faq-body">
+                  <p>Yes! The Security Guard portal is built with oversized touch-friendly buttons, high-contrast text,
+                    fast numeric keypads, and zero complex menus for frictionless gate operation.</p>
+                  <ul class="faq-feature-list">
+                    <li><i class="fa-solid fa-circle-check"></i> Instant QR pass scanner with camera integration</li>
+                    <li><i class="fa-solid fa-circle-check"></i> One-tap 6-digit visitor OTP verification</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Dedicated delivery vendor quick-log (Swiggy, Zomato,
+                      Amazon)</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- FAQ 4 -->
+          <div class="faq-item" id="faq-item-4">
+            <button class="faq-trigger" onclick="toggleFaqItem('faq-item-4')" aria-expanded="false">
+              <div class="faq-trigger-left">
+                <span class="faq-number-pill">04</span>
+                <span class="faq-question-title">How do digital visitor entries and pre-approved guest passes
+                  work?</span>
+              </div>
+              <div class="faq-indicator" aria-hidden="true">
+                <span class="faq-morph-icon">
+                  <span class="faq-bar-horizontal"></span>
+                  <span class="faq-bar-vertical"></span>
+                </span>
+              </div>
+            </button>
+            <div class="faq-content-wrapper">
+              <div class="faq-content-inner">
+                <div class="faq-body">
+                  <p>Residents can generate a digital visitor pass from their portal in seconds. The guest receives a
+                    WhatsApp/SMS link with a secure QR code and numeric OTP that the guard validates instantly at the
+                    gate for seamless contactless entry.</p>
+                  <ul class="faq-feature-list">
+                    <li><i class="fa-solid fa-circle-check"></i> Instant visitor link via WhatsApp or SMS</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Real-time resident push confirmation upon guest arrival
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- FAQ 5 -->
+          <div class="faq-item" id="faq-item-5">
+            <button class="faq-trigger" onclick="toggleFaqItem('faq-item-5')" aria-expanded="false">
+              <div class="faq-trigger-left">
+                <span class="faq-number-pill">05</span>
+                <span class="faq-question-title">How are monthly maintenance and utility payments settled?</span>
+              </div>
+              <div class="faq-indicator" aria-hidden="true">
+                <span class="faq-morph-icon">
+                  <span class="faq-bar-horizontal"></span>
+                  <span class="faq-bar-vertical"></span>
+                </span>
+              </div>
+            </button>
+            <div class="faq-content-wrapper">
+              <div class="faq-content-inner">
+                <div class="faq-body">
+                  <p>Payments made via UPI QR code, Net Banking, or Direct Bank Transfer go straight into your society's
+                    registered bank account with instant automated digital receipts generated for residents.</p>
+                  <ul class="faq-feature-list">
+                    <li><i class="fa-solid fa-circle-check"></i> Direct dynamic UPI QR generation with auto-filled
+                      invoice amounts</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Instant downloadable PDF payment receipts</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Zero third-party escrow delays â€” direct account
+                      settlement</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Bottom Support Card -->
+        <div class="faq-support-card">
+          <div class="faq-support-info">
+            <div class="faq-support-icon">
+              <i class="fa-solid fa-headset"></i>
+            </div>
+            <div class="faq-support-text">
+              <h4>Still have questions?</h4>
+              <p>Can't find what you're looking for? Explore our documentation or test our live interactive demo.</p>
+            </div>
+          </div>
+          <div class="faq-support-actions">
+            <a href="docs.html" class="cosmic-btn-ghost" style="padding: 10px 18px; font-size: 13.5px;">
+              <i class="fa-solid fa-book-open"></i> Read Docs
+            </a>
+            <a href="demo.html" class="cosmic-btn-primary" style="padding: 10px 20px; font-size: 13.5px;">
+              <i class="fa-solid fa-play"></i> Try Sandbox Demo
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  <!-- CONTACT SECTION -->
+  <section class="cosmic-section" id="contact">
+    <div class="container mx-auto px-6 max-w-6xl">
+      <div class="cosmic-section-head">
+        <span class="cosmic-eyebrow--section"><i class="fa-solid fa-envelope" style="margin-right:6px;"></i> Contact Us</span>
+        <h2 class="cosmic-section-title">Get in Touch with Our Team</h2>
+        <p class="cosmic-section-sub">Have questions about onboarding your housing society, scheduling an on-site demonstration, or requesting enterprise features? We are here to assist you 24/7.</p>
+      </div>
+
+      <div class="cosmic-contact-wrapper" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 32px; margin-top: 40px; align-items: start;">
+        <!-- Left: Contact Details & Society Advisory -->
+        <div class="cosmic-contact-cards" style="display: flex; flex-direction: column; gap: 20px;">
+          <!-- Card 1: Direct Support -->
+          <div class="cosmic-feat-card" style="margin: 0; padding: 24px;">
+            <div style="display: flex; gap: 16px; align-items: flex-start;">
+              <div class="cosmic-bcard__icon" style="min-width: 44px; width: 44px; height: 44px; font-size: 18px;">
+                <i class="fa-solid fa-envelope"></i>
+              </div>
+              <div>
+                <h4 style="color: var(--cosmic-text-head); font-size: 17px; font-weight: 700; margin: 0 0 4px;">Email Support</h4>
+                <p style="color: var(--cosmic-text-sec); font-size: 14px; margin: 0 0 8px;">Our dedicated technical and onboarding team responds within minutes.</p>
+                <a href="mailto:support@leonex.io" style="color: var(--cosmic-amber-light); font-weight: 600; text-decoration: none; font-size: 14.5px;">support@leonex.io</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: Phone & WhatsApp -->
+          <div class="cosmic-feat-card" style="margin: 0; padding: 24px;">
+            <div style="display: flex; gap: 16px; align-items: flex-start;">
+              <div class="cosmic-bcard__icon" style="min-width: 44px; width: 44px; height: 44px; font-size: 18px;">
+                <i class="fa-brands fa-whatsapp"></i>
+              </div>
+              <div>
+                <h4 style="color: var(--cosmic-text-head); font-size: 17px; font-weight: 700; margin: 0 0 4px;">Phone &amp; WhatsApp Helpline</h4>
+                <p style="color: var(--cosmic-text-sec); font-size: 14px; margin: 0 0 8px;">Mon &ndash; Sat, 9:00 AM &ndash; 8:00 PM IST for urgent inquiries.</p>
+                <a href="tel:+919876543210" style="color: var(--cosmic-amber-light); font-weight: 600; text-decoration: none; font-size: 14.5px;">+91 98765 43210</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3: Enterprise & Onboarding -->
+          <div class="cosmic-feat-card" style="margin: 0; padding: 24px;">
+            <div style="display: flex; gap: 16px; align-items: flex-start;">
+              <div class="cosmic-bcard__icon" style="min-width: 44px; width: 44px; height: 44px; font-size: 18px;">
+                <i class="fa-solid fa-location-dot"></i>
+              </div>
+              <div>
+                <h4 style="color: var(--cosmic-text-head); font-size: 17px; font-weight: 700; margin: 0 0 4px;">Headquarters</h4>
+                <p style="color: var(--cosmic-text-sec); font-size: 14px; margin: 0;">Leonex Systems Tech Park, BKC, Mumbai &bull; Gujarat Hub</p>
+                <div style="margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: #10B981; font-weight: 600;">
+                  <span style="width: 8px; height: 8px; border-radius: 50%; background: #10B981; display: inline-block;"></span> 24/7 Gate Emergency Server Live
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Interactive Contact Form -->
+        <div class="cosmic-contact-form-card" style="background: var(--cosmic-card); border: 1px solid var(--cosmic-card-border); border-radius: 16px; padding: 32px; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
+          <h3 style="color: var(--cosmic-text-head); font-size: 20px; font-weight: 700; margin: 0 0 8px;">Send a Direct Message</h3>
+          <p style="color: var(--cosmic-text-sec); font-size: 14px; margin: 0 0 24px;">Fill out the form below and an SSMS specialist will contact you shortly.</p>
+
+          <form id="contactForm" onsubmit="handleContactSubmit(event)" style="display: flex; flex-direction: column; gap: 16px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div>
+                <label style="display: block; font-size: 13px; font-weight: 600; color: var(--cosmic-text-head); margin-bottom: 6px;">Your Name *</label>
+                <input type="text" id="contactName" required placeholder="e.g. Ramesh Patel" class="cosmic-contact-input" style="width: 100%; padding: 11px 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; color: var(--cosmic-text-head); font-size: 14px; outline: none; transition: border-color 0.2s;" />
+              </div>
+              <div>
+                <label style="display: block; font-size: 13px; font-weight: 600; color: var(--cosmic-text-head); margin-bottom: 6px;">Society Name *</label>
+                <input type="text" id="contactSociety" required placeholder="e.g. Sunrise Enclave" class="cosmic-contact-input" style="width: 100%; padding: 11px 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; color: var(--cosmic-text-head); font-size: 14px; outline: none; transition: border-color 0.2s;" />
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div>
+                <label style="display: block; font-size: 13px; font-weight: 600; color: var(--cosmic-text-head); margin-bottom: 6px;">Email Address *</label>
+                <input type="email" id="contactEmail" required placeholder="ramesh@example.com" class="cosmic-contact-input" style="width: 100%; padding: 11px 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; color: var(--cosmic-text-head); font-size: 14px; outline: none; transition: border-color 0.2s;" />
+              </div>
+              <div>
+                <label style="display: block; font-size: 13px; font-weight: 600; color: var(--cosmic-text-head); margin-bottom: 6px;">Phone Number *</label>
+                <input type="tel" id="contactPhone" required placeholder="+91 98765 00000" class="cosmic-contact-input" style="width: 100%; padding: 11px 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; color: var(--cosmic-text-head); font-size: 14px; outline: none; transition: border-color 0.2s;" />
+              </div>
+            </div>
+
+            <div>
+              <label style="display: block; font-size: 13px; font-weight: 600; color: var(--cosmic-text-head); margin-bottom: 6px;">How can we help? *</label>
+              <textarea id="contactMessage" required rows="3" placeholder="Tell us about your society requirements (number of flats, gate setup, automated billing needs)..." class="cosmic-contact-input" style="width: 100%; padding: 11px 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; color: var(--cosmic-text-head); font-size: 14px; outline: none; resize: vertical; transition: border-color 0.2s;" border-box;></textarea>
+            </div>
+
+            <div id="contactSuccessMsg" style="display:none; padding: 12px 16px; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; color: #10B981; font-size: 14px;">
+              <i class="fa-solid fa-circle-check" style="margin-right: 6px;"></i> Thank you! Your message has been sent. An SSMS specialist will reach out to you within 24 hours.
+            </div>
+
+            <button type="submit" id="contactSubmitBtn" class="cosmic-btn-primary" style="width: 100%; justify-content: center; padding: 13px; font-size: 15px; margin-top: 4px;">
+              <i class="fa-solid fa-paper-plane"></i> Send Message
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA BANNER -->
+  <section class="cosmic-section cosmic-section--alt" id="cta-final">
+    <div class="container mx-auto px-6 max-w-5xl">
+      <div class="cosmic-cta-banner">
+        <h2 style="font-size: clamp(28px, 4vw, 44px); font-weight:800; margin-bottom:14px;">Transform Your Housing
+          Society Today</h2>
+        <p style="font-size: 16px; margin-bottom: 28px; max-width: 600px; margin-left: auto; margin-right: auto;">Join
+          forward-thinking residential communities already streamlining billing, gate security, and resident happiness
+          with Leonex.</p>
+        <div class="cosmic-cta-group">
+          <a href="demo.html" class="cosmic-btn-primary"><i class="fa-solid fa-play"></i> Explore Live Demo</a>
+          <a href="login.html?tab=register" class="cosmic-btn-ghost"><i class="fa-solid fa-user-plus"></i> Register
+            Society Free</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COSMIC FOOTER -->
+  <footer class="cosmic-footer" id="footer">
+    <div class="container mx-auto px-6 max-w-6xl">
+      <div
+        style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 36px; margin-bottom: 40px;">
+        <div style="grid-column: span 1.5;">
+          <a class="cosmic-footer-logo" href="index.html">
+            <span class="cosmic-footer-logo-icon"><i class="fa-solid fa-building-user"></i></span>
+            <span>Society<span style="color:var(--cosmic-amber)">Hub</span></span>
+          </a>
+          <p class="cosmic-footer-tagline">The complete digital platform for modern housing society administration
+            &mdash; billing, gate security, and community governance.</p>
+        </div>
+
+        <div>
+          <div class="cosmic-footer-col-title">Navigation</div>
+          <ul class="cosmic-footer-links">
+            <li><a href="index.html"><i class="fa-solid fa-angle-right"></i> Home</a></li>
+            <li><a href="demo.html"><i class="fa-solid fa-angle-right"></i> Role Demos</a></li>
+            <li><a href="#about"><i class="fa-solid fa-angle-right"></i> About</a></li>
+            <li><a href="#features"><i class="fa-solid fa-angle-right"></i> Features</a></li>
+            <li><a href="super-admin.html"><i class="fa-solid fa-crown" style="color:var(--cosmic-amber-bright);"></i> Super Admin Portal</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="cosmic-footer-col-title">Resources</div>
+          <ul class="cosmic-footer-links">
+            <li><a href="docs.html"><i class="fa-solid fa-angle-right"></i> Documentation</a></li>
+            <li><a href="docs.html#api"><i class="fa-solid fa-angle-right"></i> API &amp; Architecture</a></li>
+            <li><a href="changelog.html"><i class="fa-solid fa-angle-right"></i> Changelog</a></li>
+            <li><a href="manifest.json"><i class="fa-solid fa-angle-right"></i> PWA Manifest</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="cosmic-footer-col-title">Legal & Security</div>
+          <ul class="cosmic-footer-links">
+            <li><a href="privacy.html"><i class="fa-solid fa-shield-halved"></i> Privacy Policy</a></li>
+            <li><a href="terms.html"><i class="fa-solid fa-file-contract"></i> Terms of Service</a></li>
+            <li><a href="cookies.html"><i class="fa-solid fa-cookie"></i> Cookie Preferences</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="cosmic-footer-bottom">
+        <div class="cosmic-footer-bottom-inner">
+          <span class="cosmic-footer-copy">&copy; 2026 Leonex Systems. All rights reserved.</span>
+          <div class="cosmic-footer-bottom-links">
+            <a href="privacy.html">Privacy</a>
+            <a href="terms.html">Terms</a>
+            <a href="cookies.html">Cookies</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/db.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/firebase-auth.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/cosmic-rain.js"></script>
+  <script src="js/click-spark.js"></script>
+  <script src="js/vercel-tabs.js"></script>
+  <script>
+    const hb = document.getElementById('navHamburger'), md = document.getElementById('navMobileDrawer');
+    if (hb && md) {
+      hb.addEventListener('click', () => md.classList.toggle('open'));
+      md.querySelectorAll('a').forEach(a => a.addEventListener('click', () => md.classList.remove('open')));
+    }
+
+    function handleContactSubmit(e) {
+      e.preventDefault();
+      const btn = document.getElementById('contactSubmitBtn');
+      const success = document.getElementById('contactSuccessMsg');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
+      }
+      setTimeout(() => {
+        if (btn) {
+          btn.style.display = 'none';
+        }
+        if (success) {
+          success.style.display = 'block';
+        }
+        const form = document.getElementById('contactForm');
+        if (form) form.reset();
+      }, 650);
+    }
+
+    function toggleFaqItem(itemId) {
+      const item = document.getElementById(itemId);
+      if (!item) return;
+      const isOpen = item.classList.contains('is-open');
+
+      // Smoothly close all other open FAQ items (rotating their Ã— back to +)
+      document.querySelectorAll('.faq-item').forEach(el => {
+        if (el !== item && el.classList.contains('is-open')) {
+          el.classList.remove('is-open');
+          const trigger = el.querySelector('.faq-trigger');
+          if (trigger) trigger.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      // Toggle the clicked FAQ item
+      if (isOpen) {
+        item.classList.remove('is-open');
+        const trigger = item.querySelector('.faq-trigger');
+        if (trigger) trigger.setAttribute('aria-expanded', 'false');
+      } else {
+        item.classList.add('is-open');
+        const trigger = item.querySelector('.faq-trigger');
+        if (trigger) trigger.setAttribute('aria-expanded', 'true');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      try { await SystemDB.init(); } catch (e) { console.warn('DB:', e); }
+      try { initFirebaseAuth(); } catch (e) { console.warn('FB:', e); }
+      try {
+        const u = SystemDB.getCurrentUser();
+        // If user is exploring demo mode or on landing page, do not trap them in redirect loop
+        if (sessionStorage.getItem('ssm_demo_mode') === 'true') {
+          // Allow full browsing of landing page
+        } else if (u && u.role && u.status === 'Approved' && window.location.search.includes('auth=success')) {
+          rd(u.role);
+          return;
+        } else if (u && u.status === 'Pending') {
+          window.location.href = 'waiting-approval.html';
+          return;
+        }
+      } catch (e) { }
+    });
+
+    function rd(r) {
+      const m = {
+        'Admin': 'admin.html',
+        'Resident': 'resident.html',
+        'Security Guard': 'guard.html',
+        'Committee Member': 'committee.html'
+      };
+      window.location.href = m[r] || 'resident.html';
+    }
+
+    let dp = null;
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => { }));
+    }
+    window.addEventListener('online', () => { const b = document.getElementById('offlineBanner'); if (b) b.style.display = 'none'; });
+    window.addEventListener('offline', () => { const b = document.getElementById('offlineBanner'); if (b) b.style.display = 'block'; });
+  </script>
+  <script src="js/pwa-install.js"></script>
+</body>
+
+</html>
+

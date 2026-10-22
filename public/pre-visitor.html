@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pre-Register Visitor | Leonex SSMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="js/theme.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+  <link href="css/style.css?v=3.5" rel="stylesheet">
+  <link href="css/reactbits-theme.css" rel="stylesheet">
+  <link rel="manifest" href="manifest.json">
+  <style>
+    .pav-card { border-left: 3px solid var(--accent-orange); transition: transform 0.2s; }
+    .pav-card:hover { transform: translateY(-2px); }
+    .timeline-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent-orange); flex-shrink: 0; margin-top: 5px; }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark navbar-custom navbar-dashboard">
+    <div class="container-fluid px-4">
+      <a class="navbar-brand" href="resident.html">
+        <div class="brand-icon"><i class="fa-solid fa-building-user"></i></div>
+        <span>Society<span style="color: var(--accent-blue);">Hub</span></span>
+        <span class="badge bg-info text-dark ms-2 fs-8"><i class="fa-solid fa-user-clock me-1"></i>Pre-Register Visitor</span>
+      </a>
+      <div class="d-flex align-items-center gap-3">
+        <button class="btn-theme-toggle" onclick="toggleTheme()"><i class="fa-solid fa-sun" id="themeIcon"></i></button>
+        <div id="clerkUserNav" class="clerk-user-nav-container"></div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container-fluid px-4 py-4">
+    <div class="d-flex align-items-center mb-4">
+      <div>
+        <h3 class="fw-bold mb-1"><i class="fa-solid fa-user-clock text-info me-2"></i>Pre-Register an Expected Visitor</h3>
+        <p class="caption-text mb-0">Inform the security guard in advance. Your visitor will be marked <strong>Pre-Approved</strong> at the gate for faster entry.</p>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <!-- Form -->
+      <div class="col-lg-5">
+        <div class="hub-card p-4">
+          <h5 class="fw-bold mb-4"><i class="fa-solid fa-calendar-plus text-warning me-2"></i>Add Expected Visitor</h5>
+          <form id="preVisitorForm">
+            <div class="mb-3">
+              <label class="form-label caption-text fw-semibold">Visitor Full Name *</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+                <input type="text" class="form-control" id="pvName" required placeholder="e.g. Ravi Patel">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label caption-text fw-semibold">Visitor Phone *</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
+                <input type="tel" class="form-control" id="pvPhone" required placeholder="10-digit mobile">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label caption-text fw-semibold">Purpose of Visit *</label>
+              <select class="form-select" id="pvPurpose" required>
+                <option value="Family Visit">Family Visit</option>
+                <option value="Friend / Guest">Friend / Guest</option>
+                <option value="Doctor / Medical">Doctor / Medical</option>
+                <option value="Plumber / Electrician">Plumber / Electrician</option>
+                <option value="Interior / Renovation Work">Interior / Renovation Work</option>
+                <option value="Cab / Driver">Cab / Driver</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label caption-text fw-semibold">Expected Date *</label>
+              <input type="date" class="form-control" id="pvDate" required>
+            </div>
+            <div class="row g-2 mb-4">
+              <div class="col-6">
+                <label class="form-label caption-text fw-semibold">From Time *</label>
+                <input type="time" class="form-control" id="pvTimeFrom" required>
+              </div>
+              <div class="col-6">
+                <label class="form-label caption-text fw-semibold">To Time *</label>
+                <input type="time" class="form-control" id="pvTimeTo" required>
+              </div>
+            </div>
+            <div class="alert alert-info py-2 caption-text mb-4">
+              <i class="fa-solid fa-circle-info me-1"></i>
+              The guard will see a <strong>Pre-Approved</strong> badge when this visitor arrives. You'll receive a notification when they check in.
+            </div>
+            <button type="submit" class="btn btn-primary-custom w-100 py-2 fw-semibold">
+              <i class="fa-solid fa-calendar-check me-2"></i>Pre-Register Visitor
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Pre-registered list -->
+      <div class="col-lg-7">
+        <div class="hub-card p-4">
+          <div class="d-flex align-items-center justify-content-between mb-4">
+            <h5 class="fw-bold mb-0"><i class="fa-solid fa-list-check text-success me-2"></i>Your Pre-Registered Visitors</h5>
+            <span class="badge bg-success-subtle text-success fs-8" id="pavCount">0 entries</span>
+          </div>
+          <div id="pavList">
+            <!-- Dynamic -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/db.js"></script>
+
+  <script src="js/notifications.js"></script>
+  <script>
+    let currentUser = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await SystemDB.init();
+      currentUser = SystemDB.getCurrentUser();
+      if (!currentUser || (currentUser.role !== 'Resident' && currentUser.role !== 'Admin')) {
+        window.location.href = 'index.html'; return;
+      }
+
+      // Set default date to today
+      document.getElementById('pvDate').valueAsDate = new Date();
+
+      renderPAVList();
+
+      document.getElementById('preVisitorForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const data = {
+          visitorName: document.getElementById('pvName').value.trim(),
+          visitorPhone: document.getElementById('pvPhone').value.trim(),
+          purpose: document.getElementById('pvPurpose').value,
+          expectedDate: document.getElementById('pvDate').value,
+          expectedTimeFrom: document.getElementById('pvTimeFrom').value,
+          expectedTimeTo: document.getElementById('pvTimeTo').value
+        };
+
+        const res = SystemDB.addPreApprovedVisitor(data);
+        if (res.success) {
+          document.getElementById('preVisitorForm').reset();
+          document.getElementById('pvDate').valueAsDate = new Date();
+          renderPAVList();
+          if (typeof showToast === 'function') showToast(`${data.visitorName} pre-registered! Guard has been notified.`, 'success');
+        }
+      });
+    });
+
+    function renderPAVList() {
+      const list = document.getElementById('pavList');
+      const all = SystemDB.getPreApprovedVisitors();
+      const mine = currentUser.role === 'Admin' ? all : all.filter(p => p.residentId === currentUser.id || p.flat === currentUser.flat);
+      
+      document.getElementById('pavCount').textContent = `${mine.length} ${mine.length === 1 ? 'entry' : 'entries'}`;
+
+      if (!mine.length) {
+        list.innerHTML = `
+          <div class="text-center text-muted py-5">
+            <i class="fa-solid fa-user-clock fs-2 opacity-25 d-block mb-3"></i>
+            <p class="fw-semibold">No pre-registered visitors yet.</p>
+            <p class="caption-text">Use the form to add an expected visitor in advance.</p>
+          </div>`;
+        return;
+      }
+
+      list.innerHTML = mine.map(p => {
+        const purposeIcons = { 'Family Visit': 'fa-heart', 'Friend / Guest': 'fa-users', 'Doctor / Medical': 'fa-stethoscope', 'Plumber / Electrician': 'fa-screwdriver-wrench', 'Interior / Renovation Work': 'fa-helmet-safety', 'Cab / Driver': 'fa-car', 'Other': 'fa-circle-question' };
+        return `
+        <div class="hub-card p-3 mb-3 pav-card">
+          <div class="d-flex align-items-start justify-content-between gap-3">
+            <div class="d-flex gap-3 align-items-start">
+              <div class="timeline-dot mt-1"></div>
+              <div>
+                <div class="fw-bold text-heading">${p.visitorName}</div>
+                <small class="text-muted d-block"><i class="fa-solid fa-phone me-1"></i>${p.visitorPhone}</small>
+                <div class="d-flex align-items-center gap-2 mt-2 flex-wrap">
+                  <span class="badge bg-info-subtle text-info border border-info-subtle fs-8">
+                    <i class="fa-solid ${purposeIcons[p.purpose] || 'fa-circle-question'} me-1"></i>${p.purpose}
+                  </span>
+                  <span class="badge bg-warning bg-opacity-15 text-warning border border-warning-subtle fs-8">
+                    <i class="fa-regular fa-calendar me-1"></i>${p.expectedDate}
+                  </span>
+                  <span class="badge bg-secondary bg-opacity-15 text-secondary fs-8">
+                    <i class="fa-regular fa-clock me-1"></i>${p.expectedTimeFrom} – ${p.expectedTimeTo}
+                  </span>
+                </div>
+                ${p.flat && currentUser.role === 'Admin' ? `<small class="text-muted fs-8 mt-1 d-block">Flat: ${p.flat} · ${p.residentName}</small>` : ''}
+              </div>
+            </div>
+            <div class="d-flex gap-2 align-items-center flex-shrink-0">
+              <span class="badge ${p.status === 'Arrived' ? 'bg-success' : 'bg-warning text-dark'} fs-8">${p.status}</span>
+              <button class="btn btn-sm btn-outline-danger rounded-circle p-1" onclick="removePAV('${p.id}')" title="Cancel">
+                <i class="fa-solid fa-xmark fs-8"></i>
+              </button>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function removePAV(id) {
+      if (!confirm('Cancel this pre-registration?')) return;
+      SystemDB.deletePreApprovedVisitor(id);
+      renderPAVList();
+      if (typeof showToast === 'function') showToast('Pre-registration cancelled.', 'warning');
+    }
+
+    async function logout() {
+      if (window.Clerk && window.Clerk.user) {
+        try { await window.Clerk.signOut(); } catch (e) { /* non-fatal */ }
+      }
+      sessionStorage.clear();
+      window.location.href = 'login.html';
+    }
+  </script>
+  <!-- Clerk SDK -->
+  <script
+    async
+    crossorigin="anonymous"
+    data-clerk-publishable-key="pk_test_c3VpdGVkLXJvdWdoeS0xNzk4LmNsZXJrLmFjY291bnRzLmRldiQ"
+    src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5/dist/clerk.browser.js"
+    type="text/javascript"
+  ></script>
+  <script src="js/clerk-navbar.js"></script>
+</body>
+</html>

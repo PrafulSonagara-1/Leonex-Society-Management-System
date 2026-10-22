@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Waiting for Approval | Leonex SSMS</title>
+  <meta name="description" content="Your Leonex SSMS membership application is being reviewed by the Society Administrator.">
+  <meta name="robots" content="noindex">
+
+  <!-- Theme toggle pre-loader (must run before paint) -->
+  <script src="js/theme.js"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Font Awesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+  <!-- Custom Master Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/reactbits-theme.css">
+
+  <style>
+    /* ── Waiting-approval page layout (scoped) ── */
+    .wait-shell {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background:
+        radial-gradient(900px 420px at 85% -10%, rgba(37, 99, 235, 0.14), transparent 60%),
+        radial-gradient(700px 380px at 8% 108%, rgba(245, 158, 11, 0.10), transparent 55%),
+        var(--bg-primary);
+    }
+    .wait-main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 16px 56px;
+    }
+    .wait-wrap { width: 100%; max-width: 620px; }
+
+    .wait-brand { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; }
+    .wait-brand .brand-icon { width: 44px; height: 44px; min-width: 44px; font-size: 18px; border-radius: 13px; }
+    .wait-brand-name { font-size: 24px; font-weight: 800; color: var(--text-heading); letter-spacing: -0.02em; line-height: 1.1; }
+    .wait-brand-name span { color: var(--accent-primary); }
+
+    .wait-card { padding: 30px; }
+    @media (min-width: 576px) { .wait-card { padding: 40px; } }
+
+    /* Status hero icon */
+    .wait-hero {
+      width: 84px; height: 84px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 18px;
+      font-size: 32px;
+    }
+    .wait-hero--pending { background: rgba(245, 158, 11, 0.14); color: var(--accent-warning); border: 1px solid rgba(245, 158, 11, 0.3); }
+    .wait-hero--rejected, .wait-hero--suspended { background: rgba(239, 68, 68, 0.12); color: var(--accent-danger); border: 1px solid rgba(239, 68, 68, 0.28); }
+    .wait-hero--approved { background: rgba(16, 185, 129, 0.14); color: var(--accent-success); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .wait-hero--pending i { animation: waitPulse 2.4s ease-in-out infinite; }
+    @keyframes waitPulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.08); opacity: 0.85; }
+    }
+
+    /* Progress timeline */
+    .wait-timeline { display: flex; margin: 26px 0 8px; }
+    .wait-step { flex: 1; text-align: center; position: relative; }
+    .wait-step__dot {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      margin: 0 auto 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      background: var(--surface-2);
+      color: var(--text-muted);
+      border: 2px solid var(--border-color);
+      position: relative;
+      z-index: 1;
+      transition: all 0.3s ease;
+    }
+    .wait-step::before {
+      content: '';
+      position: absolute;
+      top: 17px;
+      left: -50%;
+      width: 100%;
+      height: 2px;
+      background: var(--border-color);
+    }
+    .wait-step:first-child::before { display: none; }
+    .wait-step__label { font-size: 12px; font-weight: 700; color: var(--text-muted); }
+    .wait-step--done .wait-step__dot { background: var(--accent-success); border-color: var(--accent-success); color: #fff; }
+    .wait-step--done .wait-step__label { color: var(--text-secondary); }
+    .wait-step--done::before { background: var(--accent-success); }
+    .wait-step--active .wait-step__dot {
+      background: rgba(245, 158, 11, 0.16);
+      border-color: var(--accent-warning);
+      color: var(--accent-warning);
+      box-shadow: 0 0 0 5px rgba(245, 158, 11, 0.12);
+    }
+    .wait-step--active .wait-step__label { color: var(--accent-warning); }
+    .wait-step--active::before { background: var(--accent-success); }
+    .wait-step--fail .wait-step__dot { background: rgba(239, 68, 68, 0.14); border-color: var(--accent-danger); color: var(--accent-danger); }
+    .wait-step--fail .wait-step__label { color: var(--accent-danger); }
+    .wait-step--fail::before { background: var(--accent-danger); }
+
+    /* What happens next */
+    .wait-next { text-align: left; margin-top: 22px; }
+    .wait-next__item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      background: var(--surface-1);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      margin-bottom: 10px;
+    }
+    .wait-next__item > i { color: var(--accent-primary); margin-top: 3px; width: 16px; text-align: center; }
+    .wait-next__item p { margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+    .wait-next__item strong { color: var(--text-heading); }
+
+    .wait-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 18px;
+      justify-content: center;
+      margin-top: 18px;
+      font-size: 12.5px;
+      color: var(--text-muted);
+    }
+    .wait-meta span i { color: var(--accent-primary); margin-right: 6px; }
+
+    .btn-outline-custom {
+      background: transparent;
+      border: 1px solid var(--border-dark);
+      color: var(--text-primary);
+      border-radius: var(--radius-md);
+      font-weight: 700;
+      padding: 12px 20px;
+      transition: all 0.2s ease;
+    }
+    .btn-outline-custom:hover { border-color: var(--accent-primary); color: var(--accent-primary); background: rgba(37, 99, 235, 0.06); }
+  </style>
+</head>
+<body>
+  <div class="wait-shell">
+    <div class="wait-main">
+      <div class="wait-wrap">
+
+        <!-- Brand -->
+        <div class="text-center mb-4">
+          <a class="wait-brand" href="index.html" aria-label="Leonex SSMS Home">
+            <div class="brand-icon"><i class="fa-solid fa-building-user"></i></div>
+            <div>
+              <div class="wait-brand-name">Society<span>Hub</span></div>
+              <div class="caption-text">Smart Housing Society Management</div>
+            </div>
+          </a>
+        </div>
+
+        <!-- Status Card -->
+        <div class="hub-card wait-card rounded-4 shadow-lg text-center">
+
+          <!-- Loading skeleton (shown before first render) -->
+          <div id="waitSkeleton" class="py-3"></div>
+
+          <!-- Content (rendered by JS) -->
+          <div id="waitContent" style="display:none;">
+            <div class="wait-hero" id="waitHero"><i class="fa-solid fa-hourglass-half"></i></div>
+
+            <h2 class="fw-bold mb-1" id="waitHeading" style="color: var(--text-heading);">Registration Under Review</h2>
+            <p class="mb-3" id="waitSubheading" style="color: var(--text-secondary); font-size: 14.5px;">
+              Your application has been submitted and is waiting for verification by the Society Administrator.
+            </p>
+
+            <div class="mb-2" id="waitBadge"></div>
+            <div class="caption-text mb-1" id="waitUserLine"></div>
+
+            <!-- Progress timeline -->
+            <div class="wait-timeline" id="waitTimeline">
+              <div class="wait-step wait-step--done">
+                <div class="wait-step__dot"><i class="fa-solid fa-check"></i></div>
+                <div class="wait-step__label">Registered</div>
+              </div>
+              <div class="wait-step wait-step--active" id="waitStepReview">
+                <div class="wait-step__dot"><i class="fa-solid fa-magnifying-glass"></i></div>
+                <div class="wait-step__label">Under Review</div>
+              </div>
+              <div class="wait-step" id="waitStepApproved">
+                <div class="wait-step__dot"><i class="fa-solid fa-door-open"></i></div>
+                <div class="wait-step__label">Portal Access</div>
+              </div>
+            </div>
+
+            <!-- What happens next -->
+            <div class="wait-next" id="waitNext">
+              <div class="wait-next__item">
+                <i class="fa-solid fa-user-check"></i>
+                <p><strong>Verification.</strong> The Society Administrator reviews your application and member details.</p>
+              </div>
+              <div class="wait-next__item">
+                <i class="fa-solid fa-house-circle-check"></i>
+                <p><strong>Allotment.</strong> Your flat (or gate posting, for security staff) is assigned to your account.</p>
+              </div>
+              <div class="wait-next__item">
+                <i class="fa-solid fa-bell"></i>
+                <p><strong>Activation.</strong> Once approved, you can sign in and start using your portal right away.</p>
+              </div>
+            </div>
+
+            <div class="wait-meta">
+              <span><i class="fa-solid fa-clock"></i>Usually reviewed within 24–48 hours</span>
+              <span><i class="fa-solid fa-headset"></i>Need help? Contact the Society Office</span>
+            </div>
+
+            <!-- Actions -->
+            <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center mt-4">
+              <button type="button" class="btn btn-primary-custom" id="checkStatusBtn">
+                <i class="fa-solid fa-rotate"></i> Check Status
+              </button>
+              <button type="button" class="btn btn-outline-custom" id="backToLoginBtn">
+                <i class="fa-solid fa-arrow-left"></i> Back to Login
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Help note -->
+        <div class="text-center mt-4">
+          <a href="index.html" class="text-muted text-decoration-none fs-7"><i class="fa-solid fa-house me-1"></i> Back to Homepage</a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts (contract order) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/ui.js"></script>
+
+  <script src="js/notifications.js"></script>
+  <script>
+    /* ════════════════════════════════════════════
+       Leonex SSMS — Waiting for Approval page logic
+       ════════════════════════════════════════════ */
+
+    function redirectByRole(role) {
+      if (role === 'Admin') window.location.href = 'admin.html';
+      else if (role === 'Resident') window.location.href = 'resident.html';
+      else if (role === 'Security Guard') window.location.href = 'guard.html';
+      else if (role === 'Committee Member') window.location.href = 'committee.html';
+      else window.location.href = 'index.html';
+    }
+
+    function toastMsg(msg, type) {
+      try {
+        if (typeof showToast === 'function') { showToast(esc(msg), type || 'success'); return; }
+        if (window.SHUI && typeof SHUI.toast === 'function') { SHUI.toast(msg, type || 'success'); return; }
+      } catch (e) { /* noop */ }
+      console.log('[toast]', type, msg);
+    }
+
+    function esc(v) {
+      if (window.SHUI && typeof SHUI.escapeHtml === 'function') return SHUI.escapeHtml(v);
+      return String(v === null || v === undefined ? '' : v);
+    }
+
+    function statusBadgeHtml(status) {
+      if (window.SHUI && typeof SHUI.statusBadge === 'function') return SHUI.statusBadge(status);
+      return '<span class="sh-badge sh-badge--warning">' + esc(status) + '</span>';
+    }
+
+    // ── Render the card for a given user/status ──
+    function renderStatus(user) {
+      const status = (user && user.status) || 'Pending';
+      const hero = document.getElementById('waitHero');
+      const heading = document.getElementById('waitHeading');
+      const sub = document.getElementById('waitSubheading');
+      const badge = document.getElementById('waitBadge');
+      const userLine = document.getElementById('waitUserLine');
+      const stepReview = document.getElementById('waitStepReview');
+      const stepApproved = document.getElementById('waitStepApproved');
+      const next = document.getElementById('waitNext');
+
+      // User context line
+      if (user && user.name) {
+        const roleTxt = user.role ? ' · ' + esc(user.role) : '';
+        userLine.innerHTML = '<i class="fa-solid fa-user me-1"></i>' + esc(user.name) + roleTxt;
+      } else {
+        userLine.innerHTML = '';
+      }
+
+      badge.innerHTML = statusBadgeHtml(status);
+
+      // Reset step classes
+      stepReview.className = 'wait-step';
+      stepApproved.className = 'wait-step';
+
+      if (status === 'Approved') {
+        hero.className = 'wait-hero wait-hero--approved';
+        hero.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+        heading.textContent = 'Account Approved!';
+        sub.textContent = 'Your membership has been verified. Redirecting you to your portal…';
+        stepReview.classList.add('wait-step--done');
+        stepApproved.classList.add('wait-step--done');
+        next.style.display = 'none';
+      } else if (status === 'Rejected') {
+        hero.className = 'wait-hero wait-hero--rejected';
+        hero.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>';
+        heading.textContent = 'Application Not Approved';
+        sub.textContent = 'Unfortunately your registration was not approved. Please contact the Society Office for details, or register again with corrected information.';
+        stepReview.classList.add('wait-step--fail');
+        next.style.display = 'none';
+      } else if (status === 'Suspended') {
+        hero.className = 'wait-hero wait-hero--suspended';
+        hero.innerHTML = '<i class="fa-solid fa-ban"></i>';
+        heading.textContent = 'Account Suspended';
+        sub.textContent = 'Your account has been suspended. Please contact the Society Office to restore access.';
+        stepReview.classList.add('wait-step--fail');
+        next.style.display = 'none';
+      } else {
+        // Pending (default)
+        hero.className = 'wait-hero wait-hero--pending';
+        hero.innerHTML = '<i class="fa-solid fa-hourglass-half"></i>';
+        heading.textContent = 'Registration Under Review';
+        sub.textContent = 'Your application has been submitted and is waiting for verification by the Society Administrator.';
+        stepReview.classList.add('wait-step--active');
+        next.style.display = '';
+      }
+    }
+
+    // ── Read the freshest record for the session user ──
+    function freshestUser(sessUser) {
+      try {
+        const users = SystemDB.getUsers();
+        const email = String(sessUser.email || '').toLowerCase();
+        return users.find(u => u.id === sessUser.id || (u.email && u.email.toLowerCase() === email)) || sessUser;
+      } catch (e) {
+        return sessUser;
+      }
+    }
+
+    function persistSession(user) {
+      try { sessionStorage.setItem('ssm_current_user', JSON.stringify(user)); } catch (e) { /* noop */ }
+    }
+
+    // ── Check status: re-read the latest user status and act on it ──
+    async function checkStatus() {
+      const btn = document.getElementById('checkStatusBtn');
+      const orig = btn.innerHTML;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Checking…';
+      btn.disabled = true;
+
+      try {
+        // Re-init to pull the latest data (e.g. an admin approval saved to localStorage)
+        try { await SystemDB.init(); } catch (e) { /* use existing data */ }
+
+        const sessUser = SystemDB.getCurrentUser();
+        if (!sessUser) { window.location.href = 'login.html'; return; }
+
+        const fresh = freshestUser(sessUser);
+        persistSession(fresh);
+        renderStatus(fresh);
+
+        const status = fresh.status || 'Pending';
+        if (status === 'Approved') {
+          toastMsg('Great news — your account has been approved! Redirecting…', 'success');
+          setTimeout(() => redirectByRole(fresh.role), 1000);
+          return; // keep button busy during redirect
+        } else if (status === 'Rejected') {
+          toastMsg('Your application was not approved. Please contact the Society Office.', 'error');
+        } else if (status === 'Suspended') {
+          toastMsg('Your account is suspended. Please contact the Society Office.', 'error');
+        } else {
+          toastMsg('Still pending approval. Please check back a little later.', 'info');
+        }
+      } catch (err) {
+        console.error('Check status error:', err);
+        toastMsg('Could not refresh your status. Please try again.', 'error');
+      }
+      btn.innerHTML = orig;
+      btn.disabled = false;
+    }
+
+    // ── Back to login: clear the pending session and return ──
+    function backToLogin() {
+      try { sessionStorage.removeItem('ssm_current_user'); } catch (e) { /* noop */ }
+      window.location.href = 'login.html';
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Skeleton while the DB loads
+      const skeleton = document.getElementById('waitSkeleton');
+      if (window.SHUI && typeof SHUI.skeletonHtml === 'function') skeleton.innerHTML = SHUI.skeletonHtml(5);
+
+      try { await SystemDB.init(); } catch (e) { console.warn('SystemDB init warning:', e); }
+
+      const user = SystemDB.getCurrentUser();
+
+      // No session at all → nothing to wait on, go to login
+      if (!user) { window.location.href = 'login.html'; return; }
+
+      // Already approved → straight to the right portal
+      if (user.status === 'Approved') { redirectByRole(user.role); return; }
+
+      // Small delay so the skeleton is perceptible, then render
+      setTimeout(() => {
+        skeleton.style.display = 'none';
+        document.getElementById('waitContent').style.display = '';
+        renderStatus(freshestUser(user));
+      }, 350);
+
+      document.getElementById('checkStatusBtn').addEventListener('click', checkStatus);
+      document.getElementById('backToLoginBtn').addEventListener('click', backToLogin);
+    });
+  </script>
+</body>
+</html>

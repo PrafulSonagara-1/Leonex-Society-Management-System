@@ -1,0 +1,1647 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Control Center | SocietyHub</title>
+
+  <!-- Google Fonts: Comfortaa, Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Theme toggle pre-loader -->
+  <script src="js/theme.js"></script>
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Custom CSS -->
+  <link href="css/style.css" rel="stylesheet">
+  <!-- Leonex Clean Zero-Glow Sidebar CSS -->
+  <link href="css/sidebar.css" rel="stylesheet">
+  <!-- ReactBits Card & Table Design System -->
+  <link href="css/reactbits-theme.css" rel="stylesheet">
+
+  <style>
+    body, html, *, .hub-card, .btn, .table, .form-control, .form-select, .badge, .modal, .leonex-sidebar {
+      font-family: 'Comfortaa', 'Plus Jakarta Sans', sans-serif !important;
+    }
+
+    :root {
+      --sa-gold: #D4955A;
+      --sa-dark-card: #141418;
+      --sa-dark-border: rgba(255, 255, 255, 0.08);
+    }
+
+    [data-theme="dark"] body {
+      background: #0e0e12 !important;
+      color: #F1F5F9;
+    }
+
+    [data-theme="light"] body {
+      background: #F8FAFC !important;
+      color: #0F172A;
+    }
+
+    [data-theme="light"] .sa-kpi-card,
+    [data-theme="light"] .sa-card {
+      background: #FFFFFF !important;
+      border: 1px solid #E2E8F0 !important;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04) !important;
+    }
+
+    [data-theme="light"] .sa-kpi-card:hover,
+    [data-theme="light"] .sa-card:hover {
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08) !important;
+      border-color: rgba(99, 102, 241, 0.35) !important;
+    }
+
+    [data-theme="light"] .sa-kpi-val {
+      color: #0F172A !important;
+    }
+
+    [data-theme="light"] .sa-kpi-label {
+      color: #64748B !important;
+    }
+
+    [data-theme="light"] .sa-table th {
+      background: #F8FAFC !important;
+      color: #64748B !important;
+      border-bottom: 1px solid #E2E8F0 !important;
+    }
+
+    [data-theme="light"] .sa-table td {
+      color: #1E293B !important;
+      border-bottom: 1px solid #F1F5F9 !important;
+    }
+
+    [data-theme="light"] .sa-table tr:hover td {
+      background: #F8FAFC !important;
+    }
+
+    /* Zero-glow clean sidebar override */
+    [data-theme="dark"] .leonex-sidebar {
+      background-color: #141418 !important;
+      background: #141418 !important;
+      box-shadow: none !important;
+      border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    [data-theme="light"] .leonex-sidebar {
+      background-color: #FFFFFF !important;
+      background: #FFFFFF !important;
+      border-right: 1px solid #E2E8F0 !important;
+    }
+
+    /* ReactBits Master KPI & Dashboard Cards */
+    .sa-kpi-card {
+      background: #17171e !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      border-radius: 12px !important;
+      padding: 22px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    .sa-kpi-card:hover {
+      background: #17171e !important;
+      border-color: #3b82f6 !important;
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.35), 0 4px 18px rgba(0, 0, 0, 0.4), 0 0 14px rgba(59, 130, 246, 0.2) !important;
+      transform: translateY(-1.5px);
+    }
+    .sa-kpi-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 19px;
+      flex-shrink: 0;
+    }
+    .sa-kpi-val {
+      font-size: 28px;
+      font-weight: 700;
+      color: #FFFFFF;
+      line-height: 1.1;
+      margin-top: 8px;
+      margin-bottom: 4px;
+    }
+    .sa-kpi-label {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.55);
+      font-weight: 500;
+    }
+
+    .sa-card {
+      background: #14111c !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      border-radius: 16px !important;
+      padding: 24px;
+      margin-bottom: 24px;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    .sa-card:hover {
+      background: #14111c !important;
+      border-color: #3b82f6 !important;
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.38), 0 8px 30px rgba(0, 0, 0, 0.55), 0 0 18px rgba(59, 130, 246, 0.25) !important;
+      transform: translateY(-2px);
+    }
+
+    /* ReactBits Precision Table Design */
+    .sa-table th {
+      background: rgba(255, 255, 255, 0.025) !important;
+      color: rgba(255, 255, 255, 0.5) !important;
+      font-size: 11.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+      padding: 14px 18px !important;
+    }
+    .sa-table td {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+      padding: 14px 18px !important;
+      vertical-align: middle;
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 13.5px;
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    .sa-table tr:hover td {
+      background: transparent !important;
+      color: #FFFFFF !important;
+      border-bottom-color: rgba(59, 130, 246, 0.45) !important;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .status-pill.active {
+      background: rgba(16, 185, 129, 0.12);
+      color: #10B981;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .status-pill.pending {
+      background: rgba(245, 158, 11, 0.12);
+      color: #F59E0B;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, #D4955A, #B87B44);
+      color: #fff;
+      font-weight: 600;
+      border: none;
+      border-radius: 12px;
+      padding: 8px 18px;
+      transition: all 0.2s ease;
+    }
+    .btn-gold:hover {
+      background: linear-gradient(135deg, #E2A46C, #C88950);
+      color: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(212, 149, 90, 0.35);
+    }
+
+    /* Modal styling */
+    .modal-content {
+      background: #0F1626 !important;
+      border: 1px solid rgba(255,255,255,0.12) !important;
+      border-radius: 20px !important;
+      color: #F1F5F9 !important;
+    }
+    .modal-header {
+      border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+    }
+    .modal-footer {
+      border-top: 1px solid rgba(255,255,255,0.08) !important;
+    }
+    .form-control, .form-select {
+      background: #17171e !important;
+      border: 1px solid rgba(255,255,255,0.08) !important;
+      color: #fff !important;
+      border-radius: 10px !important;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: #D4955A !important;
+      box-shadow: 0 0 0 3px rgba(212,149,90,0.2) !important;
+    }
+
+    /* Towers & Flats Design System */
+    .tower-filter-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+    .tower-filter-card:hover {
+      background: rgba(255, 255, 255, 0.06);
+      transform: translateY(-2px);
+      border-color: rgba(99, 102, 241, 0.4);
+    }
+    .tower-filter-card.active {
+      background: rgba(99, 102, 241, 0.12) !important;
+      border-color: #6366F1 !important;
+      box-shadow: 0 0 16px rgba(99, 102, 241, 0.25);
+    }
+    [data-theme="light"] .tower-filter-card {
+      background: #FFFFFF;
+      border-color: #E2E8F0;
+    }
+    [data-theme="light"] .tower-filter-card.active {
+      background: #EEF2FF !important;
+      border-color: #6366F1 !important;
+    }
+
+    .floor-row-wrapper {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+      padding: 18px 20px;
+      margin-bottom: 16px;
+      transition: all 0.2s ease;
+    }
+    [data-theme="light"] .floor-row-wrapper {
+      background: #F8FAFC;
+      border-color: #E2E8F0;
+    }
+
+    .flat-unit-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 14px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 125px;
+    }
+    .flat-unit-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      border-color: rgba(99, 102, 241, 0.5) !important;
+    }
+    [data-theme="light"] .flat-unit-card {
+      background: #FFFFFF;
+      border-color: #E2E8F0;
+    }
+    .flat-unit-card.occupied-owner {
+      border-left: 4px solid #10B981 !important;
+    }
+    .flat-unit-card.occupied-tenant {
+      border-left: 4px solid #8B5CF6 !important;
+    }
+    .flat-unit-card.vacant-unit {
+      border: 1px dashed rgba(255, 255, 255, 0.25) !important;
+      border-left: 4px solid #F59E0B !important;
+      background: rgba(245, 158, 11, 0.02) !important;
+    }
+    [data-theme="light"] .flat-unit-card.vacant-unit {
+      border-color: #CBD5E1 !important;
+      background: #FFFBEB !important;
+    }
+
+    /* Amenities Design System */
+    .amenity-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 20px;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+      position: relative;
+    }
+    .amenity-card:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(99, 102, 241, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+    }
+    [data-theme="light"] .amenity-card {
+      background: #FFFFFF;
+      border-color: #E2E8F0;
+    }
+    .amenity-icon-box {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════ Main Application Layout ═══════════════ -->
+  <div class="leonex-layout" id="mainAppLayout">
+    <!-- Fixed Left Sidebar (Controlled via sidebar.js — Zero-Glow Clean Styling) -->
+    <aside class="leonex-sidebar" id="leonexSidebar"></aside>
+
+    <!-- Main Viewport Area -->
+    <div class="leonex-main-wrapper">
+
+      <!-- ═══════════════ Top Navbar (Matching hero.png & admin-dark.png) ═══════════════ -->
+      <nav class="navbar navbar-expand-lg navbar-custom navbar-dashboard">
+        <div class="container-fluid px-4">
+          <div class="d-flex align-items-center gap-2">
+            <button class="leonex-mobile-toggle me-2" aria-label="Open Navigation">
+              <i class="fa-solid fa-bars"></i>
+            </button>
+            <span class="badge bg-danger rounded-pill px-3 py-2 fs-8 fw-bold d-inline-flex align-items-center gap-1 shadow-sm">
+              <i class="fa-solid fa-user-gear"></i> Admin Control Center
+            </span>
+            <span id="adminModeBadge" class="badge rounded-pill px-3 py-2 fs-8 fw-semibold d-inline-flex align-items-center gap-1 shadow-sm"></span>
+          </div>
+
+          <div class="d-flex align-items-center gap-3">
+            <button class="btn btn-primary btn-sm rounded-pill px-3 fw-semibold d-none d-sm-inline-flex align-items-center gap-2" id="btnInstallApp" onclick="if(window.installPwa)window.installPwa(); else showToast('App install ready', 'info');">
+              <i class="fa-solid fa-download"></i> Install App
+            </button>
+
+            <button class="btn-nav-icon position-relative border-0 bg-transparent text-secondary" title="Notifications" onclick="toggleNotificationPanel(this)" aria-label="Notifications">
+              <svg class="animate-bell-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path class="animate-bell-clapper" d="M10.268 21a2 2 0 0 0 3.464 0" />
+                <path class="animate-bell-body" d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" />
+              </svg>
+              <span class="notif-dot"></span>
+            </button>
+
+            <button class="btn-theme-toggle" onclick="toggleTheme()" title="Switch Theme">
+              <i class="fa-solid fa-moon" id="themeIcon"></i>
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <!-- ═══════════════ Main Container ═══════════════ -->
+      <div class="container-fluid px-3 px-lg-4 py-4">
+
+        <!-- Hidden tab triggers for sidebar.js navigation -->
+        <div class="d-none" id="v-pills-tab" role="tablist">
+          <button class="nav-link active" id="tab-dashboard-btn" data-bs-toggle="pill" data-bs-target="#tab-dashboard" type="button"></button>
+          <button class="nav-link" id="tab-residents-btn" data-bs-toggle="pill" data-bs-target="#tab-residents" type="button"></button>
+          <button class="nav-link" id="tab-towers-btn" data-bs-toggle="pill" data-bs-target="#tab-towers" type="button"></button>
+          <button class="nav-link" id="tab-complaints-btn" data-bs-toggle="pill" data-bs-target="#tab-complaints" type="button"></button>
+          <button class="nav-link" id="tab-visitors-btn" data-bs-toggle="pill" data-bs-target="#tab-visitors" type="button"></button>
+          <button class="nav-link" id="tab-billing-btn" data-bs-toggle="pill" data-bs-target="#tab-billing" type="button"></button>
+          <button class="nav-link" id="tab-expenses-btn" data-bs-toggle="pill" data-bs-target="#tab-expenses" type="button"></button>
+          <button class="nav-link" id="tab-amenities-btn" data-bs-toggle="pill" data-bs-target="#tab-amenities" type="button"></button>
+          <button class="nav-link" id="tab-notices-btn" data-bs-toggle="pill" data-bs-target="#tab-notices" type="button"></button>
+          <button class="nav-link" id="tab-polls-btn" data-bs-toggle="pill" data-bs-target="#tab-polls" type="button"></button>
+          <button class="nav-link" id="tab-reports-btn" data-bs-toggle="pill" data-bs-target="#tab-reports" type="button"></button>
+          <button class="nav-link" id="tab-roles-btn" data-bs-toggle="pill" data-bs-target="#tab-roles" type="button"></button>
+          <button class="nav-link" id="tab-audit-btn" data-bs-toggle="pill" data-bs-target="#tab-audit" type="button"></button>
+        </div>
+
+        <div class="tab-content" id="v-pills-tabContent">
+
+          <!-- ═════════════════════════════════════════════════════════════════════════
+               TAB 1: ADMINISTRATOR OVERVIEW (Matching hero.png & admin-dark.png)
+               ═════════════════════════════════════════════════════════════════════════ -->
+          <div class="tab-pane fade show active" id="tab-dashboard" role="tabpanel">
+            <!-- Header -->
+            <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+              <div>
+                <h2 class="fw-bold mb-1 text-white" style="font-size: 26px;">Administrator Overview</h2>
+                <p class="text-secondary mb-0 fs-7" id="adminSocietySub">Real-time stats across residents, collections, complaints and gate security.</p>
+              </div>
+              <button class="btn btn-outline-primary btn-sm rounded-pill px-3 d-inline-flex align-items-center gap-2" onclick="loadAdminDashboard()">
+                <i class="fa-solid fa-arrows-rotate"></i> Refresh Data
+              </button>
+            </div>
+
+            <!-- New Society Welcome Banner (Shown for fresh non-demo societies) -->
+            <div id="newSocietyWelcomeBanner"></div>
+
+            <!-- 4 Dark Leonex KPI Cards -->
+            <div class="row g-3 mb-4">
+              <!-- Total Residents -->
+              <div class="col-6 col-lg-3">
+                <div class="sa-kpi-card">
+                  <div class="d-flex align-items-center justify-content-between mb-1">
+                    <span class="sa-kpi-label">Total Residents</span>
+                    <div class="sa-kpi-icon" style="background: rgba(59, 130, 246, 0.15); color: #3B82F6;">
+                      <i class="fa-solid fa-users"></i>
+                    </div>
+                  </div>
+                  <div class="sa-kpi-val" id="kpiResidents">7</div>
+                  <div class="mt-2">
+                    <span class="badge rounded-pill" style="background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.7); font-size: 11px;">
+                      <i class="fa-solid fa-check me-1 text-success"></i> Active accounts
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Maintenance Collected -->
+              <div class="col-6 col-lg-3">
+                <div class="sa-kpi-card">
+                  <div class="d-flex align-items-center justify-content-between mb-1">
+                    <span class="sa-kpi-label">Maintenance Collected</span>
+                    <div class="sa-kpi-icon" style="background: rgba(16, 185, 129, 0.15); color: #10B981;">
+                      <i class="fa-solid fa-file-invoice-dollar"></i>
+                    </div>
+                  </div>
+                  <div class="sa-kpi-val text-success" id="kpiCollection">₹22,000</div>
+                  <div class="mt-2">
+                    <span class="badge rounded-pill" style="background: rgba(16, 185, 129, 0.12); color: #10B981; font-size: 11px;" id="kpiCollectionRate">
+                      Collection Rate: 74%
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Active Complaints -->
+              <div class="col-6 col-lg-3">
+                <div class="sa-kpi-card">
+                  <div class="d-flex align-items-center justify-content-between mb-1">
+                    <span class="sa-kpi-label">Active Complaints</span>
+                    <div class="sa-kpi-icon" style="background: rgba(245, 158, 11, 0.15); color: #F59E0B;">
+                      <i class="fa-solid fa-headset"></i>
+                    </div>
+                  </div>
+                  <div class="sa-kpi-val text-warning" id="kpiPendingComplaints">4</div>
+                  <div class="mt-2">
+                    <span class="badge rounded-pill" style="background: rgba(245, 158, 11, 0.12); color: #F59E0B; font-size: 11px;">
+                      <i class="fa-solid fa-clock me-1"></i> Requires attention
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Gate Check-Ins Today -->
+              <div class="col-6 col-lg-3">
+                <div class="sa-kpi-card">
+                  <div class="d-flex align-items-center justify-content-between mb-1">
+                    <span class="sa-kpi-label">Gate Check-Ins Today</span>
+                    <div class="sa-kpi-icon" style="background: rgba(14, 165, 233, 0.15); color: #0EA5E9;">
+                      <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                  </div>
+                  <div class="sa-kpi-val text-info" id="kpiVisitors">5</div>
+                  <div class="mt-2">
+                    <span class="badge rounded-pill" style="background: rgba(14, 165, 233, 0.12); color: #0EA5E9; font-size: 11px;">
+                      <i class="fa-solid fa-user-check me-1"></i> Verified passes
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2 Charts Row Matching hero.png / admin-dark.png -->
+            <div class="row g-4 mb-4">
+              <!-- Monthly Maintenance Collection -->
+              <div class="col-lg-7">
+                <div class="sa-card h-100">
+                  <h5 class="fw-bold text-white mb-3 d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-chart-column text-primary"></i> Monthly Maintenance Collection (₹)
+                  </h5>
+                  <div style="height: 260px;">
+                    <canvas id="billingChart"></canvas>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Complaint Statistics -->
+              <div class="col-lg-5">
+                <div class="sa-card h-100">
+                  <h5 class="fw-bold text-white mb-3 d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-chart-pie text-warning"></i> Complaint Statistics
+                  </h5>
+                  <div style="height: 260px;">
+                    <canvas id="complaintChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═════════════════════════════════════════════════════════════════════════
+               TAB 2: RESIDENTS DIRECTORY
+               ═════════════════════════════════════════════════════════════════════════ -->
+          <div class="tab-pane fade" id="tab-residents" role="tabpanel">
+            <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+              <div>
+                <h3 class="fw-bold text-white mb-1"><i class="fa-solid fa-users text-primary me-2"></i>Resident Directory</h3>
+                <p class="text-secondary mb-0 fs-7">Manage all society residents, flat allocations, and approvals.</p>
+              </div>
+              <button class="btn btn-gold rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#addResidentModal">
+                <i class="fa-solid fa-user-plus me-1"></i> Add Resident
+              </button>
+            </div>
+
+            <div class="sa-card p-3">
+              <div class="table-responsive">
+                <table class="table sa-table align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th>Member Name & Role</th>
+                      <th>Flat / Location</th>
+                      <th>Email</th>
+                      <th>Phone</th>
+                      <th>Role</th>
+                      <th>Status</th>
+                      <th class="text-end">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="residentsTableBody">
+                    <!-- Populated dynamically via admin.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═════════════════════════════════════════════════════════════════════════
+               TAB 3: TOWERS & FLATS
+               ═════════════════════════════════════════════════════════════════════════ -->
+          <!-- ═════════════════════════════════════════════════════════════════════════
+               TAB 3: TOWERS & FLATS MANAGEMENT
+               ═════════════════════════════════════════════════════════════════════════ -->
+          <div class="tab-pane fade" id="tab-towers" role="tabpanel">
+            <!-- Header & Action Buttons -->
+            <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+              <div>
+                <h3 class="fw-bold text-white mb-1"><i class="fa-solid fa-building-user text-info me-2"></i>Towers & Flats Management</h3>
+                <p class="text-secondary mb-0 fs-7">Interactive wing layout, floor-wise unit occupancy matrix, and flat inventory.</p>
+              </div>
+              <div class="d-flex align-items-center gap-2 flex-wrap">
+                <button class="btn btn-outline-secondary btn-sm rounded-pill px-3 d-inline-flex align-items-center gap-2" onclick="exportFlatsCSV()">
+                  <i class="fa-solid fa-file-csv text-success"></i> Export CSV
+                </button>
+                <button class="btn btn-outline-info btn-sm rounded-pill px-3 d-inline-flex align-items-center gap-2" onclick="renderTowersAndFlats()">
+                  <i class="fa-solid fa-arrows-rotate"></i> Refresh
+                </button>
+                <button class="btn btn-gold btn-sm rounded-pill px-3 d-inline-flex align-items-center gap-2" onclick="openAddFlatModal()">
+                  <i class="fa-solid fa-plus"></i> Add Flat / Unit
+                </button>
+              </div>
+            </div>
+
+            <!-- Society-Wide Flats KPI Ribbon -->
+            <div class="row g-3 mb-4">
+              <div class="col-xl-3 col-sm-6">
+                <div class="sa-kpi-card">
+                  <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="sa-kpi-label text-secondary fs-8 fw-semibold text-uppercase tracking-wider">Total Society Units</span>
+                    <div class="sa-kpi-icon" style="background: rgba(99, 102, 241, 0.12); color: #818CF8;">
+                      <i class="fa-solid fa-building"></i>
+                    </div>
+                  </div>
+                  <div class="sa-kpi-val fs-2 fw-bold text-white mb-1" id="kpiTotalFlats">--</div>
+                  <div class="text-secondary fs-8"><span class="text-info fw-semibold" id="kpiTowersCount">3 Wings / Towers</span> mapped</div>
+                </div>
+              </div>
+
+              <div class="col-xl-3 col-sm-6">
+                <div class="sa-kpi-card">
+                  <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="sa-kpi-label text-secondary fs-8 fw-semibold text-uppercase tracking-wider">Occupied Units</span>
+                    <div class="sa-kpi-icon" style="background: rgba(16, 185, 129, 0.12); color: #34D399;">
+                      <i class="fa-solid fa-house-chimney-user"></i>
+                    </div>
+                  </div>
+                  <div class="sa-kpi-val fs-2 fw-bold text-white mb-1" id="kpiOccupiedFlats">--</div>
+                  <div class="text-secondary fs-8"><span class="text-success fw-semibold" id="kpiOccupancyRate">--% Occupancy</span> rate</div>
+                </div>
+              </div>
+
+              <div class="col-xl-3 col-sm-6">
+                <div class="sa-kpi-card">
+                  <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="sa-kpi-label text-secondary fs-8 fw-semibold text-uppercase tracking-wider">Vacant Units</span>
+                    <div class="sa-kpi-icon" style="background: rgba(245, 158, 11, 0.12); color: #FBBF24;">
+                      <i class="fa-solid fa-door-open"></i>
+                    </div>
+                  </div>
+                  <div class="sa-kpi-val fs-2 fw-bold text-white mb-1" id="kpiVacantFlats">--</div>
+                  <div class="text-secondary fs-8"><span class="text-warning fw-semibold">Available</span> for allotment</div>
+                </div>
+              </div>
+
+              <div class="col-xl-3 col-sm-6">
+                <div class="sa-kpi-card">
+                  <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="sa-kpi-label text-secondary fs-8 fw-semibold text-uppercase tracking-wider">Tenancy Split</span>
+                    <div class="sa-kpi-icon" style="background: rgba(139, 92, 246, 0.12); color: #A78BFA;">
+                      <i class="fa-solid fa-people-roof"></i>
+                    </div>
+                  </div>
+                  <div class="sa-kpi-val fs-2 fw-bold text-white mb-1" id="kpiTenancySplit">--</div>
+                  <div class="text-secondary fs-8"><span class="text-emerald-400 fw-semibold" id="kpiOwnerCount">--</span> Owners • <span class="text-purple-400 fw-semibold" id="kpiTenantCount">--</span> Tenants</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tower Filter Selector Cards -->
+            <div class="mb-4">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-secondary fs-8 fw-semibold text-uppercase tracking-wider">Select Wing / Tower</span>
+                <small class="text-secondary fs-8">Click a tower card to filter view</small>
+              </div>
+              <div class="row g-3" id="towersSummaryCards">
+                <!-- Populated dynamically via admin.js -->
+              </div>
+            </div>
+
+            <!-- Search, Filter & View Controls -->
+            <div class="sa-card p-3 mb-4">
+              <div class="row g-2 align-items-center">
+                <div class="col-md-4">
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-transparent border-end-0 text-secondary"><i class="fa-solid fa-magnifying-glass"></i></span>
+                    <input type="text" class="form-control border-start-0" id="flatSearchInput" placeholder="Search flat (A-101), resident, or parking…" oninput="filterFlats()">
+                  </div>
+                </div>
+
+                <div class="col-md-2 col-6">
+                  <select class="form-select form-select-sm" id="flatTowerFilterSelect" onchange="filterFlats()">
+                    <option value="ALL">All Towers</option>
+                  </select>
+                </div>
+
+                <div class="col-md-2 col-6">
+                  <select class="form-select form-select-sm" id="flatStatusFilterSelect" onchange="filterFlats()">
+                    <option value="ALL">All Statuses</option>
+                    <option value="Occupied">Occupied Units</option>
+                    <option value="Vacant">Vacant Units</option>
+                    <option value="Owner">Owners Only</option>
+                    <option value="Tenant">Tenants Only</option>
+                  </select>
+                </div>
+
+                <div class="col-md-2 col-6">
+                  <select class="form-select form-select-sm" id="flatFloorFilterSelect" onchange="filterFlats()">
+                    <option value="ALL">All Floors</option>
+                    <option value="5">5th Floor</option>
+                    <option value="4">4th Floor</option>
+                    <option value="3">3rd Floor</option>
+                    <option value="2">2nd Floor</option>
+                    <option value="1">1st Floor</option>
+                  </select>
+                </div>
+
+                <div class="col-md-2 col-6 text-end">
+                  <div class="btn-group btn-group-sm w-100" role="group">
+                    <button type="button" class="btn btn-primary" id="btnViewGrid" onclick="switchFlatsView('grid')" title="Visual Floor Grid View">
+                      <i class="fa-solid fa-border-all me-1"></i> Grid
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" id="btnViewTable" onclick="switchFlatsView('table')" title="Searchable Directory Table">
+                      <i class="fa-solid fa-table-list me-1"></i> Table
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- View 1: Visual Floor Matrix Grid View -->
+            <div id="towersFloorGridView">
+              <!-- Populated dynamically via admin.js (grouped by floor) -->
+            </div>
+
+            <!-- View 2: Searchable Directory Table View (Hidden by default) -->
+            <div id="towersTableView" class="d-none">
+              <div class="sa-card p-3">
+                <div class="table-responsive">
+                  <table class="table sa-table align-middle mb-0">
+                    <thead>
+                      <tr>
+                        <th>Flat No</th>
+                        <th>Wing / Tower</th>
+                        <th>Floor</th>
+                        <th>Type / Area</th>
+                        <th>Occupant Details</th>
+                        <th>Status</th>
+                        <th>Parking Slot</th>
+                        <th>Maintenance</th>
+                        <th class="text-end">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="flatsTableBody">
+                      <!-- Populated dynamically via admin.js -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═════════════════════════════════════════════════════════════════════════
+               TAB 4: HELPDESK & COMPLAINTS
+               ═════════════════════════════════════════════════════════════════════════ -->
+          <div class="tab-pane fade" id="tab-complaints" role="tabpanel">
+            <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+              <div>
+                <h3 class="fw-bold text-white mb-1"><i class="fa-solid fa-headset text-warning me-2"></i>Complaints & Tickets</h3>
+                <p class="text-secondary mb-0 fs-7">Track, assign, and resolve resident complaints in real-time.</p>
+              </div>
+            </div>
+            <div class="sa-card p-3">
+              <div class="table-responsive">
+                <table class="table sa-table align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th>Ticket ID</th>
+                      <th>Resident & Flat</th>
+                      <th>Category</th>
+                      <th>Subject</th>
+                      <th>Status</th>
+                      <th>Date</th>
+                      <th class="text-end">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="adminComplaintsTableBody">
+                    <!-- Populated dynamically via admin.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═════════════════════════════════════════════════════════════════════════
+               TAB 5: GATE VISITORS LOG
+               ═════════════════════════════════════════════════════════════════════════ -->
+          <div class="tab-pane fade" id="tab-visitors" role="tabpanel">
+            <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+              <div>
+                <h3 class="fw-bold text-white mb-1"><i class="fa-solid fa-shield-halved text-info me-2"></i>Gate Visitors Log</h3>
+                <p class="text-secondary mb-0 fs-7">Real-time gate pass log of visitor check-ins and cab entries.</p>
+              </div>
+            </div>
+            <div class="sa-card p-3">
+              <div class="table-responsive">
+                <table class="table sa-table align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th>Visitor Name</th>
+                      <th>Visiting Flat</th>
+                      <th>Purpose / Type</th>
+                      <th>Vehicle No</th>
+                      <th>Entry Time</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="adminVisitorsTableBody">
+                    <!-- Populated dynamically via admin.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═════════════════════════════════════════════════════════════════════════
+               TAB 6: MAINTENANCE BILLING
+               ═════════════════════════════════════════════════════════════════════════ -->
+          <div class="tab-pane fade" id="tab-billing" role="tabpanel">
+            <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+              <div>
+                <h3 class="fw-bold text-white mb-1"><i class="fa-solid fa-file-invoice-dollar text-success me-2"></i>Maintenance Billing</h3>
+                <p class="text-secondary mb-0 fs-7">Manage society maintenance invoices, collections, and dues.</p>
+              </div>
+            </div>
+            <div class="sa-card p-3">
+              <div class="table-responsive">
+                <table class="table sa-table align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th>Invoice ID</th>
+                      <th>Resident & Flat</th>
+                      <th>Bill Period</th>
+                      <th>Amount (₹)</th>
+                      <th>Due Date</th>
+                      <th>Status</th>
+                      <th class="text-end">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="adminBillingTableBody">
+                    <!-- Populated dynamically via admin.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═════════════════════════════════════════════════════════════════════════
+               TAB 7: EXPENSES LEDGER
+               ═════════════════════════════════════════════════════════════════════════ -->
+          <div class="tab-pane fade" id="tab-expenses" role="tabpanel">
+            <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+              <div>
+                <h3 class="fw-bold text-white mb-1"><i class="fa-solid fa-receipt text-warning me-2"></i>Society Expenses</h3>
+                <p class="text-secondary mb-0 fs-7">Audited society expenditures, vendor bills, and maintenance costs.</p>
+              </div>
+            </div>
+            <div class="sa-card p-4">
+              <div class="alert alert-dark border-secondary text-secondary">
+                <i class="fa-solid fa-circle-info me-2 text-warning"></i>Society ledger reconciled with bank accounts. Total recorded expense this month: ₹34,200.
+              </div>
+            </div>
+          </div>
+
+          <!-- ═════════════════════════════════════════════════════════════════════════
+               TAB 8: AMENITY RESERVATIONS
+               ═════════════════════════════════════════════════════════════════════════ -->
+          <!-- ═════════════════════════════════════════════════════════════════════════
+               TAB 8: AMENITY & FACILITY RESERVATIONS
+               ═════════════════════════════════════════════════════════════════════════ -->
+          <div class="tab-pane fade" id="tab-amenities" role="tabpanel">
+            <!-- Header & Actions -->
+            <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+              <div>
+                <h3 class="fw-bold text-white mb-1"><i class="fa-solid fa-calendar-check text-primary me-2"></i>Amenity & Facility Reservations</h3>
+                <p class="text-secondary mb-0 fs-7">Manage clubhouse, event hall, swimming pool, sports court bookings and resident slots.</p>
+              </div>
+              <div class="d-flex align-items-center gap-2 flex-wrap">
+                <button class="btn btn-outline-secondary btn-sm rounded-pill px-3 d-inline-flex align-items-center gap-2" onclick="exportAmenityBookingsCSV()">
+                  <i class="fa-solid fa-file-csv text-success"></i> Export CSV
+                </button>
+                <button class="btn btn-outline-info btn-sm rounded-pill px-3 d-inline-flex align-items-center gap-2" onclick="renderAmenitiesDashboard()">
+                  <i class="fa-solid fa-arrows-rotate"></i> Refresh
+                </button>
+                <button class="btn btn-outline-primary btn-sm rounded-pill px-3 d-inline-flex align-items-center gap-2" onclick="openAdminBookingModal()">
+                  <i class="fa-solid fa-calendar-plus"></i> Book for Resident
+                </button>
+                <button class="btn btn-gold btn-sm rounded-pill px-3 d-inline-flex align-items-center gap-2" onclick="openAddAmenityModal()">
+                  <i class="fa-solid fa-plus"></i> Add Facility
+                </button>
+              </div>
+            </div>
+
+            <!-- Amenities KPI Ribbon -->
+            <div class="row g-3 mb-4">
+              <div class="col-xl-3 col-sm-6">
+                <div class="sa-kpi-card">
+                  <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="sa-kpi-label text-secondary fs-8 fw-semibold text-uppercase tracking-wider">Total Facilities</span>
+                    <div class="sa-kpi-icon" style="background: rgba(99, 102, 241, 0.12); color: #818CF8;">
+                      <i class="fa-solid fa-building-circle-check"></i>
+                    </div>
+                  </div>
+                  <div class="sa-kpi-val fs-2 fw-bold text-white mb-1" id="kpiTotalAmenities">--</div>
+                  <div class="text-secondary fs-8"><span class="text-info fw-semibold" id="kpiOperationalCount">All Operational</span></div>
+                </div>
+              </div>
+
+              <div class="col-xl-3 col-sm-6">
+                <div class="sa-kpi-card">
+                  <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="sa-kpi-label text-secondary fs-8 fw-semibold text-uppercase tracking-wider">Active Bookings</span>
+                    <div class="sa-kpi-icon" style="background: rgba(16, 185, 129, 0.12); color: #34D399;">
+                      <i class="fa-solid fa-calendar-days"></i>
+                    </div>
+                  </div>
+                  <div class="sa-kpi-val fs-2 fw-bold text-white mb-1" id="kpiActiveBookings">--</div>
+                  <div class="text-secondary fs-8"><span class="text-success fw-semibold" id="kpiConfirmedBookings">-- Confirmed</span> slots</div>
+                </div>
+              </div>
+
+              <div class="col-xl-3 col-sm-6">
+                <div class="sa-kpi-card">
+                  <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="sa-kpi-label text-secondary fs-8 fw-semibold text-uppercase tracking-wider">Revenue Collected</span>
+                    <div class="sa-kpi-icon" style="background: rgba(212, 149, 90, 0.12); color: #D4955A;">
+                      <i class="fa-solid fa-indian-rupee-sign"></i>
+                    </div>
+                  </div>
+                  <div class="sa-kpi-val fs-2 fw-bold text-white mb-1" id="kpiAmenityRevenue">--</div>
+                  <div class="text-secondary fs-8">Facility maintenance fund</div>
+                </div>
+              </div>
+
+              <div class="col-xl-3 col-sm-6">
+                <div class="sa-kpi-card">
+                  <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="sa-kpi-label text-secondary fs-8 fw-semibold text-uppercase tracking-wider">Most Popular</span>
+                    <div class="sa-kpi-icon" style="background: rgba(236, 72, 153, 0.12); color: #F472B6;">
+                      <i class="fa-solid fa-fire"></i>
+                    </div>
+                  </div>
+                  <div class="sa-kpi-val fs-5 fw-bold text-white mb-1 text-truncate" id="kpiPopularAmenity">--</div>
+                  <div class="text-secondary fs-8" id="kpiPopularAmenitySub">Top booked amenity</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Society Amenities Cards Grid -->
+            <div class="mb-5">
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                <h5 class="fw-bold text-white mb-0"><i class="fa-solid fa-shapes text-warning me-2"></i>Community Venues & Facilities</h5>
+                <small class="text-secondary fs-8">Click 'Book Slot' to reserve for any resident</small>
+              </div>
+              <div class="row g-3" id="adminAmenitiesGrid">
+                <!-- Populated dynamically via admin.js -->
+              </div>
+            </div>
+
+            <!-- Resident Bookings & Reservations Table -->
+            <div class="sa-card p-3">
+              <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+                <h5 class="fw-bold text-white mb-0"><i class="fa-solid fa-list-check text-info me-2"></i>Resident Reservation Logs</h5>
+                <span class="badge bg-secondary bg-opacity-25 text-heading border fs-8" id="bookingsCountBadge">-- Bookings Recorded</span>
+              </div>
+
+              <!-- Search & Filter Controls -->
+              <div class="row g-2 align-items-center mb-3">
+                <div class="col-md-5">
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-transparent border-end-0 text-secondary"><i class="fa-solid fa-magnifying-glass"></i></span>
+                    <input type="text" class="form-control border-start-0" id="bookingSearchInput" placeholder="Search resident, flat (A-101), amenity, or booking ID…" oninput="filterBookings()">
+                  </div>
+                </div>
+                <div class="col-md-3 col-6">
+                  <select class="form-select form-select-sm" id="bookingAmenityFilter" onchange="filterBookings()">
+                    <option value="ALL">All Facilities</option>
+                  </select>
+                </div>
+                <div class="col-md-2 col-6">
+                  <select class="form-select form-select-sm" id="bookingStatusFilter" onchange="filterBookings()">
+                    <option value="ALL">All Statuses</option>
+                    <option value="Confirmed">Confirmed</option>
+                    <option value="Cancelled">Cancelled</option>
+                  </select>
+                </div>
+                <div class="col-md-2 col-12 text-end">
+                  <button class="btn btn-sm btn-outline-secondary w-100" onclick="resetBookingFilters()">
+                    <i class="fa-solid fa-rotate-left me-1"></i> Reset
+                  </button>
+                </div>
+              </div>
+
+              <!-- Table -->
+              <div class="table-responsive">
+                <table class="table sa-table align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th>Booking ID</th>
+                      <th>Facility</th>
+                      <th>Resident & Flat</th>
+                      <th>Date & Slot</th>
+                      <th>Purpose</th>
+                      <th>Fee</th>
+                      <th>Status</th>
+                      <th class="text-end">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="adminBookingsTableBody">
+                    <!-- Populated dynamically via admin.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═════════════════════════════════════════════════════════════════════════
+               TAB 9: NOTICES & BULLETINS
+               ═════════════════════════════════════════════════════════════════════════ -->
+          <div class="tab-pane fade" id="tab-notices" role="tabpanel">
+            <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+              <div>
+                <h3 class="fw-bold text-white mb-1"><i class="fa-solid fa-bullhorn text-danger me-2"></i>Notice Publisher</h3>
+                <p class="text-secondary mb-0 fs-7">Broadcast official society announcements and emergency bulletins.</p>
+              </div>
+              <button class="btn btn-gold rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#addNoticeModal">
+                <i class="fa-solid fa-paper-plane me-1"></i> Publish Notice
+              </button>
+            </div>
+            <div id="adminNoticesContainer" class="row g-3">
+              <!-- Populated dynamically via admin.js -->
+            </div>
+          </div>
+
+          <!-- ═════════════════════════════════════════════════════════════════════════
+               TAB 10: POLLS & VOTING
+               ═════════════════════════════════════════════════════════════════════════ -->
+          <div class="tab-pane fade" id="tab-polls" role="tabpanel">
+            <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+              <div>
+                <h3 class="fw-bold text-white mb-1"><i class="fa-solid fa-square-poll-vertical text-info me-2"></i>Society Polls & AGM Voting</h3>
+                <p class="text-secondary mb-0 fs-7">Create opinion polls and AGM resolutions for verified society members.</p>
+              </div>
+            </div>
+            <div class="sa-card p-4">
+              <div class="text-secondary fs-7">Active Poll: Solar Panel Installation in Wing A & B (78% in favor).</div>
+            </div>
+          </div>
+
+          <!-- ═════════════════════════════════════════════════════════════════════════
+               TAB 11: REPORTS & AUDITS
+               ═════════════════════════════════════════════════════════════════════════ -->
+          <div class="tab-pane fade" id="tab-reports" role="tabpanel">
+            <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+              <div>
+                <h3 class="fw-bold text-white mb-1"><i class="fa-solid fa-chart-line text-success me-2"></i>Reports & Audits</h3>
+                <p class="text-secondary mb-0 fs-7">Financial collection reports, complaint SLA audits, and visitor history.</p>
+              </div>
+            </div>
+            <div class="sa-card p-4">
+              <div class="text-secondary fs-7">Monthly audit generated on 1st of every month. Available for PDF export.</div>
+            </div>
+          </div>
+
+          <!-- ═════════════════════════════════════════════════════════════════════════
+               TAB 12: ROLE & USER ACCESS
+               ═════════════════════════════════════════════════════════════════════════ -->
+          <div class="tab-pane fade" id="tab-roles" role="tabpanel">
+            <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+              <div>
+                <h3 class="fw-bold text-white mb-1"><i class="fa-solid fa-user-gear text-warning me-2"></i>Role & User Access</h3>
+                <p class="text-secondary mb-0 fs-7">Configure society roles and toggle optional governance portals.</p>
+              </div>
+            </div>
+
+            <!-- Committee Module Governance & Optional Panel Switch -->
+            <div class="sa-card p-4 mb-4 border border-warning border-opacity-25" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.07), rgba(20, 20, 24, 0.95)); border-radius: 16px;">
+              <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="p-3 rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background: rgba(245, 158, 11, 0.15); color: #F59E0B; font-size: 22px; flex-shrink: 0;">
+                    <i class="fa-solid fa-users-gear"></i>
+                  </div>
+                  <div>
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                      <h5 class="fw-bold text-white mb-0">Committee Governance Portal & Roles</h5>
+                      <span id="commModuleStatusBadge" class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-30 rounded-pill px-2.5 py-1 fs-9 fw-bold">Active & Enabled</span>
+                    </div>
+                    <p class="text-secondary mb-0 fs-8 mt-1">
+                      Choose whether your society operates with an elected Committee Member oversight panel (Treasurers, Auditors) or is managed purely by the Society Secretary / Admin.
+                    </p>
+                  </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-3">
+                  <div class="form-check form-switch fs-5 m-0 p-0 d-flex align-items-center gap-2">
+                    <input class="form-check-input ms-0 cursor-pointer" type="checkbox" id="toggleCommitteeModule" role="switch" style="width: 46px; height: 24px;">
+                    <label class="form-check-label fs-8 fw-semibold text-white cursor-pointer" for="toggleCommitteeModule" id="toggleCommitteeModuleLabel">Enable Committee Panel</label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Module Info Row -->
+              <div class="mt-3 pt-3 border-top border-white border-opacity-10 d-flex align-items-center justify-content-between flex-wrap gap-2 text-secondary fs-8">
+                <div>
+                  <i class="fa-solid fa-circle-info text-warning me-1"></i>
+                  <span id="committeeModuleDesc">When disabled, the Committee oversight panel (<code>committee.html</code>) is locked and the Committee Member role cannot be assigned.</span>
+                </div>
+                <div id="committeeMemberCountBadge" class="text-white">
+                  <i class="fa-solid fa-user-shield me-1 text-info"></i> Active Committee Members: <strong class="text-warning" id="activeCommitteeCount">0</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="sa-card p-3">
+              <div class="table-responsive">
+                <table class="table sa-table align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th>User Name</th>
+                      <th>Email</th>
+                      <th>Assigned Role</th>
+                      <th>Status</th>
+                      <th class="text-end">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="roleSettingsTableBody">
+                    <!-- Populated dynamically via admin.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═════════════════════════════════════════════════════════════════════════
+               TAB 13: AUDIT LOGS
+               ═════════════════════════════════════════════════════════════════════════ -->
+          <div class="tab-pane fade" id="tab-audit" role="tabpanel">
+            <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+              <div>
+                <h3 class="fw-bold text-white mb-1"><i class="fa-solid fa-clock-rotate-left text-success me-2"></i>Security Audit Logs</h3>
+                <p class="text-secondary mb-0 fs-7">Immutable audit trail of society events, logins, and status updates.</p>
+              </div>
+            </div>
+            <div class="sa-card p-3">
+              <div class="table-responsive">
+                <table class="table sa-table align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th>Timestamp</th>
+                      <th>Event Action</th>
+                      <th>Module</th>
+                      <th>Actor</th>
+                      <th>Details</th>
+                    </tr>
+                  </thead>
+                  <tbody id="auditLogsTableBody">
+                    <!-- Populated dynamically via admin.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ MODALS ═══════════════ -->
+
+  <!-- Modal: Add Resident -->
+  <div class="modal fade" id="addResidentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form id="addResidentForm">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold text-white"><i class="fa-solid fa-user-plus text-primary me-2"></i>Add New Resident</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body p-4">
+            <div class="mb-3">
+              <label class="form-label text-secondary fs-8 fw-semibold">Full Name *</label>
+              <input type="text" class="form-control" id="resName" required placeholder="e.g. Rahul Sharma">
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-secondary fs-8 fw-semibold">Flat / Unit Number *</label>
+              <input type="text" class="form-control" id="resFlat" required placeholder="e.g. A-302">
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-secondary fs-8 fw-semibold">Phone Number *</label>
+              <input type="tel" class="form-control" id="resPhone" required placeholder="e.g. +91 98765 43210">
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-secondary fs-8 fw-semibold">Email Address *</label>
+              <input type="email" class="form-control" id="resEmail" required placeholder="e.g. rahul@example.com">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-gold rounded-pill px-4">Register Resident</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Update Complaint Status -->
+  <div class="modal fade" id="updateComplaintModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form id="updateComplaintForm">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold text-white"><i class="fa-solid fa-pen-to-square text-warning me-2"></i>Update Complaint Ticket</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body p-4">
+            <input type="hidden" id="editCmpId">
+            <div class="mb-3">
+              <label class="form-label text-secondary fs-8 fw-semibold">Ticket</label>
+              <input type="text" class="form-control" id="editCmpTitle" readonly style="opacity: 0.7;">
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-secondary fs-8 fw-semibold">Status *</label>
+              <select class="form-select" id="editCmpStatus" required>
+                <option value="Pending">Pending (Open)</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Resolved">Resolved</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-secondary fs-8 fw-semibold">Admin Resolution Notes</label>
+              <textarea class="form-control" id="editCmpNotes" rows="3" placeholder="Enter progress or resolution details…"></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-gold rounded-pill px-4">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Publish Notice -->
+  <div class="modal fade" id="addNoticeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form id="addNoticeForm">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold text-white"><i class="fa-solid fa-bullhorn text-danger me-2"></i>Publish Society Notice</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body p-4">
+            <div class="mb-3">
+              <label class="form-label text-secondary fs-8 fw-semibold">Notice Title *</label>
+              <input type="text" class="form-control" id="noticeTitle" required placeholder="e.g. Water Supply Maintenance">
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-secondary fs-8 fw-semibold">Category *</label>
+              <select class="form-select" id="noticeCategory" required>
+                <option value="General">General Announcement</option>
+                <option value="Maintenance">Maintenance & Repairs</option>
+                <option value="Emergency">Emergency Alert</option>
+                <option value="Event">Community Event</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-secondary fs-8 fw-semibold">Notice Content *</label>
+              <textarea class="form-control" id="noticeContent" rows="4" required placeholder="Enter announcement body text…"></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-gold rounded-pill px-4">Publish Broadcast</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Change Role -->
+  <div class="modal fade" id="changeRoleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form id="changeRoleForm">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold text-white"><i class="fa-solid fa-user-gear text-warning me-2"></i>Change User Role</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body p-4">
+            <input type="hidden" id="roleUserId">
+            <div class="mb-3">
+              <label class="form-label text-secondary fs-8 fw-semibold">Member</label>
+              <input type="text" class="form-control" id="roleUserName" readonly style="opacity: 0.7;">
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-secondary fs-8 fw-semibold">New Role *</label>
+              <select class="form-select" id="roleSelect" required>
+                <option value="Resident">Resident</option>
+                <option value="Security Guard">Security Guard</option>
+                <option value="Committee Member" id="optRoleCommittee">Committee Member</option>
+                <option value="Admin">Society Admin</option>
+              </select>
+              <div id="roleCommitteeDisabledAlert" class="form-text text-warning mt-1 d-none fs-8">
+                <i class="fa-solid fa-triangle-exclamation me-1"></i> Committee Member role is disabled in Society Settings.
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-gold rounded-pill px-4">Update Role</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Add New Flat / Unit -->
+  <div class="modal fade" id="addNewFlatModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form id="addNewFlatForm" onsubmit="handleAddNewFlatSubmit(event)">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold text-white"><i class="fa-solid fa-building-circle-check text-info me-2"></i>Add New Flat / Unit</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body p-4">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Wing / Tower *</label>
+                <select class="form-select" id="newFlatTower" required onchange="handleNewFlatTowerChange()">
+                  <option value="Tower A">Tower A (Sunrise Wing)</option>
+                  <option value="Tower B">Tower B (Meadows Wing)</option>
+                  <option value="Tower C">Tower C (Greenview Wing)</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Floor Number *</label>
+                <select class="form-select" id="newFlatFloor" required onchange="handleNewFlatFloorChange()">
+                  <option value="1">1st Floor</option>
+                  <option value="2">2nd Floor</option>
+                  <option value="3">3rd Floor</option>
+                  <option value="4">4th Floor</option>
+                  <option value="5">5th Floor</option>
+                  <option value="6">6th Floor</option>
+                  <option value="7">7th Floor</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Flat / Unit Number *</label>
+                <input type="text" class="form-control" id="newFlatNumber" required placeholder="e.g. A-601">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Unit Type / BHK *</label>
+                <select class="form-select" id="newFlatBhk" required>
+                  <option value="1 BHK">1 BHK</option>
+                  <option value="2 BHK" selected>2 BHK</option>
+                  <option value="3 BHK">3 BHK</option>
+                  <option value="4 BHK">4 BHK</option>
+                  <option value="Penthouse">Penthouse</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Carpet Area (sq.ft)</label>
+                <input type="number" class="form-control" id="newFlatSqft" placeholder="e.g. 1150" value="1150">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Parking Slot</label>
+                <input type="text" class="form-control" id="newFlatParking" placeholder="e.g. P-A601">
+              </div>
+              <div class="col-12">
+                <label class="form-label text-secondary fs-8 fw-semibold">Monthly Maintenance (₹)</label>
+                <input type="number" class="form-control" id="newFlatMaintenance" value="3500" required>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-gold rounded-pill px-4"><i class="fa-solid fa-plus me-1"></i> Create Unit</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Flat Details & Allotment Quick Actions -->
+  <div class="modal fade" id="flatDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="d-flex align-items-center gap-2">
+            <h5 class="modal-title fw-bold text-white mb-0" id="detailModalTitle"><i class="fa-solid fa-house-chimney text-info me-2"></i>Flat Details</h5>
+            <span class="badge" id="detailModalStatusBadge">Occupied</span>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4" id="flatDetailsBody">
+          <!-- Populated dynamically via admin.js -->
+        </div>
+        <div class="modal-footer d-flex justify-content-between">
+          <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3" id="btnDeleteFlat">
+            <i class="fa-solid fa-trash me-1"></i> Delete Flat
+          </button>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary rounded-pill px-4" id="btnActionFlatAllot">
+              <i class="fa-solid fa-user-plus me-1"></i> Allot Resident
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Allot Flat to Member -->
+  <div class="modal fade" id="allocateFlatModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form id="allocateFlatForm">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold text-white"><i class="fa-solid fa-building-circle-check text-success me-2"></i>Allot Flat to Resident</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body p-4">
+            <input type="hidden" id="allocUserId">
+            <div class="mb-3">
+              <label class="form-label text-secondary fs-8 fw-semibold">Resident / User *</label>
+              <select class="form-select" id="allocUserSelect" onchange="syncAllocUserSelect()">
+                <!-- Populated dynamically -->
+              </select>
+              <input type="hidden" id="allocUserName">
+              <input type="hidden" id="allocRole" value="Resident">
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Wing / Tower *</label>
+                <select class="form-select" id="allocTower" required>
+                  <option value="Tower A">Tower A</option>
+                  <option value="Tower B">Tower B</option>
+                  <option value="Tower C">Tower C</option>
+                </select>
+              </div>
+              <div class="col-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Floor *</label>
+                <input type="text" class="form-control" id="allocFloor" placeholder="e.g. 3rd Floor" value="1st Floor" required>
+              </div>
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Flat Number *</label>
+                <input type="text" class="form-control" id="allocFlat" placeholder="e.g. A-302" required>
+              </div>
+              <div class="col-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Resident Type *</label>
+                <select class="form-select" id="allocType" required>
+                  <option value="Owner">Owner</option>
+                  <option value="Tenant">Tenant</option>
+                </select>
+              </div>
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Maintenance (₹) *</label>
+                <input type="number" class="form-control" id="allocMaintenance" value="3500" required>
+              </div>
+              <div class="col-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Parking Slot</label>
+                <input type="text" class="form-control" id="allocParking" placeholder="e.g. P-14">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-gold rounded-pill px-4">Confirm Allotment</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: View Member Details -->
+  <div class="modal fade" id="memberDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold text-white"><i class="fa-solid fa-id-card text-info me-2"></i>Member Profile Details</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4" id="memberDetailsBody">
+          <!-- Populated dynamically via viewMemberDetails -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Add New Amenity Facility -->
+  <div class="modal fade" id="addAmenityModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form id="addAmenityForm" onsubmit="handleAddNewAmenitySubmit(event)">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold text-white"><i class="fa-solid fa-shapes text-warning me-2"></i>Add Community Facility</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body p-4">
+            <div class="mb-3">
+              <label class="form-label text-secondary fs-8 fw-semibold">Facility Name *</label>
+              <input type="text" class="form-control" id="newAmenityName" required placeholder="e.g. Squash Court & Lounge">
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Icon</label>
+                <select class="form-select" id="newAmenityIcon">
+                  <option value="fa-building">Building / Hall</option>
+                  <option value="fa-dumbbell">Gym / Fitness</option>
+                  <option value="fa-tree">Garden / Lawn</option>
+                  <option value="fa-water-ladder">Pool / Water</option>
+                  <option value="fa-table-tennis-paddle-ball">Sports / Court</option>
+                  <option value="fa-film">Theater / Cinema</option>
+                  <option value="fa-spa">Spa / Wellness</option>
+                  <option value="fa-volleyball">Court / Ground</option>
+                </select>
+              </div>
+              <div class="col-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Max Capacity</label>
+                <input type="number" class="form-control" id="newAmenityCapacity" value="50" min="1" required>
+              </div>
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Rate per Slot (₹)</label>
+                <input type="number" class="form-control" id="newAmenityRate" value="1000" min="0" required placeholder="0 for Free">
+              </div>
+              <div class="col-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Operational Status</label>
+                <select class="form-select" id="newAmenityStatus">
+                  <option value="Active">Operational & Active</option>
+                  <option value="Maintenance">Under Maintenance</option>
+                </select>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-secondary fs-8 fw-semibold">Facility Description</label>
+              <textarea class="form-control" id="newAmenityDesc" rows="3" placeholder="Equipment, features, guidelines, and access timings…"></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-gold rounded-pill px-4"><i class="fa-solid fa-plus me-1"></i> Create Facility</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Book Amenity on Behalf of Resident -->
+  <div class="modal fade" id="adminBookAmenityModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form id="adminBookAmenityForm" onsubmit="handleAdminBookingSubmit(event)">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold text-white"><i class="fa-solid fa-calendar-check text-primary me-2"></i>Book Amenity for Resident</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body p-4">
+            <div class="mb-3">
+              <label class="form-label text-secondary fs-8 fw-semibold">Select Facility / Venue *</label>
+              <select class="form-select" id="adminBookAmenitySelect" required onchange="handleAdminBookingAmenityChange()">
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-secondary fs-8 fw-semibold">Resident / Flat *</label>
+              <select class="form-select" id="adminBookResidentSelect" required>
+                <!-- Populated dynamically from residents -->
+              </select>
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Reservation Date *</label>
+                <input type="date" class="form-control" id="adminBookDate" required>
+              </div>
+              <div class="col-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Booking Slot *</label>
+                <select class="form-select" id="adminBookTimeSlot" required>
+                  <option value="Morning (09:00 AM - 02:00 PM)">Morning (09:00 AM - 02:00 PM)</option>
+                  <option value="Evening (05:00 PM - 11:00 PM)">Evening (05:00 PM - 11:00 PM)</option>
+                  <option value="Full Day (09:00 AM - 11:00 PM)">Full Day (09:00 AM - 11:00 PM)</option>
+                  <option value="Early Morning (06:00 AM - 08:00 AM)">Early Morning (06:00 AM - 08:00 AM)</option>
+                </select>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-secondary fs-8 fw-semibold">Event Purpose / Remarks *</label>
+              <input type="text" class="form-control" id="adminBookPurpose" required placeholder="e.g. Birthday Party, Yoga Workshop, Family Gathering">
+            </div>
+            <div class="d-flex align-items-center justify-content-between p-3 rounded-3" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);">
+              <span class="text-secondary fs-8">Facility Fee:</span>
+              <span class="fw-bold text-success fs-6 font-monospace" id="adminBookFeeDisplay">₹2,000</span>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-gold rounded-pill px-4"><i class="fa-solid fa-check me-1"></i> Confirm Reservation</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: View Booking Details -->
+  <div class="modal fade" id="bookingDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="d-flex align-items-center gap-2">
+            <h5 class="modal-title fw-bold text-white mb-0" id="bookingDetailModalTitle"><i class="fa-solid fa-receipt text-info me-2"></i>Booking Details</h5>
+            <span class="badge" id="bookingDetailStatusBadge">Confirmed</span>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4" id="bookingDetailsBody">
+          <!-- Populated dynamically via admin.js -->
+        </div>
+        <div class="modal-footer d-flex justify-content-between">
+          <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3" id="btnCancelBookingAction">
+            <i class="fa-solid fa-ban me-1"></i> Cancel Reservation
+          </button>
+          <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" style="position: fixed; bottom: 24px; right: 24px; z-index: 99999; display: flex; flex-direction: column; gap: 8px;"></div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/db.js?v=4.4"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/admin.js?v=4.4"></script>
+  <script src="js/sidebar.js"></script>
+</body>
+</html>

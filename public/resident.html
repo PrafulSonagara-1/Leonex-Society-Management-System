@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resident Portal | SocietyHub</title>
+  <meta name="description" content="Resident portal for maintenance bills, complaints, amenities, gate passes and society governance.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script src="js/theme.js"></script>
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <link href="css/style.css" rel="stylesheet">
+  <link href="css/sidebar.css" rel="stylesheet">
+  <link href="css/reactbits-theme.css" rel="stylesheet">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0e0e12">
+
+  <style>
+    body, html, *, .hub-card, .btn, .table, .form-control, .form-select, .badge, .modal, .leonex-sidebar {
+      font-family: 'Comfortaa', 'Plus Jakarta Sans', sans-serif !important;
+    }
+
+    :root {
+      --sa-gold: #D4955A;
+      --sa-dark-card: #141418;
+      --sa-dark-border: rgba(255, 255, 255, 0.08);
+    }
+
+    [data-theme="dark"] body {
+      background: #0e0e12 !important;
+      color: #F1F5F9;
+    }
+
+    [data-theme="light"] body {
+      background: #F8FAFC !important;
+      color: #0F172A;
+    }
+
+    [data-theme="light"] .hub-card {
+      background: #FFFFFF !important;
+      border: 1px solid #E2E8F0 !important;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04) !important;
+      color: #0F172A !important;
+    }
+
+    [data-theme="light"] .hub-card:hover {
+      border-color: rgba(99, 102, 241, 0.35) !important;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08) !important;
+    }
+
+    [data-theme="light"] .modal-content {
+      background: #FFFFFF !important;
+      border: 1px solid #E2E8F0 !important;
+      color: #0F172A !important;
+    }
+
+    [data-theme="light"] .form-control,
+    [data-theme="light"] .form-select {
+      background: #FFFFFF !important;
+      border: 1px solid #CBD5E1 !important;
+      color: #0F172A !important;
+    }
+
+    /* Zero-glow clean sidebar override */
+    [data-theme="dark"] .leonex-sidebar {
+      background-color: #141418 !important;
+      background: #141418 !important;
+      box-shadow: none !important;
+      border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    [data-theme="light"] .leonex-sidebar {
+      background-color: #FFFFFF !important;
+      background: #FFFFFF !important;
+      border-right: 1px solid #E2E8F0 !important;
+    }
+
+    .hub-card {
+      background: #141418 !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      border-radius: 16px !important;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    .hub-card:hover {
+      background: #141418 !important;
+      border-color: #3b82f6 !important;
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.38), 0 8px 30px rgba(0, 0, 0, 0.55), 0 0 18px rgba(59, 130, 246, 0.25) !important;
+      transform: translateY(-2px);
+    }
+    .btn-gold {
+      background: linear-gradient(135deg, #D4955A, #8A542D);
+      color: #fff !important;
+      border: none;
+      font-weight: 600;
+    }
+    .btn-gold:hover {
+      background: linear-gradient(135deg, #e5a76e, #9b5f33);
+      color: #fff !important;
+    }
+    .modal-content {
+      background: #141418 !important;
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 20px;
+      color: #F1F5F9;
+    }
+    .form-control, .form-select {
+      background: #17171e !important;
+      border: 1px solid rgba(255,255,255,0.08) !important;
+      color: #fff !important;
+      border-radius: 10px;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: #D4955A !important;
+      box-shadow: 0 0 0 3px rgba(212,149,90,0.2) !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Offline Banner -->
+  <div class="offb" id="offlineBanner" style="display:none;"><i class="fa-solid fa-wifi"></i> Offline &mdash; Actions will sync when connection returns.</div>
+
+  <!-- ═══════════════ Main Application Layout ═══════════════ -->
+  <div class="leonex-layout" id="mainAppLayout">
+    <!-- Fixed Left Sidebar (Controlled via sidebar.js — Zero-Glow Clean Styling) -->
+    <aside class="leonex-sidebar" id="leonexSidebar"></aside>
+
+    <!-- Main Viewport Area -->
+    <div class="leonex-main-wrapper">
+
+      <!-- ═══════════════ Top Navbar (Matching hero.png & admin-dark.png) ═══════════════ -->
+      <nav class="navbar navbar-expand-lg navbar-custom navbar-dashboard">
+        <div class="container-fluid px-4">
+          <div class="d-flex align-items-center gap-2">
+            <button class="leonex-mobile-toggle me-2" aria-label="Open Navigation">
+              <i class="fa-solid fa-bars"></i>
+            </button>
+            <span class="badge rounded-pill px-3 py-2 fs-8 fw-bold d-inline-flex align-items-center gap-1 shadow-sm" style="background: rgba(16,185,129,0.15); color: #10B981; border: 1px solid rgba(16,185,129,0.3);">
+              <i class="fa-solid fa-house-user"></i> Resident Portal
+            </span>
+            <span id="resModeBadge" class="badge rounded-pill px-3 py-2 fs-8 fw-semibold d-inline-flex align-items-center gap-1 shadow-sm"></span>
+          </div>
+
+          <div class="d-flex align-items-center gap-3">
+            <button class="btn-nav-icon position-relative border-0 bg-transparent text-secondary" title="Notifications" onclick="toggleNotificationPanel(this)" aria-label="Notifications">
+              <svg class="animate-bell-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path class="animate-bell-clapper" d="M10.268 21a2 2 0 0 0 3.464 0" />
+                <path class="animate-bell-body" d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" />
+              </svg>
+              <span class="notif-dot"></span>
+            </button>
+
+            <button class="btn-theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme" title="Switch Theme">
+              <i class="fa-solid fa-moon" id="themeIcon"></i>
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Main Container -->
+      <div class="container-fluid px-3 px-lg-4 py-4">
+
+        <!-- Visitor Approval Banner (Auto-shown by resident.js if pending visitor exists) -->
+        <div id="visitorApprovalBanner" class="alert alert-warning border-0 mb-4 rounded-4 shadow-sm" style="display:none; background: linear-gradient(135deg, rgba(245,158,11,0.18), rgba(217,119,6,0.12)); border: 1px solid rgba(245,158,11,0.35) !important;">
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-3">
+              <i class="fa-solid fa-bell text-warning fs-4"></i>
+              <div id="bannerVisitorDetails" class="text-white">A visitor is requesting entry to your flat.</div>
+            </div>
+            <div id="bannerActionBtns" class="d-flex gap-2"></div>
+          </div>
+        </div>
+
+        <!-- Header Actions Row -->
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+          <div>
+            <h4 class="fw-bold mb-1 text-white">Resident Hub</h4>
+            <p class="text-secondary fs-8 mb-0">Manage maintenance invoices, gate passes, complaints and community polls.</p>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-outline-warning btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#addVisitorModal">
+              <i class="fa-solid fa-user-plus me-1"></i> Pre-Approve Guest
+            </button>
+            <button class="btn btn-gold btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#newComplaintModal">
+              <i class="fa-solid fa-plus me-1"></i> New Complaint
+            </button>
+          </div>
+        </div>
+
+        <!-- Tab Navigation Triggers (Controlled via sidebar.js) -->
+        <div class="d-none" id="residentTabs" role="tablist">
+          <button class="nav-link active" id="tab-res-home-btn" data-bs-toggle="tab" data-bs-target="#tab-res-home"></button>
+          <button class="nav-link" id="tab-res-bills-btn" data-bs-toggle="tab" data-bs-target="#tab-res-bills"></button>
+          <button class="nav-link" id="tab-res-complaints-btn" data-bs-toggle="tab" data-bs-target="#tab-res-complaints"></button>
+          <button class="nav-link" id="tab-res-visitors-btn" data-bs-toggle="tab" data-bs-target="#tab-res-visitors"></button>
+          <button class="nav-link" id="tab-res-amenities-btn" data-bs-toggle="tab" data-bs-target="#tab-res-amenities"></button>
+          <button class="nav-link" id="tab-res-family-btn" data-bs-toggle="tab" data-bs-target="#tab-res-family"></button>
+          <button class="nav-link" id="tab-res-notices-btn" data-bs-toggle="tab" data-bs-target="#tab-res-notices"></button>
+          <button class="nav-link" id="tab-res-documents-btn" data-bs-toggle="tab" data-bs-target="#tab-res-documents"></button>
+          <button class="nav-link" id="tab-res-polls-btn" data-bs-toggle="tab" data-bs-target="#tab-res-polls"></button>
+          <button class="nav-link" id="tab-res-sos-btn" data-bs-toggle="tab" data-bs-target="#tab-res-sos"></button>
+        </div>
+
+    <!-- Tab Content Panes -->
+    <div class="tab-content" id="residentTabsContent">
+      <!-- 1. Home / Overview -->
+      <div class="tab-pane fade show active" id="tab-res-home" role="tabpanel">
+        <div id="homeContent"></div>
+      </div>
+
+      <!-- 2. Bills & Payments -->
+      <div class="tab-pane fade" id="tab-res-bills" role="tabpanel">
+        <div class="row g-4 mb-4">
+          <div class="col-lg-5">
+            <div id="currentBillCard"></div>
+          </div>
+          <div class="col-lg-7">
+            <div class="hub-card p-4">
+              <h5 class="fw-bold mb-3"><i class="fa-solid fa-clock-rotate-left text-warning me-2"></i> Payment History</h5>
+              <div id="billsTableHost"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Complaints -->
+      <div class="tab-pane fade" id="tab-res-complaints" role="tabpanel">
+        <div class="hub-card p-4 mb-4">
+          <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+            <h5 class="fw-bold mb-0"><i class="fa-solid fa-list-check text-warning me-2"></i> Maintenance Tickets</h5>
+            <button class="btn btn-gold rounded-pill px-3 btn-sm" data-bs-toggle="modal" data-bs-target="#newComplaintModal">
+              <i class="fa-solid fa-plus me-1"></i> Raise Ticket
+            </button>
+          </div>
+          <div id="complaintsTableHost"></div>
+        </div>
+      </div>
+
+      <!-- 4. Visitors & Gate Passes -->
+      <div class="tab-pane fade" id="tab-res-visitors" role="tabpanel">
+        <div class="row g-4 mb-4">
+          <div class="col-lg-5">
+            <div class="hub-card p-4 h-100">
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                <h5 class="fw-bold mb-0"><i class="fa-solid fa-user-clock text-warning me-2"></i> Expected Guests</h5>
+                <button class="btn btn-outline-warning btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#addVisitorModal">+ Pre-Approve</button>
+              </div>
+              <div id="preVisitorsHost"></div>
+            </div>
+          </div>
+          <div class="col-lg-7">
+            <div class="hub-card p-4 h-100">
+              <h5 class="fw-bold mb-3"><i class="fa-solid fa-id-card text-warning me-2"></i> Recent Gate Visits</h5>
+              <div id="visitorsTableHost"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Amenities -->
+      <div class="tab-pane fade" id="tab-res-amenities" role="tabpanel">
+        <div class="hub-card p-4 mb-4">
+          <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+            <h5 class="fw-bold mb-0"><i class="fa-solid fa-swimming-pool text-warning me-2"></i> Society Amenities</h5>
+            <button class="btn btn-gold btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#bookAmenityModal">
+              <i class="fa-solid fa-calendar-plus me-1"></i> Book a Slot
+            </button>
+          </div>
+          <div class="row g-3" id="amenitiesGrid"></div>
+        </div>
+        <div class="row g-4">
+          <div class="col-md-6">
+            <div class="hub-card p-4">
+              <h6 class="fw-bold mb-3">Upcoming Reservations</h6>
+              <div id="upcomingBookingsHost"></div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="hub-card p-4">
+              <h6 class="fw-bold mb-3">Booking History</h6>
+              <div id="pastBookingsHost"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Family & Tenancy -->
+      <div class="tab-pane fade" id="tab-res-family" role="tabpanel">
+        <div class="hub-card p-4">
+          <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+            <h5 class="fw-bold mb-0"><i class="fa-solid fa-users text-warning me-2"></i> Family Members & Residents</h5>
+            <button class="btn btn-gold btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#familyMemberModal">
+              <i class="fa-solid fa-user-plus me-1"></i> Add Member
+            </button>
+          </div>
+          <div class="row g-3" id="familyGrid"></div>
+        </div>
+      </div>
+
+      <!-- 7. Notices & Events -->
+      <div class="tab-pane fade" id="tab-res-notices" role="tabpanel">
+        <div class="row g-4">
+          <div class="col-lg-7">
+            <div class="hub-card p-4">
+              <h5 class="fw-bold mb-3"><i class="fa-solid fa-bullhorn text-warning me-2"></i> Official Notices</h5>
+              <div id="resNoticesContainer"></div>
+            </div>
+          </div>
+          <div class="col-lg-5">
+            <div class="hub-card p-4">
+              <h5 class="fw-bold mb-3"><i class="fa-solid fa-calendar-star text-warning me-2"></i> Upcoming Events</h5>
+              <div id="resEventsContainer"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8. Documents -->
+      <div class="tab-pane fade" id="tab-res-documents" role="tabpanel">
+        <div class="hub-card p-4">
+          <h5 class="fw-bold mb-3"><i class="fa-solid fa-folder-open text-warning me-2"></i> Society Documents & Bye-Laws</h5>
+          <div id="documentsTableHost"></div>
+        </div>
+      </div>
+
+      <!-- 9. Polls & Voting -->
+      <div class="tab-pane fade" id="tab-res-polls" role="tabpanel">
+        <div class="hub-card p-4">
+          <h5 class="fw-bold mb-3"><i class="fa-solid fa-square-poll-vertical text-warning me-2"></i> Active Community Polls</h5>
+          <div id="pollsContainer"></div>
+        </div>
+      </div>
+
+      <!-- 10. Emergency SOS -->
+      <div class="tab-pane fade" id="tab-res-sos" role="tabpanel">
+        <div class="row g-4">
+          <div class="col-lg-6">
+            <div class="hub-card p-4 border border-danger" style="background: rgba(239,68,68,0.06);">
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                <h5 class="fw-bold text-danger mb-0"><i class="fa-solid fa-triangle-exclamation me-2"></i> Instant Emergency SOS</h5>
+              </div>
+              <p class="text-secondary fs-8">Broadcast an immediate alarm to the Gate Security guard desk and society office.</p>
+              <form id="sosForm" onsubmit="event.preventDefault();">
+                <div class="mb-3">
+                  <label class="form-label text-secondary fs-8 fw-semibold">Emergency Type</label>
+                  <select class="form-select" id="sosType">
+                    <option value="Medical">Medical Emergency</option>
+                    <option value="Fire">Fire Hazard</option>
+                    <option value="Security">Security Intruder</option>
+                    <option value="Lift">Elevator Trapped</option>
+                    <option value="Gas Leak">Gas Leak</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label text-secondary fs-8 fw-semibold">Urgent Notes</label>
+                  <textarea class="form-control" id="sosMessage" rows="2" placeholder="e.g. Need stretcher at Tower A, Flat 402 immediately"></textarea>
+                </div>
+                <button type="submit" class="btn btn-danger w-100 rounded-pill py-2 fw-bold">
+                  <i class="fa-solid fa-bullhorn me-1"></i> Trigger Gate Alarm
+                </button>
+              </form>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="hub-card p-4 mb-4">
+              <h5 class="fw-bold mb-3"><i class="fa-solid fa-phone text-warning me-2"></i> Emergency Contacts</h5>
+              <div id="emergencyContactsList"></div>
+            </div>
+            <div class="hub-card p-4">
+              <h5 class="fw-bold mb-3"><i class="fa-solid fa-clock-rotate-left text-warning me-2"></i> Past SOS Alerts</h5>
+              <div id="sosAlertsHost"></div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /#residentTabsContent -->
+    </div><!-- /.container-fluid -->
+  </div><!-- /.leonex-main-wrapper -->
+</div><!-- /.leonex-layout -->
+
+  <!-- ══════════════════════════════════════════════════════════════
+       MODALS
+       ══════════════════════════════════════════════════════════════ -->
+
+  <!-- Modal 1: Pre-Approve Visitor -->
+  <div class="modal fade" id="addVisitorModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header border-bottom border-secondary" style="border-color: rgba(255,255,255,0.08) !important;">
+          <h5 class="modal-title fw-bold"><i class="fa-solid fa-user-plus text-warning me-2"></i>Pre-Approve Visitor / Delivery</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="addVisitorForm">
+          <div class="modal-body p-4">
+            <input type="hidden" id="visPreRegister" value="true">
+            <div class="mb-3">
+              <label class="form-label text-secondary fs-8 fw-semibold">Visitor Name *</label>
+              <input type="text" class="form-control" id="visName" placeholder="e.g. John Doe / Swiggy Delivery" required>
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Phone Number *</label>
+                <input type="tel" class="form-control" id="visPhone" placeholder="9876543210" required>
+              </div>
+              <div class="col-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Type</label>
+                <select class="form-select" id="visType">
+                  <option value="Guest">Guest</option>
+                  <option value="Delivery">Delivery</option>
+                  <option value="Cab">Cab</option>
+                  <option value="Service Provider">Service Provider</option>
+                </select>
+              </div>
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Expected Date</label>
+                <input type="date" class="form-control" id="visExpectedDate">
+              </div>
+              <div class="col-3">
+                <label class="form-label text-secondary fs-8 fw-semibold">From</label>
+                <input type="time" class="form-control" id="visExpectedFrom" value="09:00">
+              </div>
+              <div class="col-3">
+                <label class="form-label text-secondary fs-8 fw-semibold">To</label>
+                <input type="time" class="form-control" id="visExpectedTo" value="18:00">
+              </div>
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Purpose</label>
+                <input type="text" class="form-control" id="visPurpose" placeholder="e.g. Dinner Guest / Package">
+              </div>
+              <div class="col-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Vehicle Number</label>
+                <input type="text" class="form-control" id="visVehicle" placeholder="e.g. MH 02 AB 1234">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer border-top border-secondary p-3" style="border-color: rgba(255,255,255,0.08) !important;">
+            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-gold rounded-pill px-4">Generate Gate Pass</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Visitor Pass QR / Code -->
+  <div class="modal fade" id="visitorPassModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold">Visitor Gate Pass</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4" id="visitorPassBody"></div>
+        <div class="modal-footer border-0 pt-0">
+          <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: Raise Maintenance Complaint -->
+  <div class="modal fade" id="newComplaintModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header border-bottom border-secondary" style="border-color: rgba(255,255,255,0.08) !important;">
+          <h5 class="modal-title fw-bold"><i class="fa-solid fa-headset text-warning me-2"></i>Raise Maintenance Complaint</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="newComplaintForm">
+          <div class="modal-body p-4">
+            <div class="mb-3">
+              <label class="form-label text-secondary fs-8 fw-semibold">Subject / Title *</label>
+              <input type="text" class="form-control" id="cmpTitle" placeholder="e.g. Water leakage in balcony" required>
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Category</label>
+                <select class="form-select" id="cmpCategory">
+                  <option value="Plumbing">Plumbing</option>
+                  <option value="Electrical">Electrical</option>
+                  <option value="Carpentry">Carpentry</option>
+                  <option value="Security">Security</option>
+                  <option value="Common Area">Common Area</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="col-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Priority</label>
+                <select class="form-select" id="cmpPriority">
+                  <option value="Low">Low</option>
+                  <option value="Medium" selected>Medium</option>
+                  <option value="High">High</option>
+                  <option value="Urgent">Urgent</option>
+                </select>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-secondary fs-8 fw-semibold">Description *</label>
+              <textarea class="form-control" id="cmpDesc" rows="3" placeholder="Provide full details regarding the issue…" required></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-secondary fs-8 fw-semibold">Attachment Photo (Optional)</label>
+              <input type="file" class="form-control" id="cmpImage" accept="image/*">
+            </div>
+          </div>
+          <div class="modal-footer border-top border-secondary p-3" style="border-color: rgba(255,255,255,0.08) !important;">
+            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-gold rounded-pill px-4">Submit Complaint</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 4: Complaint Detail View -->
+  <div class="modal fade" id="complaintDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header border-bottom border-secondary" style="border-color: rgba(255,255,255,0.08) !important;">
+          <h5 class="modal-title fw-bold">Complaint Ticket Details</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4" id="complaintDetailBody"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 5: Pay Maintenance Bill -->
+  <div class="modal fade" id="payBillModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header border-bottom border-secondary" style="border-color: rgba(255,255,255,0.08) !important;">
+          <h5 class="modal-title fw-bold"><i class="fa-solid fa-credit-card text-success me-2"></i>Pay Maintenance Due</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="payBillForm">
+          <input type="hidden" id="payBillId">
+          <div class="modal-body p-4">
+            <div id="payStepForm">
+              <div class="mb-3">
+                <label class="form-label text-secondary fs-8 fw-semibold">Select Payment Gateway / Method</label>
+                <select class="form-select" id="payMethod">
+                  <option value="UPI">UPI Instant (GPay / PhonePe / Paytm)</option>
+                  <option value="Card">Credit / Debit Card</option>
+                  <option value="NetBanking">Net Banking</option>
+                </select>
+              </div>
+            </div>
+            <div id="payStepProcessing" style="display:none; text-align:center; padding: 24px 0;">
+              <div class="spinner-border text-warning mb-3" role="status"></div>
+              <h6 class="fw-bold text-white">Contacting Payment Gateway…</h6>
+              <p class="text-secondary fs-8">Simulating verified payment reconciliation.</p>
+            </div>
+            <div id="payStepSuccess" style="display:none; text-align:center; padding: 20px 0;">
+              <i class="fa-solid fa-circle-check text-success fs-1 mb-2"></i>
+              <h5 class="fw-bold text-white">Payment Successful! 🎉</h5>
+              <p class="text-secondary fs-8">Your digital receipt has been generated.</p>
+              <button type="button" class="btn btn-outline-success rounded-pill px-4 mt-2" id="btnDownloadNewReceipt">
+                <i class="fa-solid fa-download me-1"></i> Download Tax Receipt
+              </button>
+            </div>
+          </div>
+          <div class="modal-footer border-top border-secondary p-3" id="payBillModalFooter" style="border-color: rgba(255,255,255,0.08) !important;">
+            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-gold rounded-pill px-4">Confirm & Pay</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 6: Book Amenity -->
+  <div class="modal fade" id="bookAmenityModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header border-bottom border-secondary" style="border-color: rgba(255,255,255,0.08) !important;">
+          <h5 class="modal-title fw-bold"><i class="fa-solid fa-calendar-check text-warning me-2"></i>Book Amenity</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="bookAmenityForm">
+          <div class="modal-body p-4">
+            <div id="bookingConflictAlert" class="alert alert-danger py-2 fs-8" style="display:none;"></div>
+            <div class="mb-3">
+              <label class="form-label text-secondary fs-8 fw-semibold">Amenity *</label>
+              <select class="form-select" id="bookAmenitySelect" required></select>
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Date *</label>
+                <input type="date" class="form-control" id="bookDate" required>
+              </div>
+              <div class="col-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Time Slot *</label>
+                <select class="form-select" id="bookTimeSlot" required>
+                  <option value="Morning (06:00 - 10:00)">Morning (06:00 - 10:00)</option>
+                  <option value="Afternoon (12:00 - 16:00)">Afternoon (12:00 - 16:00)</option>
+                  <option value="Evening (17:00 - 21:00)">Evening (17:00 - 21:00)</option>
+                  <option value="Full Day (08:00 - 22:00)">Full Day (08:00 - 22:00)</option>
+                </select>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-secondary fs-8 fw-semibold">Event / Booking Purpose</label>
+              <input type="text" class="form-control" id="bookPurpose" placeholder="e.g. Birthday Party / Practice Session">
+            </div>
+          </div>
+          <div class="modal-footer border-top border-secondary p-3" style="border-color: rgba(255,255,255,0.08) !important;">
+            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-gold rounded-pill px-4">Reserve Slot</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 7: Add/Edit Family Member -->
+  <div class="modal fade" id="familyMemberModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header border-bottom border-secondary" style="border-color: rgba(255,255,255,0.08) !important;">
+          <h5 class="modal-title fw-bold" id="familyModalTitle"><i class="fa-solid fa-user-plus text-warning me-2"></i>Add Family Member</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="familyMemberForm">
+          <input type="hidden" id="famEditId">
+          <div class="modal-body p-4">
+            <div class="mb-3">
+              <label class="form-label text-secondary fs-8 fw-semibold">Full Name *</label>
+              <input type="text" class="form-control" id="famName" placeholder="e.g. Rita Patel" required>
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Relationship *</label>
+                <select class="form-select" id="famRelationship">
+                  <option value="Spouse">Spouse</option>
+                  <option value="Child">Child</option>
+                  <option value="Parent">Parent</option>
+                  <option value="Sibling">Sibling</option>
+                  <option value="Tenant">Tenant</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="col-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Age</label>
+                <input type="number" class="form-control" id="famAge" placeholder="e.g. 32">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-secondary fs-8 fw-semibold">Phone Number</label>
+              <input type="tel" class="form-control" id="famPhone" placeholder="+91 98765 00000">
+            </div>
+            <div class="form-check form-switch mt-2">
+              <input class="form-check-input" type="checkbox" id="famEmergency">
+              <label class="form-check-label text-secondary fs-8" for="famEmergency">Mark as Emergency Contact</label>
+            </div>
+          </div>
+          <div class="modal-footer border-top border-secondary p-3" style="border-color: rgba(255,255,255,0.08) !important;">
+            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-gold rounded-pill px-4">Save Member</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" style="position: fixed; bottom: 24px; right: 24px; z-index: 99999; display: flex; flex-direction: column; gap: 8px;"></div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/receipt.js"></script>
+  <script src="js/resident.js"></script>
+  <script src="js/sidebar.js"></script>
+</body>
+</html>

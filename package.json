@@ -1,0 +1,28 @@
+{
+  "name": "smart-society-management-system",
+  "version": "1.0.0",
+  "description": "A Digital Platform for Residential Society Administration",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "society-management",
+    "mis",
+    "express"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@clerk/clerk-js": "^6.31.1",
+    "@clerk/express": "^2.1.67",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
+    "express": "^4.19.2",
+    "firebase": "^12.16.0",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.24.3"
+  }
+}

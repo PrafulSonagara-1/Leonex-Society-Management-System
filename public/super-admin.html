@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Owner Control Center | SocietyHub Master</title>
+
+  <!-- Google Fonts: Comfortaa & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Theme toggle pre-loader -->
+  <script src="js/theme.js"></script>
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Custom CSS -->
+  <link href="css/style.css" rel="stylesheet">
+  <!-- Leonex Sidebar CSS -->
+  <link href="css/sidebar.css" rel="stylesheet">
+  <link href="css/reactbits-theme.css" rel="stylesheet">
+
+  <style>
+    /* Comfortaa font applied globally across Super Admin portal */
+    body, html, *, .hub-card, .btn, .table, .form-control, .form-select, .badge, .modal, .leonex-sidebar {
+      font-family: 'Comfortaa', 'Plus Jakarta Sans', sans-serif !important;
+    }
+
+    :root {
+      --sa-gold: #D4955A;
+      --sa-gold-glow: rgba(212, 149, 90, 0.25);
+      --sa-purple: #8B5CF6;
+      --sa-dark-card: #141418;
+      --sa-dark-border: rgba(255, 255, 255, 0.08);
+    }
+
+    [data-theme="dark"] body {
+      background: #0e0e12 !important;
+      color: #F1F5F9;
+    }
+
+    [data-theme="light"] body {
+      background: #F8FAFC !important;
+      color: #0F172A;
+    }
+
+    [data-theme="light"] .sa-kpi-card,
+    [data-theme="light"] .sa-card {
+      background: #FFFFFF !important;
+      border: 1px solid #E2E8F0 !important;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04) !important;
+    }
+
+    [data-theme="light"] .sa-kpi-card:hover,
+    [data-theme="light"] .sa-card:hover {
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08) !important;
+      border-color: rgba(99, 102, 241, 0.35) !important;
+    }
+
+    [data-theme="light"] .sa-kpi-val {
+      color: #0F172A !important;
+    }
+
+    [data-theme="light"] .sa-kpi-label {
+      color: #64748B !important;
+    }
+
+    [data-theme="light"] .sa-table th {
+      background: #F8FAFC !important;
+      color: #64748B !important;
+      border-bottom: 1px solid #E2E8F0 !important;
+    }
+
+    [data-theme="light"] .sa-table td {
+      color: #1E293B !important;
+      border-bottom: 1px solid #F1F5F9 !important;
+    }
+
+    [data-theme="light"] .sa-table tr:hover td {
+      background: #F8FAFC !important;
+    }
+
+    /* Zero-glow clean sidebar override */
+    [data-theme="dark"] .leonex-sidebar {
+      background-color: #141418 !important;
+      background: #141418 !important;
+      box-shadow: none !important;
+      border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    [data-theme="light"] .leonex-sidebar {
+      background-color: #FFFFFF !important;
+      background: #FFFFFF !important;
+      border-right: 1px solid #E2E8F0 !important;
+    }
+
+    .sa-owner-badge {
+      background: linear-gradient(135deg, #D4955A, #8A542D);
+      color: #fff;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      padding: 6px 12px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 14px rgba(212, 149, 90, 0.3);
+    }
+
+    .sa-kpi-card {
+      background: #14111c !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      border-radius: 16px !important;
+      padding: 22px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    .sa-kpi-card:hover {
+      background: #14111c !important;
+      border-color: #3b82f6 !important;
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.35), 0 8px 30px rgba(0, 0, 0, 0.45), 0 0 18px rgba(59, 130, 246, 0.25) !important;
+      transform: translateY(-2px);
+    }
+    .sa-kpi-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin-bottom: 16px;
+    }
+    .sa-kpi-val {
+      font-size: 28px;
+      font-weight: 700;
+      color: #FFFFFF;
+      line-height: 1.1;
+      margin-bottom: 4px;
+    }
+    .sa-kpi-label {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.55);
+    }
+
+    .sa-card {
+      background: #14111c !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      border-radius: 16px !important;
+      padding: 24px;
+      margin-bottom: 24px;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    .sa-card:hover {
+      background: #14111c !important;
+      border-color: #3b82f6 !important;
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.38), 0 8px 30px rgba(0, 0, 0, 0.55), 0 0 18px rgba(59, 130, 246, 0.25) !important;
+      transform: translateY(-2px);
+    }
+
+    .sa-table th {
+      background: rgba(255, 255, 255, 0.025) !important;
+      color: rgba(255, 255, 255, 0.5) !important;
+      font-size: 11.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+      padding: 14px 18px !important;
+    }
+    .sa-table td {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+      padding: 14px 18px !important;
+      vertical-align: middle;
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 13.5px;
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    .sa-table tr:hover td {
+      background: transparent !important;
+      color: #FFFFFF !important;
+      border-bottom-color: rgba(59, 130, 246, 0.45) !important;
+    }
+
+    .code-badge {
+      background: rgba(212, 149, 90, 0.12);
+      border: 1px solid rgba(212, 149, 90, 0.35);
+      color: #D4955A;
+      font-family: monospace !important;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .code-badge:hover {
+      background: rgba(212, 149, 90, 0.22);
+      transform: scale(1.03);
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .status-pill.active {
+      background: rgba(16, 185, 129, 0.12);
+      color: #10B981;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .status-pill.suspended {
+      background: rgba(239, 68, 68, 0.12);
+      color: #EF4444;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, #D4955A, #B87B44);
+      color: #fff;
+      font-weight: 600;
+      border: none;
+      border-radius: 12px;
+      padding: 8px 18px;
+      transition: all 0.2s ease;
+    }
+    .btn-gold:hover {
+      background: linear-gradient(135deg, #E2A46C, #C88950);
+      color: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(212, 149, 90, 0.35);
+    }
+
+    .search-input-wrap {
+      position: relative;
+      max-width: 320px;
+      width: 100%;
+    }
+    .search-input-wrap i {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(255,255,255,0.4);
+      font-size: 13px;
+    }
+    .search-input-wrap input {
+      padding-left: 38px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #fff;
+      border-radius: 12px;
+      font-size: 13px;
+    }
+    .search-input-wrap input:focus {
+      background: rgba(255,255,255,0.08);
+      border-color: #D4955A;
+      box-shadow: 0 0 0 3px rgba(212, 149, 90, 0.2);
+      color: #fff;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10B981;
+      display: inline-block;
+      box-shadow: 0 0 8px #10B981;
+      animation: pulseDot 2s infinite;
+    }
+    @keyframes pulseDot {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    /* Master Security Gate Overlay */
+    #saSecurityGate {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse 70% 50% at 50% 20%, rgba(212,149,90,0.18) 0%, transparent 65%),
+                  radial-gradient(ellipse 50% 40% at 85% 90%, rgba(99,102,241,0.15) 0%, transparent 60%),
+                  #0e0e12;
+      z-index: 99999;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow-y: auto;
+    }
+    .sa-gate-container {
+      max-width: 480px;
+      width: 100%;
+      margin: auto;
+    }
+    .sa-gate-box {
+      background: #141418;
+      border: 1px solid rgba(212, 149, 90, 0.35);
+      border-radius: 24px;
+      padding: 36px 32px;
+      box-shadow: 0 24px 70px rgba(0,0,0,0.7), 0 0 40px rgba(212,149,90,0.12);
+      backdrop-filter: blur(20px);
+    }
+    .sa-gate-icon {
+      width: 68px;
+      height: 68px;
+      background: rgba(212, 149, 90, 0.12);
+      border: 1px solid rgba(212, 149, 90, 0.35);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      color: #D4955A;
+      margin: 0 auto;
+      box-shadow: 0 0 30px rgba(212, 149, 90, 0.25);
+    }
+    .badge-rule-passed {
+      background: rgba(16, 185, 129, 0.15) !important;
+      border-color: rgba(16, 185, 129, 0.4) !important;
+      color: #10B981 !important;
+    }
+    .badge-rule-passed i::before {
+      content: "\f058" !important; /* fa-solid fa-circle-check */
+    }
+
+    /* Fallback Access Denied Screen */
+    #accessDeniedOverlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #0e0e12;
+      z-index: 99998;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .denied-box {
+      max-width: 480px;
+      width: 100%;
+      background: #141418;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 24px;
+      padding: 40px;
+      text-align: center;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+    }
+    .denied-icon {
+      width: 72px;
+      height: 72px;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      color: #EF4444;
+      margin: 0 auto 20px;
+    }
+  </style>
+</head>
+<body class="bg-light">
+
+  <!-- ═══════════════ Super Admin Master Security Gate ═══════════════ -->
+  <div id="saSecurityGate" style="display: none;">
+    <div class="sa-gate-container">
+      <div class="sa-gate-box">
+        <!-- Brand Header Badge -->
+        <div class="text-center mb-4">
+          <div class="sa-gate-icon mb-3">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <span class="sa-owner-badge mb-2">
+            <i class="fa-solid fa-crown"></i>
+            <span>SYSTEM OWNER • MASTER ACCESS</span>
+          </span>
+          <h2 class="fw-bold text-white mt-2 mb-1" style="letter-spacing: -0.02em;">Super Admin Access</h2>
+          <p class="text-secondary fs-7 mb-0" style="line-height: 1.5;">
+            Authenticate with your System Owner credentials to access the SaaS Master Control Center.
+          </p>
+        </div>
+
+        <!-- Alert Container -->
+        <div id="gateErrorAlert" class="alert alert-danger py-2 px-3 fs-8 mb-3 border-0 d-none" style="background: rgba(239,68,68,0.15); color: #FCA5A5;">
+          <i class="fa-solid fa-circle-exclamation me-1"></i> <span id="gateErrorMessage">Invalid credentials.</span>
+        </div>
+
+        <!-- Login Form -->
+        <form id="saGateLoginForm" onsubmit="handleSecurityGateLogin(event)">
+          <div class="mb-3">
+            <label class="form-label text-secondary fs-8 fw-semibold">System Owner Name or Username</label>
+            <div class="input-group">
+              <span class="input-group-text bg-dark border-secondary text-secondary"><i class="fa-solid fa-user-shield"></i></span>
+              <input type="text" class="form-control text-white bg-dark border-secondary" id="gateUsername" placeholder="e.g. superadmin or Leonex System Owner" required value="superadmin" autocomplete="username">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-secondary fs-8 fw-semibold">Strong Password</label>
+            <div class="input-group">
+              <span class="input-group-text bg-dark border-secondary text-secondary"><i class="fa-solid fa-lock"></i></span>
+              <input type="password" class="form-control text-white bg-dark border-secondary" id="gatePassword" placeholder="Enter strong password" required autocomplete="current-password">
+              <button class="btn btn-outline-secondary" type="button" onclick="togglePassVisibility('gatePassword', this)" title="Show/Hide Password">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Default Credentials Helper Chip -->
+          <div class="p-3 rounded-3 mb-3" style="background: rgba(212, 149, 90, 0.08); border: 1px solid rgba(212, 149, 90, 0.25);">
+            <div class="d-flex align-items-center justify-content-between gap-2">
+              <div class="fs-9 text-secondary">
+                <i class="fa-solid fa-key text-warning me-1"></i> Default Master Password: <strong class="text-warning">SuperAdmin@2026!</strong>
+              </div>
+              <button type="button" class="btn btn-xs btn-outline-warning rounded-pill py-0 px-2 fs-9" onclick="autoFillDefaultCredentials()">
+                Fill Default
+              </button>
+            </div>
+            <div class="text-secondary fs-9 mt-1" style="font-size: 11px;">
+              * You can manually change this password and your name anytime inside Dashboard Settings.
+            </div>
+          </div>
+
+          <div class="d-flex align-items-center justify-content-between mb-4">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="gateRememberMe" checked>
+              <label class="form-check-label text-secondary fs-8" for="gateRememberMe">
+                Remember Master Session
+              </label>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-gold w-100 py-2 rounded-pill fw-bold fs-7 mb-3" id="gateUnlockBtn">
+            <i class="fa-solid fa-lock-open me-2"></i> Unlock Master Dashboard
+          </button>
+
+          <div class="text-center">
+            <a href="index.html" class="text-secondary text-decoration-none fs-8 hover-white">
+              <i class="fa-solid fa-arrow-left me-1"></i> Return to Homepage
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fallback Denied Overlay -->
+  <div id="accessDeniedOverlay" style="display: none;">
+    <div class="denied-box">
+      <div class="denied-icon">
+        <i class="fa-solid fa-shield-halved"></i>
+      </div>
+      <h3 class="fw-bold text-white mb-2">Access Restricted</h3>
+      <p class="text-secondary mb-4 fs-7" style="line-height:1.6;">
+        This Master Dashboard is restricted exclusively to the <strong>System Owner (Super Admin)</strong>.
+      </p>
+      <button class="btn btn-gold w-100 rounded-pill py-2 fw-semibold mb-2" onclick="showSecurityGate()">
+        <i class="fa-solid fa-key me-2"></i> Enter Master Password
+      </button>
+      <a href="login.html" class="btn btn-outline-secondary w-100 rounded-pill py-2 fw-semibold">
+        Return to Login
+      </a>
+    </div>
+  </div>
+
+  <!-- ═══════════════ Main Application Layout ═══════════════ -->
+  <div class="leonex-layout" id="mainAppLayout">
+    <!-- Fixed Left Sidebar (Controlled via sidebar.js) -->
+    <aside class="leonex-sidebar" id="leonexSidebar"></aside>
+
+    <!-- Main Viewport Area -->
+    <div class="leonex-main-wrapper">
+
+      <!-- ═══════════════ Top Navbar ═══════════════ -->
+      <nav class="navbar navbar-expand-lg navbar-dark navbar-custom navbar-dashboard">
+        <div class="container-fluid px-4">
+          <div class="d-flex align-items-center gap-2">
+            <button class="leonex-mobile-toggle me-2" aria-label="Open Navigation">
+              <i class="fa-solid fa-bars"></i>
+            </button>
+            <span class="sa-owner-badge">
+              <i class="fa-solid fa-crown"></i>
+              <span>SYSTEM OWNER • MASTER</span>
+            </span>
+            <span class="badge bg-dark border border-secondary text-secondary ms-2 fs-8 d-none d-md-inline-flex align-items-center gap-2">
+              <span class="live-dot"></span>
+              <span>All Systems Operational</span>
+            </span>
+          </div>
+
+          <div class="d-flex align-items-center gap-3">
+            <button class="btn btn-sm btn-gold d-none d-sm-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#addSocietyModal">
+              <i class="fa-solid fa-plus"></i> New Society
+            </button>
+
+            <button class="btn btn-sm btn-outline-warning d-none d-md-inline-flex align-items-center gap-2 rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#broadcastModal">
+              <i class="fa-solid fa-bullhorn"></i> Broadcast Alert
+            </button>
+
+            <button class="btn btn-sm btn-outline-warning d-inline-flex align-items-center gap-2 rounded-pill px-3" onclick="openCredentialsModal()" title="Manage Super Admin Strong Password">
+              <i class="fa-solid fa-key"></i> <span class="d-none d-sm-inline">Password & Security</span>
+            </button>
+
+            <div class="nav-divider d-none d-sm-block"></div>
+
+            <button class="btn-nav-icon position-relative border-0 bg-transparent text-secondary" title="Notifications" onclick="toggleNotificationPanel(this)" aria-label="Notifications">
+              <svg class="animate-bell-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path class="animate-bell-clapper" d="M10.268 21a2 2 0 0 0 3.464 0" />
+                <path class="animate-bell-body" d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" />
+              </svg>
+              <span class="notif-dot"></span>
+            </button>
+
+            <button class="btn-theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Theme">
+              <i class="fa-solid fa-sun" id="themeIcon"></i>
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <!-- ═══════════════ Main Container ═══════════════ -->
+      <div class="container-fluid px-3 px-lg-4 py-4">
+
+        <!-- Hidden tab triggers for sidebar.js navigation -->
+        <div class="d-none" id="v-pills-tab" role="tablist">
+          <button class="nav-link active" id="tab-sa-overview-btn" data-bs-toggle="pill" data-bs-target="#tab-sa-overview" type="button"></button>
+          <button class="nav-link" id="tab-sa-societies-btn" data-bs-toggle="pill" data-bs-target="#tab-sa-societies" type="button"></button>
+          <button class="nav-link" id="tab-sa-users-btn" data-bs-toggle="pill" data-bs-target="#tab-sa-users" type="button"></button>
+          <button class="nav-link" id="tab-sa-logs-btn" data-bs-toggle="pill" data-bs-target="#tab-sa-logs" type="button"></button>
+          <button class="nav-link" id="tab-sa-settings-btn" data-bs-toggle="pill" data-bs-target="#tab-sa-settings" type="button"></button>
+        </div>
+
+        <!-- System Announcement Banner (if active) -->
+        <div id="saBroadcastBanner" style="display: none;" class="alert alert-warning border-0 rounded-4 p-3 mb-4 d-flex align-items-center justify-content-between shadow-sm">
+          <div class="d-flex align-items-center gap-3">
+            <div class="rounded-circle bg-warning text-dark p-2 d-flex align-items-center justify-content-center" style="width:36px; height:36px;">
+              <i class="fa-solid fa-bullhorn"></i>
+            </div>
+            <div>
+              <div class="fw-bold text-white fs-7" id="bannerTitle">Global Platform Announcement</div>
+              <div class="text-white-50 fs-8" id="bannerMessage">Announcement message goes here...</div>
+            </div>
+          </div>
+          <button class="btn btn-sm btn-outline-light rounded-pill px-3" onclick="dismissBroadcast()">Dismiss</button>
+        </div>
+
+        <div class="tab-content" id="v-pills-tabContent">
+
+          <!-- ═════════════════════════════════════════════════════════════════════════
+               TAB 1: PLATFORM OVERVIEW
+               ═════════════════════════════════════════════════════════════════════════ -->
+          <div class="tab-pane fade show active" id="tab-sa-overview" role="tabpanel">
+            <div class="sh-page-title fade-up mb-4">
+              <div>
+                <h1 class="sh-page-title__title d-flex align-items-center gap-2">
+                  <span>Platform Master Overview</span>
+                  <span class="badge bg-warning-subtle text-warning border border-warning-subtle fs-8 rounded-pill">v2.4.0 Live</span>
+                </h1>
+                <span class="sh-page-title__sub">Global surveillance across all societies, users, and infrastructure health.</span>
+              </div>
+              <div class="sh-page-title__actions">
+                <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="refreshSuperAdminData()">
+                  <i class="fa-solid fa-arrows-rotate me-1"></i> Refresh Metrics
+                </button>
+              </div>
+            </div>
+
+            <!-- Master KPIs -->
+            <div class="row g-3 mb-4">
+              <div class="col-6 col-lg-3">
+                <div class="sa-kpi-card">
+                  <div class="sa-kpi-icon" style="background: rgba(212, 149, 90, 0.15); color: #D4955A;">
+                    <i class="fa-solid fa-building-circle-check"></i>
+                  </div>
+                  <div class="sa-kpi-val" id="kpiTotalSocieties">0</div>
+                  <div class="sa-kpi-label">Registered Societies</div>
+                  <div class="text-success fs-9 mt-2"><i class="fa-solid fa-arrow-trend-up me-1"></i> 100% Active</div>
+                </div>
+              </div>
+
+              <div class="col-6 col-lg-3">
+                <div class="sa-kpi-card">
+                  <div class="sa-kpi-icon" style="background: rgba(99, 102, 241, 0.15); color: #818CF8;">
+                    <i class="fa-solid fa-users"></i>
+                  </div>
+                  <div class="sa-kpi-val" id="kpiTotalUsers">0</div>
+                  <div class="sa-kpi-label">Global Registered Users</div>
+                  <div class="text-secondary fs-9 mt-2"><i class="fa-solid fa-shield me-1"></i> Verified Members</div>
+                </div>
+              </div>
+
+              <div class="col-6 col-lg-3">
+                <div class="sa-kpi-card">
+                  <div class="sa-kpi-icon" style="background: rgba(16, 185, 129, 0.15); color: #34D399;">
+                    <i class="fa-solid fa-server"></i>
+                  </div>
+                  <div class="sa-kpi-val" id="kpiUptime">99.98%</div>
+                  <div class="sa-kpi-label">Platform Service Uptime</div>
+                  <div class="text-success fs-9 mt-2"><i class="fa-solid fa-circle-check me-1"></i> Zero Incidents</div>
+                </div>
+              </div>
+
+              <div class="col-6 col-lg-3">
+                <div class="sa-kpi-card">
+                  <div class="sa-kpi-icon" style="background: rgba(245, 158, 11, 0.15); color: #FBBF24;">
+                    <i class="fa-solid fa-gauge-high"></i>
+                  </div>
+                  <div class="sa-kpi-val" id="kpiAvgLatency">24 ms</div>
+                  <div class="sa-kpi-label">Gateway API Latency</div>
+                  <div class="text-success fs-9 mt-2"><i class="fa-solid fa-bolt me-1"></i> High Performance</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="row g-4 mb-4">
+              <div class="col-lg-7">
+                <div class="sa-card h-100">
+                  <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="fw-bold text-white mb-0">
+                      <i class="fa-solid fa-chart-area text-warning me-2"></i>Societies Registration & Growth
+                    </h5>
+                    <span class="badge bg-dark text-secondary border border-secondary">Monthly Velocity</span>
+                  </div>
+                  <div style="height: 270px;"><canvas id="chartGrowth"></canvas></div>
+                </div>
+              </div>
+
+              <div class="col-lg-5">
+                <div class="sa-card h-100">
+                  <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="fw-bold text-white mb-0">
+                      <i class="fa-solid fa-chart-pie text-info me-2"></i>Societies By Type
+                    </h5>
+                    <span class="badge bg-dark text-secondary border border-secondary">Distribution</span>
+                  </div>
+                  <div style="height: 270px;"><canvas id="chartSocietiesType"></canvas></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Infrastructure Status & Live Activity Stream -->
+            <div class="row g-4 mb-4">
+              <div class="col-lg-5">
+                <div class="sa-card h-100">
+                  <h5 class="fw-bold text-white mb-3">
+                    <i class="fa-solid fa-microchip text-primary me-2"></i>Core Infrastructure Status
+                  </h5>
+                  <div class="d-flex flex-column gap-3">
+                    <div class="d-flex align-items-center justify-content-between p-3 rounded-3" style="background: rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06);">
+                      <div class="d-flex align-items-center gap-3">
+                        <i class="fa-solid fa-database text-warning fs-5"></i>
+                        <div>
+                          <div class="fw-semibold text-white fs-7">Primary Database</div>
+                          <div class="text-secondary fs-9">IndexedDB & Local State Sync</div>
+                        </div>
+                      </div>
+                      <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">Healthy</span>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between p-3 rounded-3" style="background: rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06);">
+                      <div class="d-flex align-items-center gap-3">
+                        <i class="fa-solid fa-key text-info fs-5"></i>
+                        <div>
+                          <div class="fw-semibold text-white fs-7">Clerk Identity Provider</div>
+                          <div class="text-secondary fs-9">OAuth, JWT & Session tokens</div>
+                        </div>
+                      </div>
+                      <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">Connected</span>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between p-3 rounded-3" style="background: rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06);">
+                      <div class="d-flex align-items-center gap-3">
+                        <i class="fa-solid fa-shield-halved text-success fs-5"></i>
+                        <div>
+                          <div class="fw-semibold text-white fs-7">Gate Pass & QR Engine</div>
+                          <div class="text-secondary fs-9">Real-time visitor check-in engine</div>
+                        </div>
+                      </div>
+                      <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">Operational</span>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between p-3 rounded-3" style="background: rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06);">
+                      <div class="d-flex align-items-center gap-3">
+                        <i class="fa-solid fa-bell text-danger fs-5"></i>
+                        <div>
+                          <div class="fw-semibold text-white fs-7">SOS Emergency Dispatch</div>
+                          <div class="text-secondary fs-9">Instant guard push-alert relay</div>
+                        </div>
+                      </div>
+                      <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">Standby</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-7">
+                <div class="sa-card h-100">
+                  <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="fw-bold text-white mb-0">
+                      <i class="fa-solid fa-tower-broadcast text-success me-2"></i>Live Global Activity Stream
+                    </h5>
+                    <span class="text-secondary fs-8">Real-time platform updates</span>
+                  </div>
+                  <div class="activity-list" id="globalActivityStream" style="max-height: 280px; overflow-y: auto;">
+                    <!-- Dynamically populated -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═════════════════════════════════════════════════════════════════════════
+               TAB 2: ALL SOCIETIES MANAGEMENT
+               ═════════════════════════════════════════════════════════════════════════ -->
+          <div class="tab-pane fade" id="tab-sa-societies" role="tabpanel">
+            <div class="sh-page-title fade-up mb-4">
+              <div>
+                <h1 class="sh-page-title__title">Multi-Society Management</h1>
+                <span class="sh-page-title__sub">View, inspect, activate, or provision societies across the entire platform.</span>
+              </div>
+              <div class="sh-page-title__actions d-flex gap-2">
+                <button class="btn btn-gold rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#addSocietyModal">
+                  <i class="fa-solid fa-plus me-1"></i> Register New Society
+                </button>
+              </div>
+            </div>
+
+            <div class="sa-card">
+              <!-- Controls bar -->
+              <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                  <div class="search-input-wrap">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="searchSocietyInput" class="form-control" placeholder="Search by name, code or city…" oninput="filterSocieties()">
+                  </div>
+
+                  <select class="form-select form-select-sm text-white bg-dark border-secondary rounded-3" style="width: 160px;" id="filterSocietyType" onchange="filterSocieties()">
+                    <option value="">All Types</option>
+                    <option value="Apartment / High-Rise">Apartment</option>
+                    <option value="Gated Villa Community">Gated Villa</option>
+                    <option value="Co-operative Housing">Co-operative</option>
+                    <option value="Commercial Complex">Commercial</option>
+                  </select>
+
+                  <select class="form-select form-select-sm text-white bg-dark border-secondary rounded-3" style="width: 140px;" id="filterSocietyStatus" onchange="filterSocieties()">
+                    <option value="">All Statuses</option>
+                    <option value="Active">Active</option>
+                    <option value="Suspended">Suspended</option>
+                  </select>
+                </div>
+
+                <div class="text-secondary fs-8">
+                  Showing <strong class="text-white" id="societiesCount">0</strong> registered societies
+                </div>
+              </div>
+
+              <!-- Societies Table -->
+              <div class="table-responsive">
+                <table class="table sa-table mb-0">
+                  <thead>
+                    <tr>
+                      <th>Unique Code</th>
+                      <th>Society Details</th>
+                      <th>Location</th>
+                      <th>Flats / Units</th>
+                      <th>Secretary / Admin</th>
+                      <th>Status</th>
+                      <th class="text-end">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="societiesTableBody">
+                    <!-- Dynamic content -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═════════════════════════════════════════════════════════════════════════
+               TAB 3: GLOBAL USERS DIRECTORY
+               ═════════════════════════════════════════════════════════════════════════ -->
+          <div class="tab-pane fade" id="tab-sa-users" role="tabpanel">
+            <div class="sh-page-title fade-up mb-4">
+              <div>
+                <h1 class="sh-page-title__title">Global Users Directory</h1>
+                <span class="sh-page-title__sub">Master directory of all registered platform members, residents, admins, and guards.</span>
+              </div>
+              <div class="sh-page-title__actions">
+                <span class="badge bg-dark border border-secondary text-secondary px-3 py-2 fs-8">
+                  System Total: <strong class="text-white" id="globalUsersCountBadge">0</strong> Members
+                </span>
+              </div>
+            </div>
+
+            <div class="sa-card">
+              <!-- Controls bar -->
+              <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                  <div class="search-input-wrap">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="searchUserInput" class="form-control" placeholder="Search name, email, flat…" oninput="filterGlobalUsers()">
+                  </div>
+
+                  <select class="form-select form-select-sm text-white bg-dark border-secondary rounded-3" style="width: 170px;" id="filterUserRole" onchange="filterGlobalUsers()">
+                    <option value="">All Roles</option>
+                    <option value="Admin">Society Admin</option>
+                    <option value="Resident">Resident</option>
+                    <option value="Security Guard">Security Guard</option>
+                    <option value="Committee Member">Committee Member</option>
+                    <option value="Super Admin">Super Admin</option>
+                  </select>
+
+                  <select class="form-select form-select-sm text-white bg-dark border-secondary rounded-3" style="width: 180px;" id="filterUserSociety" onchange="filterGlobalUsers()">
+                    <option value="">All Societies</option>
+                    <!-- Filled dynamically -->
+                  </select>
+                </div>
+
+                <div class="text-secondary fs-8">
+                  Showing <strong class="text-white" id="usersFilteredCount">0</strong> users
+                </div>
+              </div>
+
+              <!-- Users Table -->
+              <div class="table-responsive">
+                <table class="table sa-table mb-0">
+                  <thead>
+                    <tr>
+                      <th>User</th>
+                      <th>Contact Info</th>
+                      <th>Society</th>
+                      <th>Unit / Flat</th>
+                      <th>Assigned Role</th>
+                      <th>Status</th>
+                      <th class="text-end">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="globalUsersTableBody">
+                    <!-- Dynamic content -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═════════════════════════════════════════════════════════════════════════
+               TAB 4: SYSTEM AUDIT LOGS
+               ═════════════════════════════════════════════════════════════════════════ -->
+          <div class="tab-pane fade" id="tab-sa-logs" role="tabpanel">
+            <div class="sh-page-title fade-up mb-4">
+              <div>
+                <h1 class="sh-page-title__title">Platform Security & Audit Trail</h1>
+                <span class="sh-page-title__sub">Audit history across all administrative mutations, user authentications, and society creations.</span>
+              </div>
+              <div class="sh-page-title__actions d-flex gap-2">
+                <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="exportAuditLogs()">
+                  <i class="fa-solid fa-download me-1"></i> Export Logs (JSON)
+                </button>
+              </div>
+            </div>
+
+            <div class="sa-card">
+              <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+                <div class="search-input-wrap">
+                  <i class="fa-solid fa-magnifying-glass"></i>
+                  <input type="text" id="searchLogInput" class="form-control" placeholder="Search action, user or details…" oninput="filterAuditLogs()">
+                </div>
+                <div class="text-secondary fs-8">
+                  Recorded Logs: <strong class="text-white" id="auditLogCount">0</strong> entries
+                </div>
+              </div>
+
+              <div class="table-responsive">
+                <table class="table sa-table mb-0">
+                  <thead>
+                    <tr>
+                      <th>Timestamp</th>
+                      <th>Event Category</th>
+                      <th>Actor / Initiator</th>
+                      <th>Action Performed</th>
+                      <th>IP & Context</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="auditLogsTableBody">
+                    <!-- Dynamic content -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═════════════════════════════════════════════════════════════════════════
+               TAB 5: PLATFORM CONTROLS & MASTER SETTINGS
+               ═════════════════════════════════════════════════════════════════════════ -->
+          <div class="tab-pane fade" id="tab-sa-settings" role="tabpanel">
+            <div class="sh-page-title fade-up mb-4">
+              <div>
+                <h1 class="sh-page-title__title">Master Controls & System Settings</h1>
+                <span class="sh-page-title__sub">Configure global parameters, emergency overrides, and cross-society announcements.</span>
+              </div>
+            </div>
+
+            <div class="row g-4">
+              <!-- Platform Maintenance Switch -->
+              <div class="col-lg-6">
+                <div class="sa-card h-100">
+                  <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="d-flex align-items-center gap-3">
+                      <div class="rounded-circle p-3 d-flex align-items-center justify-content-center" style="background: rgba(239, 68, 68, 0.15); color: #EF4444; width: 48px; height: 48px;">
+                        <i class="fa-solid fa-power-off fs-5"></i>
+                      </div>
+                      <div>
+                        <h6 class="fw-bold text-white mb-0">Platform Maintenance Mode</h6>
+                        <span class="text-secondary fs-8">Disallow society logins during major platform upgrades</span>
+                      </div>
+                    </div>
+                    <div class="form-check form-switch fs-4">
+                      <input class="form-check-input" type="checkbox" id="maintenanceToggle" onchange="toggleMaintenanceMode(this.checked)">
+                    </div>
+                  </div>
+                  <p class="text-secondary fs-8 mb-3" style="line-height: 1.6;">
+                    When enabled, non-super-admin users will see an upgrade maintenance page. Only the System Owner will retain platform access.
+                  </p>
+                  <div class="alert alert-dark py-2 px-3 fs-9 text-secondary border-0 mb-0" id="maintenanceStatusNote">
+                    Status: <span class="text-success fw-bold">Live & Operational</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Global Announcement -->
+              <div class="col-lg-6">
+                <div class="sa-card h-100">
+                  <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="rounded-circle p-3 d-flex align-items-center justify-content-center" style="background: rgba(212, 149, 90, 0.15); color: #D4955A; width: 48px; height: 48px;">
+                      <i class="fa-solid fa-bullhorn fs-5"></i>
+                    </div>
+                    <div>
+                      <h6 class="fw-bold text-white mb-0">Global Announcement Broadcaster</h6>
+                      <span class="text-secondary fs-8">Broadcast high-priority alert notices across all societies</span>
+                    </div>
+                  </div>
+                  <p class="text-secondary fs-8 mb-3" style="line-height: 1.6;">
+                    Send alerts that will be displayed at the top of every society admin, resident, and guard portal.
+                  </p>
+                  <button class="btn btn-gold rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#broadcastModal">
+                    <i class="fa-solid fa-paper-plane me-1"></i> Compose Global Broadcast
+                  </button>
+                </div>
+              </div>
+
+              <!-- Super Admin Credentials & Strong Password Management -->
+              <div class="col-12">
+                <div class="sa-card" style="border: 1px solid rgba(212, 149, 90, 0.25); background: linear-gradient(180deg, rgba(212, 149, 90, 0.04) 0%, rgba(16, 22, 37, 0.95) 100%);">
+                  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+                    <div class="d-flex align-items-center gap-3">
+                      <div class="rounded-circle p-3 d-flex align-items-center justify-content-center" style="background: rgba(212, 149, 90, 0.15); color: #D4955A; width: 48px; height: 48px;">
+                        <i class="fa-solid fa-shield-halved fs-5"></i>
+                      </div>
+                      <div>
+                        <h5 class="fw-bold text-white mb-0">System Owner Credentials & Strong Password</h5>
+                        <span class="text-secondary fs-8">Set your Super Admin name and configure strong password authentication manually</span>
+                      </div>
+                    </div>
+                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-3 py-2 rounded-pill fs-8">
+                      <i class="fa-solid fa-lock me-1"></i> Bcrypt Salt-10 Encrypted
+                    </span>
+                  </div>
+
+                  <form id="saUpdateCredentialsForm" onsubmit="handleUpdateCredentials(event)">
+                    <div class="row g-3">
+                      <div class="col-md-6">
+                        <label class="form-label text-secondary fs-8 fw-semibold">Super Admin Display Name</label>
+                        <div class="input-group">
+                          <span class="input-group-text bg-dark border-secondary text-secondary"><i class="fa-solid fa-user"></i></span>
+                          <input type="text" class="form-control text-white bg-dark border-secondary" id="saInputName" placeholder="e.g. Leonex System Owner" required>
+                        </div>
+                      </div>
+
+                      <div class="col-md-6">
+                        <label class="form-label text-secondary fs-8 fw-semibold">Super Admin Username / Identifier</label>
+                        <div class="input-group">
+                          <span class="input-group-text bg-dark border-secondary text-secondary"><i class="fa-solid fa-at"></i></span>
+                          <input type="text" class="form-control text-white bg-dark border-secondary" id="saInputUsername" placeholder="e.g. superadmin" required>
+                        </div>
+                      </div>
+
+                      <div class="col-md-12">
+                        <label class="form-label text-secondary fs-8 fw-semibold">Current Strong Password * (Required to verify identity)</label>
+                        <div class="input-group">
+                          <span class="input-group-text bg-dark border-secondary text-secondary"><i class="fa-solid fa-key"></i></span>
+                          <input type="password" class="form-control text-white bg-dark border-secondary" id="saInputCurrentPass" placeholder="Enter your current password" required>
+                          <button class="btn btn-outline-secondary" type="button" onclick="togglePassVisibility('saInputCurrentPass', this)">
+                            <i class="fa-solid fa-eye"></i>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div class="col-md-6">
+                        <label class="form-label text-secondary fs-8 fw-semibold">New Strong Password *</label>
+                        <div class="input-group">
+                          <span class="input-group-text bg-dark border-secondary text-secondary"><i class="fa-solid fa-lock"></i></span>
+                          <input type="password" class="form-control text-white bg-dark border-secondary" id="saInputNewPass" placeholder="Enter new strong password" oninput="onNewPasswordInput(this.value, 'settings')">
+                          <button class="btn btn-outline-secondary" type="button" onclick="togglePassVisibility('saInputNewPass', this)">
+                            <i class="fa-solid fa-eye"></i>
+                          </button>
+                        </div>
+
+                        <!-- Real-time Password Strength Meter -->
+                        <div class="mt-2">
+                          <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fs-9 text-secondary">Password Strength:</span>
+                            <span class="fs-9 fw-bold" id="settingsStrengthLabel" style="color: #64748B;">Enter password</span>
+                          </div>
+                          <div class="progress" style="height: 6px; background: rgba(255,255,255,0.08); border-radius: 99px;">
+                            <div class="progress-bar transition-all" id="settingsStrengthBar" role="progressbar" style="width: 0%; border-radius: 99px;"></div>
+                          </div>
+                        </div>
+
+                        <!-- Password Rule Chips -->
+                        <div class="d-flex flex-wrap gap-2 mt-2" id="settingsStrengthChips">
+                          <span class="badge bg-dark border border-secondary text-secondary fs-9" id="chip-len"><i class="fa-regular fa-circle me-1"></i>8+ chars</span>
+                          <span class="badge bg-dark border border-secondary text-secondary fs-9" id="chip-upper"><i class="fa-regular fa-circle me-1"></i>Uppercase (A-Z)</span>
+                          <span class="badge bg-dark border border-secondary text-secondary fs-9" id="chip-lower"><i class="fa-regular fa-circle me-1"></i>Lowercase (a-z)</span>
+                          <span class="badge bg-dark border border-secondary text-secondary fs-9" id="chip-num"><i class="fa-regular fa-circle me-1"></i>Number (0-9)</span>
+                          <span class="badge bg-dark border border-secondary text-secondary fs-9" id="chip-sym"><i class="fa-regular fa-circle me-1"></i>Special Symbol (!@#$)</span>
+                        </div>
+                      </div>
+
+                      <div class="col-md-6">
+                        <label class="form-label text-secondary fs-8 fw-semibold">Confirm New Strong Password *</label>
+                        <div class="input-group">
+                          <span class="input-group-text bg-dark border-secondary text-secondary"><i class="fa-solid fa-shield-check"></i></span>
+                          <input type="password" class="form-control text-white bg-dark border-secondary" id="saInputConfirmPass" placeholder="Re-type new password" oninput="checkConfirmPasswordMatch('settings')">
+                          <button class="btn btn-outline-secondary" type="button" onclick="togglePassVisibility('saInputConfirmPass', this)">
+                            <i class="fa-solid fa-eye"></i>
+                          </button>
+                        </div>
+                        <div class="fs-9 mt-2" id="settingsMatchFeedback" style="color: transparent;">&nbsp;</div>
+                      </div>
+
+                      <div class="col-12 d-flex justify-content-end gap-2 mt-3">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" onclick="resetCredentialsForm()">Reset Form</button>
+                        <button type="submit" class="btn btn-gold rounded-pill px-4" id="saveCredsBtn">
+                          <i class="fa-solid fa-check me-1"></i> Save New Strong Password
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+              <!-- Database & Backup Management -->
+              <div class="col-12">
+                <div class="sa-card">
+                  <h6 class="fw-bold text-white mb-3"><i class="fa-solid fa-database text-warning me-2"></i>Platform Data Management</h6>
+                  <div class="row g-3">
+                    <div class="col-md-4">
+                      <div class="p-3 rounded-3" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);">
+                        <div class="fw-bold text-white fs-7 mb-1">Export Complete Platform DB</div>
+                        <p class="text-secondary fs-8 mb-3">Download all societies, resident records, audit logs, and configurations as JSON.</p>
+                        <button class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="exportFullPlatformData()">
+                          <i class="fa-solid fa-file-export me-1"></i> Export Platform JSON
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="col-md-4">
+                      <div class="p-3 rounded-3" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);">
+                        <div class="fw-bold text-white fs-7 mb-1">Provision Sample Demo Society</div>
+                        <p class="text-secondary fs-8 mb-3">Inject realistic sample societies and flats into the database for demonstration.</p>
+                        <button class="btn btn-sm btn-outline-info rounded-pill px-3" onclick="injectSampleSocieties()">
+                          <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Provision Sample Societies
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="col-md-4">
+                      <div class="p-3 rounded-3" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);">
+                        <div class="fw-bold text-white fs-7 mb-1">Reset Platform Cache</div>
+                        <p class="text-secondary fs-8 mb-3">Purge local temporary session storage and re-synchronize state from master.</p>
+                        <button class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="clearPlatformCache()">
+                          <i class="fa-solid fa-trash me-1"></i> Clear Local Cache
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /tab-content -->
+      </div><!-- /container-fluid -->
+    </div><!-- /leonex-main-wrapper -->
+  </div><!-- /leonex-layout -->
+
+  <!-- ═════════════════════════════════════════════════════════════════════════
+       MODAL 0: SUPER ADMIN PASSWORD & CREDENTIALS MANAGEMENT
+       ═════════════════════════════════════════════════════════════════════════ -->
+  <div class="modal fade" id="saCredentialsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content text-white" style="background: #101625; border: 1px solid rgba(212,149,90,0.3); border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.7);">
+        <div class="modal-header border-bottom" style="border-color: rgba(255,255,255,0.08) !important;">
+          <div class="d-flex align-items-center gap-2">
+            <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" style="background: rgba(212,149,90,0.15); color: #D4955A; width:36px; height:36px;">
+              <i class="fa-solid fa-key"></i>
+            </div>
+            <div>
+              <h5 class="modal-title fw-bold text-white mb-0">System Owner Security Credentials</h5>
+              <div class="text-secondary fs-9">Set your name and manually update your Super Admin strong password</div>
+            </div>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="modalUpdateCredentialsForm" onsubmit="handleModalUpdateCredentials(event)">
+          <div class="modal-body p-4">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">System Owner Display Name</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-dark border-secondary text-secondary"><i class="fa-solid fa-user"></i></span>
+                  <input type="text" class="form-control text-white bg-dark border-secondary" id="modalInputName" placeholder="e.g. Leonex System Owner" required>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Username / Identifier</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-dark border-secondary text-secondary"><i class="fa-solid fa-at"></i></span>
+                  <input type="text" class="form-control text-white bg-dark border-secondary" id="modalInputUsername" placeholder="e.g. superadmin" required>
+                </div>
+              </div>
+              <div class="col-12">
+                <label class="form-label text-secondary fs-8 fw-semibold">Current Strong Password * (To verify identity)</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-dark border-secondary text-secondary"><i class="fa-solid fa-lock"></i></span>
+                  <input type="password" class="form-control text-white bg-dark border-secondary" id="modalInputCurrentPass" placeholder="Enter current strong password" required>
+                  <button class="btn btn-outline-secondary" type="button" onclick="togglePassVisibility('modalInputCurrentPass', this)">
+                    <i class="fa-solid fa-eye"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">New Strong Password *</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-dark border-secondary text-secondary"><i class="fa-solid fa-shield-halved"></i></span>
+                  <input type="password" class="form-control text-white bg-dark border-secondary" id="modalInputNewPass" placeholder="Enter new strong password" required oninput="onNewPasswordInput(this.value, 'modal')">
+                  <button class="btn btn-outline-secondary" type="button" onclick="togglePassVisibility('modalInputNewPass', this)">
+                    <i class="fa-solid fa-eye"></i>
+                  </button>
+                </div>
+                <div class="mt-2">
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="fs-9 text-secondary">Strength:</span>
+                    <span class="fs-9 fw-bold" id="modalStrengthLabel" style="color: #64748B;">Enter password</span>
+                  </div>
+                  <div class="progress" style="height: 6px; background: rgba(255,255,255,0.08); border-radius: 99px;">
+                    <div class="progress-bar transition-all" id="modalStrengthBar" role="progressbar" style="width: 0%; border-radius: 99px;"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Confirm New Password *</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-dark border-secondary text-secondary"><i class="fa-solid fa-check-double"></i></span>
+                  <input type="password" class="form-control text-white bg-dark border-secondary" id="modalInputConfirmPass" placeholder="Re-type new password" required oninput="checkConfirmPasswordMatch('modal')">
+                  <button class="btn btn-outline-secondary" type="button" onclick="togglePassVisibility('modalInputConfirmPass', this)">
+                    <i class="fa-solid fa-eye"></i>
+                  </button>
+                </div>
+                <div class="fs-9 mt-2" id="modalMatchFeedback" style="color: transparent;">&nbsp;</div>
+              </div>
+              <div class="col-12">
+                <div class="d-flex flex-wrap gap-2" id="modalStrengthChips">
+                  <span class="badge bg-dark border border-secondary text-secondary fs-9" id="modal-chip-len"><i class="fa-regular fa-circle me-1"></i>8+ chars</span>
+                  <span class="badge bg-dark border border-secondary text-secondary fs-9" id="modal-chip-upper"><i class="fa-regular fa-circle me-1"></i>Uppercase</span>
+                  <span class="badge bg-dark border border-secondary text-secondary fs-9" id="modal-chip-lower"><i class="fa-regular fa-circle me-1"></i>Lowercase</span>
+                  <span class="badge bg-dark border border-secondary text-secondary fs-9" id="modal-chip-num"><i class="fa-regular fa-circle me-1"></i>Number</span>
+                  <span class="badge bg-dark border border-secondary text-secondary fs-9" id="modal-chip-sym"><i class="fa-regular fa-circle me-1"></i>Special Symbol</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer border-top p-3" style="border-color: rgba(255,255,255,0.08) !important;">
+            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-gold rounded-pill px-4" id="modalSaveCredsBtn">
+              <i class="fa-solid fa-check me-1"></i> Update Strong Password
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═════════════════════════════════════════════════════════════════════════
+       MODAL 1: REGISTER NEW SOCIETY
+       ═════════════════════════════════════════════════════════════════════════ -->
+  <div class="modal fade" id="addSocietyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content text-white" style="background: #101625; border: 1px solid rgba(255,255,255,0.12); border-radius: 20px;">
+        <div class="modal-header border-bottom border-secondary" style="border-color: rgba(255,255,255,0.08) !important;">
+          <div class="d-flex align-items-center gap-2">
+            <div class="rounded-circle bg-warning text-dark p-2 d-flex align-items-center justify-content-center" style="width:34px; height:34px;">
+              <i class="fa-solid fa-building"></i>
+            </div>
+            <h5 class="modal-title fw-bold text-white">Register & Provision New Society</h5>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="createSocietyForm" onsubmit="handleCreateSociety(event)">
+          <div class="modal-body p-4">
+            <div class="row g-3">
+              <div class="col-md-7">
+                <label class="form-label text-secondary fs-8 fw-semibold">Society / Community Name *</label>
+                <input type="text" class="form-control text-white bg-dark border-secondary" id="newSocName" placeholder="e.g. Palm Meadows Residency" required>
+              </div>
+              <div class="col-md-5">
+                <label class="form-label text-secondary fs-8 fw-semibold">Property Type</label>
+                <select class="form-select text-white bg-dark border-secondary" id="newSocType">
+                  <option value="Apartment / High-Rise">Apartment / High-Rise</option>
+                  <option value="Gated Villa Community">Gated Villa Community</option>
+                  <option value="Co-operative Housing">Co-operative Housing</option>
+                  <option value="Commercial Complex">Commercial Complex</option>
+                </select>
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label text-secondary fs-8 fw-semibold">Total Units / Flats *</label>
+                <input type="number" class="form-control text-white bg-dark border-secondary" id="newSocUnits" placeholder="e.g. 120" min="1" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label text-secondary fs-8 fw-semibold">City *</label>
+                <input type="text" class="form-control text-white bg-dark border-secondary" id="newSocCity" placeholder="e.g. Ahmedabad" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label text-secondary fs-8 fw-semibold">State</label>
+                <input type="text" class="form-control text-white bg-dark border-secondary" id="newSocState" placeholder="e.g. Gujarat">
+              </div>
+
+              <div class="col-12">
+                <label class="form-label text-secondary fs-8 fw-semibold">Full Property Address</label>
+                <input type="text" class="form-control text-white bg-dark border-secondary" id="newSocAddress" placeholder="e.g. Off SG Highway, Near Science City">
+              </div>
+
+              <hr class="my-2 border-secondary" style="border-color: rgba(255,255,255,0.08) !important;">
+              <div class="col-12"><div class="fw-bold text-warning fs-7"><i class="fa-solid fa-user-tie me-2"></i>Designated Society Administrator / Secretary Details</div></div>
+
+              <div class="col-md-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Secretary / Admin Name *</label>
+                <input type="text" class="form-control text-white bg-dark border-secondary" id="newSocAdminName" placeholder="e.g. Rajesh Sharma" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Admin Phone Number *</label>
+                <input type="text" class="form-control text-white bg-dark border-secondary" id="newSocAdminPhone" placeholder="e.g. +91 98765 43210" required>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Admin Email Address</label>
+                <input type="email" class="form-control text-white bg-dark border-secondary" id="newSocAdminEmail" placeholder="e.g. rajesh@palmmeadows.com">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label text-secondary fs-8 fw-semibold">Admin Flat / Office</label>
+                <input type="text" class="form-control text-white bg-dark border-secondary" id="newSocAdminFlat" placeholder="e.g. A-101 / Office" value="Office">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer border-top border-secondary p-3" style="border-color: rgba(255,255,255,0.08) !important;">
+            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-gold rounded-pill px-4"><i class="fa-solid fa-check me-1"></i> Provision Society</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═════════════════════════════════════════════════════════════════════════
+       MODAL 2: SOCIETY DETAILS INSPECTOR
+       ═════════════════════════════════════════════════════════════════════════ -->
+  <div class="modal fade" id="societyDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-white" style="background: #101625; border: 1px solid rgba(255,255,255,0.12); border-radius: 20px;">
+        <div class="modal-header border-bottom border-secondary" style="border-color: rgba(255,255,255,0.08) !important;">
+          <h5 class="modal-title fw-bold text-white"><i class="fa-solid fa-circle-info text-warning me-2"></i>Society Information</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4" id="societyDetailsContent">
+          <!-- Dynamically populated -->
+        </div>
+        <div class="modal-footer border-top border-secondary p-3" style="border-color: rgba(255,255,255,0.08) !important;">
+          <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═════════════════════════════════════════════════════════════════════════
+       MODAL 3: CHANGE USER ROLE
+       ═════════════════════════════════════════════════════════════════════════ -->
+  <div class="modal fade" id="saChangeRoleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-white" style="background: #101625; border: 1px solid rgba(255,255,255,0.12); border-radius: 20px;">
+        <div class="modal-header border-bottom border-secondary" style="border-color: rgba(255,255,255,0.08) !important;">
+          <h5 class="modal-title fw-bold text-white"><i class="fa-solid fa-user-shield text-primary me-2"></i>Manage User Role</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="saChangeRoleForm" onsubmit="handleSaveUserRole(event)">
+          <input type="hidden" id="saRoleUserId">
+          <div class="modal-body p-4">
+            <div class="mb-3">
+              <label class="form-label text-secondary fs-8 fw-semibold">Member Name</label>
+              <input type="text" class="form-control text-white bg-dark border-secondary" id="saRoleUserName" readonly>
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-secondary fs-8 fw-semibold">Select New Global Role</label>
+              <select class="form-select text-white bg-dark border-secondary" id="saRoleSelect">
+                <option value="Admin">Admin (Society Level)</option>
+                <option value="Resident">Resident</option>
+                <option value="Security Guard">Security Guard</option>
+                <option value="Committee Member">Committee Member</option>
+                <option value="Super Admin">Super Admin (Platform Owner)</option>
+              </select>
+            </div>
+            <div class="alert alert-info py-2 px-3 fs-9 border-0 mb-0" style="background: rgba(99, 102, 241, 0.15); color:#C7D2FE;">
+              <i class="fa-solid fa-info-circle me-1"></i> Role adjustments take effect immediately on next login.
+            </div>
+          </div>
+          <div class="modal-footer border-top border-secondary p-3" style="border-color: rgba(255,255,255,0.08) !important;">
+            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-gold rounded-pill px-4">Save Role</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═════════════════════════════════════════════════════════════════════════
+       MODAL 4: GLOBAL BROADCAST ANNOUNCEMENT
+       ═════════════════════════════════════════════════════════════════════════ -->
+  <div class="modal fade" id="broadcastModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-white" style="background: #101625; border: 1px solid rgba(255,255,255,0.12); border-radius: 20px;">
+        <div class="modal-header border-bottom border-secondary" style="border-color: rgba(255,255,255,0.08) !important;">
+          <h5 class="modal-title fw-bold text-white"><i class="fa-solid fa-bullhorn text-warning me-2"></i>Global Platform Broadcast</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="broadcastForm" onsubmit="handleSendBroadcast(event)">
+          <div class="modal-body p-4">
+            <div class="mb-3">
+              <label class="form-label text-secondary fs-8 fw-semibold">Broadcast Title *</label>
+              <input type="text" class="form-control text-white bg-dark border-secondary" id="bcTitle" placeholder="e.g. Scheduled Maintenance Notice" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-secondary fs-8 fw-semibold">Severity Level</label>
+              <select class="form-select text-white bg-dark border-secondary" id="bcLevel">
+                <option value="warning">Warning (Amber Alert)</option>
+                <option value="info">Informational (Blue Alert)</option>
+                <option value="danger">Critical / Emergency (Red Alert)</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-secondary fs-8 fw-semibold">Message Content *</label>
+              <textarea class="form-control text-white bg-dark border-secondary" id="bcMessage" rows="3" placeholder="Enter alert details to display across all society portals…" required></textarea>
+            </div>
+          </div>
+          <div class="modal-footer border-top border-secondary p-3" style="border-color: rgba(255,255,255,0.08) !important;">
+            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-gold rounded-pill px-4"><i class="fa-solid fa-paper-plane me-1"></i> Send Broadcast</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notifications container -->
+  <div id="toast-container" style="position: fixed; bottom: 24px; right: 24px; z-index: 99999; display: flex; flex-direction: column; gap: 8px;"></div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Clerk SDK for signOut -->
+  <script
+    async
+    crossorigin="anonymous"
+    data-clerk-publishable-key="pk_test_c3VpdGVkLXJvdWdoeS0xNzk4LmNsZXJrLmFjY291bnRzLmRldiQ"
+    src="https://suited-roughy-1798.clerk.accounts.dev/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
+    type="text/javascript"
+  ></script>
+  <script src="js/db.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/super-admin.js"></script>
+  <script src="js/sidebar.js"></script>
+</body>
+</html>

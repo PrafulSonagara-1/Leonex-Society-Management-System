@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Changelog &amp; Release Notes | Leonex SSMS</title>
+  <meta name="description" content="Leonex SSMS version history — release notes for the design system, community modules and platform upgrades.">
+  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="js/theme.js"></script>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+  <!-- Custom CSS -->
+  <link href="css/style.css" rel="stylesheet">
+  <style>
+    .changelog-entry ul li { margin-bottom: 8px; }
+    .changelog-entry ul li:last-child { margin-bottom: 0; }
+
+    /* Brand Bootstrap button + badges to royal blue */
+    .btn-outline-primary {
+      --bs-btn-color: var(--accent-primary);
+      --bs-btn-border-color: rgba(37, 99, 235, 0.45);
+      --bs-btn-hover-color: #FFFFFF;
+      --bs-btn-hover-bg: var(--accent-primary);
+      --bs-btn-hover-border-color: var(--accent-primary);
+      --bs-btn-active-color: #FFFFFF;
+      --bs-btn-active-bg: var(--accent-primary-dark);
+      --bs-btn-active-border-color: var(--accent-primary-dark);
+      --bs-btn-focus-shadow-rgb: 37, 99, 235;
+    }
+    .badge.bg-primary { background-color: var(--accent-primary) !important; }
+  </style>
+</head>
+<body class="has-floating-nav">
+
+  <!-- Floating Navbar -->
+  <div class="navbar-float-wrapper">
+    <nav class="navbar navbar-expand-lg navbar-custom" id="mainNav" aria-label="Main navigation">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="index.html" aria-label="Leonex SSMS Home">
+          <div class="brand-icon">
+            <i class="fa-solid fa-building-user"></i>
+          </div>
+          <span>Society<span style="color: var(--accent-blue);">Hub</span></span>
+        </a>
+
+        <button class="navbar-toggler-custom" type="button" data-bs-toggle="collapse"
+          data-bs-target="#navMenuCollapse" aria-controls="navMenuCollapse"
+          aria-expanded="false" aria-label="Toggle navigation">
+          <span></span><span></span><span></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navMenuCollapse">
+          <ul class="nav-center-links mx-auto list-unstyled mb-0 d-flex flex-column flex-lg-row align-items-start align-items-lg-center gap-1 py-3 py-lg-0">
+            <li><a href="index.html" class="nav-pill"><i class="fa-solid fa-house"></i> Home</a></li>
+            <li><a href="index.html#features" class="nav-pill"><i class="fa-solid fa-grid-2"></i> Features</a></li>
+            <li><a href="docs.html" class="nav-pill"><i class="fa-solid fa-book"></i> Documentation</a></li>
+            <li><a href="changelog.html" class="nav-pill active"><i class="fa-solid fa-list-check"></i> Changelog</a></li>
+          </ul>
+
+          <div class="navbar-actions" role="group" aria-label="Navbar actions">
+            <button class="btn-pwa-install" id="pwaInstallBtn" onclick="installPWA()"
+              title="Install Leonex SSMS as a standalone app" aria-label="Install App" style="display:none;">
+              <i class="fa-solid fa-download" aria-hidden="true"></i>
+              <span>Install App</span>
+            </button>
+            <button class="btn-theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Theme" aria-label="Toggle theme">
+              <i class="fa-solid fa-sun" id="themeIcon" aria-hidden="true"></i>
+            </button>
+            <a href="login.html" class="btn-signin" aria-label="Sign In to Leonex SSMS">
+              <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>
+              <span>Sign In</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </div>
+
+  <!-- Changelog Section -->
+  <div class="container py-5 my-4">
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+
+        <div class="sh-page-title">
+          <div>
+            <h1 class="sh-page-title__title"><i class="fa-solid fa-list-check me-2" style="color: var(--accent-primary);"></i> System Changelog</h1>
+            <span class="sh-page-title__sub">Version history and feature updates for the Leonex SSMS platform</span>
+          </div>
+          <div class="sh-page-title__actions">
+            <a href="index.html" class="btn btn-outline-primary rounded-pill px-4 text-decoration-none">
+              <i class="fa-solid fa-arrow-left me-2"></i> Back to Platform
+            </a>
+          </div>
+        </div>
+
+        <!-- Release 4.0 -->
+        <div class="hub-card p-4 p-md-5 mb-4 changelog-entry">
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+            <h3 class="fw-bold mb-0">
+              <span class="badge bg-primary me-2">v4.0.0</span> Community Suite &amp; Navy Design System
+              <span class="sh-badge sh-badge--primary ms-2"><i class="fa-solid fa-sparkles"></i> Latest</span>
+            </h3>
+            <span class="caption-text"><i class="fa-solid fa-calendar me-1"></i> August 26, 2026</span>
+          </div>
+          <ul class="body-text">
+            <li>🎨 <strong>New design system:</strong> deep navy/slate surfaces with a royal-blue accent, rebuilt around one token system with full Light, Dark and System theme support.</li>
+            <li>🧩 <strong>SHUI component library:</strong> KPI stat cards, searchable/sortable/paginated tables, timelines, badges, empty states, skeleton loaders, confirm dialogs and toasts across every portal.</li>
+            <li>💸 <strong>Expenses module:</strong> society expense ledger with categories and monthly totals for transparent committee accounting.</li>
+            <li>📅 <strong>Events module:</strong> create, promote and track society gatherings and festivals.</li>
+            <li>📁 <strong>Documents module:</strong> central repository for society records, bylaws and forms.</li>
+            <li>🗳️ <strong>Polls upgrade:</strong> community voting with double-vote protection via per-poll voter lists.</li>
+            <li>🚨 <strong>Emergency SOS:</strong> raise and resolve society-wide emergency alerts, surfaced across all portals.</li>
+            <li>👨‍👩‍👧 <strong>Family members registry</strong> and 🅿️ <strong>parking slot management</strong> — assign and release slots with a visual slot grid.</li>
+            <li>🔔 <strong>Notification center rebuilt:</strong> stored + derived notifications (gate visitors, unpaid bills, pending approvals), approve/deny actions right from the bell, mark-all-read and unread badges.</li>
+            <li>🧾 <strong>Audit everywhere:</strong> every significant action now writes to the audit trail; monthly billing &amp; collection stats power reports, plus a global search across all modules.</li>
+            <li>🛠️ <strong>Complaint lifecycle refined:</strong> Open → Assigned → In Progress → Resolved → Closed, with full timeline entries on assignment and notes.</li>
+            <li>🛡️ <strong>Visitor flow standardised:</strong> Guest, Delivery, Cab, Service Provider, Staff and Other types with Pending → Approved → Checked In → Checked Out | Rejected lifecycle.</li>
+            <li>📱 <strong>Landing, docs &amp; changelog refreshed</strong> on the new design system; PWA install and offline banner retained.</li>
+          </ul>
+        </div>
+
+        <!-- Release 2.5 -->
+        <div class="hub-card p-4 p-md-5 mb-4 changelog-entry">
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+            <h3 class="fw-bold mb-0"><span class="badge bg-primary me-2">v2.5.0</span> Master SaaS UI/UX Overhaul</h3>
+            <span class="caption-text"><i class="fa-solid fa-calendar me-1"></i> July 27, 2026</span>
+          </div>
+          <ul class="body-text">
+            <li>✨ <strong>Floating Glassmorphic Navbar:</strong> Added floating header pill with smooth backdrop blur and scroll effects.</li>
+            <li>🎨 <strong>Strict 60-30-10 Color Architecture:</strong> Implemented high-contrast input controls, slate card surfaces, and vibrant accent tokens.</li>
+            <li>🔐 <strong>Static Google Auth Integration:</strong> Enhanced client-side Google sign-in fallback for static deployment.</li>
+            <li>📱 <strong>Multi-Device Responsiveness:</strong> Full layout adaptation across smartphones, tablets, laptops, and desktop screens.</li>
+            <li>👑 <strong>Role &amp; Access Controls:</strong> Dynamic Grant/Revoke Admin controls in Admin settings panel.</li>
+          </ul>
+        </div>
+
+        <!-- Release 2.0 -->
+        <div class="hub-card p-4 p-md-5 mb-4 changelog-entry">
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+            <h3 class="fw-bold mb-0"><span class="badge bg-secondary me-2">v2.0.0</span> Express Backend &amp; JWT Authentication</h3>
+            <span class="caption-text"><i class="fa-solid fa-calendar me-1"></i> July 21, 2026</span>
+          </div>
+          <ul class="body-text">
+            <li>🛡️ Express server integration with bcrypt password hashing and JWT token authorization.</li>
+            <li>📋 Registration approval workflow for pending resident and guard accounts.</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer strip -->
+  <footer class="footer-premium" style="padding-top: 40px;">
+    <div class="footer-bottom-strip" style="margin-top: 0;">
+      <div class="container">
+        <div class="footer-bottom-content">
+          <div class="footer-bottom-left">
+            <span class="footer-copyright">&copy; 2026 Leonex SSMS Systems Inc.</span>
+          </div>
+          <div class="footer-bottom-center">
+            <span class="footer-creator-text">
+              <span class="footer-creator-dot" aria-hidden="true"></span>
+              Built by <span class="footer-creator-name">Jenil Barad</span>
+            </span>
+          </div>
+          <div class="footer-bottom-right">
+            <a href="privacy.html" class="footer-bottom-link">Privacy Policy</a>
+            <span class="footer-bottom-divider" aria-hidden="true">·</span>
+            <a href="terms.html" class="footer-bottom-link">Terms of Service</a>
+            <span class="footer-bottom-divider" aria-hidden="true">·</span>
+            <a href="cookies.html" class="footer-bottom-link">Cookie Preferences</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Navbar Scroll & PWA Handler -->
+  <script>
+    (function () {
+      const nav = document.getElementById('mainNav');
+      if (!nav) return;
+      window.addEventListener('scroll', function () {
+        nav.classList.toggle('navbar-scrolled', window.scrollY > 40);
+      });
+    })();
+
+    let deferredPrompt = null;
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      });
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const btn = document.getElementById('pwaInstallBtn');
+      if (btn) btn.style.display = 'inline-flex';
+    });
+
+    function installPWA() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
+      } else {
+        const note = document.createElement('div');
+        note.className = 'toast-custom info';
+        note.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:9999;';
+        note.innerHTML = '<i class="fa-solid fa-circle-info" style="color:var(--accent-info);"></i> Leonex SSMS is installable — open your browser menu and choose "Install app" or "Add to Home Screen".';
+        document.body.appendChild(note);
+        setTimeout(() => note.remove(), 4200);
+      }
+    }
+  </script>
+  <script src="js/vercel-tabs.js"></script>
+</body>
+</html>

@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documentation &amp; API Reference | Leonex SSMS</title>
+  <meta name="description" content="Leonex SSMS v4.0 documentation — modules, role guides, demo accounts, tech stack and API architecture.">
+  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="js/theme.js"></script>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+  <!-- Custom CSS -->
+  <link href="css/style.css" rel="stylesheet">
+  <style>
+    section[id], div[id] { scroll-margin-top: 110px; }
+    @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+
+    /* Docs module list rows */
+    .doc-module-row {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .doc-module-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .doc-module-row:first-child { padding-top: 0; }
+    .doc-module-icon {
+      width: 42px;
+      height: 42px;
+      min-width: 42px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+    .doc-module-row h6 { font-size: 14.5px; font-weight: 800; margin-bottom: 2px; color: var(--text-heading); }
+    .doc-module-row p { font-size: 13.5px; color: var(--text-secondary); margin: 0; }
+
+    /* Endpoint reference block */
+    .doc-endpoints {
+      background: #0B1220;
+      border: 1px solid #1E293B;
+      border-radius: var(--radius-lg);
+      padding: 18px 20px;
+      font-family: ui-monospace, 'Cascadia Mono', 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 2;
+      color: #CBD5E1;
+      overflow-x: auto;
+    }
+    .doc-endpoints .m-get { color: #60A5FA; font-weight: 700; }
+    .doc-endpoints .m-post { color: #34D399; font-weight: 700; }
+    .doc-endpoints .muted { color: #64748B; }
+
+    /* Demo account table cell helpers */
+    .doc-demo-note {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      background: rgba(37, 99, 235, 0.07);
+      border: 1px solid rgba(37, 99, 235, 0.2);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      font-size: 13.5px;
+      color: var(--text-secondary);
+    }
+    [data-theme="dark"] .doc-demo-note { background: rgba(96, 165, 250, 0.08); border-color: rgba(96, 165, 250, 0.25); }
+    .doc-demo-note i { color: var(--accent-primary); margin-top: 3px; }
+
+    /* Brand Bootstrap outline button to royal blue */
+    .btn-outline-primary {
+      --bs-btn-color: var(--accent-primary);
+      --bs-btn-border-color: rgba(37, 99, 235, 0.45);
+      --bs-btn-hover-color: #FFFFFF;
+      --bs-btn-hover-bg: var(--accent-primary);
+      --bs-btn-hover-border-color: var(--accent-primary);
+      --bs-btn-active-color: #FFFFFF;
+      --bs-btn-active-bg: var(--accent-primary-dark);
+      --bs-btn-active-border-color: var(--accent-primary-dark);
+      --bs-btn-focus-shadow-rgb: 37, 99, 235;
+    }
+  </style>
+</head>
+<body class="has-floating-nav" data-bs-spy="scroll" data-bs-target="#docIndexNav" data-bs-offset="130" tabindex="0">
+
+  <!-- Floating Navbar -->
+  <div class="navbar-float-wrapper">
+    <nav class="navbar navbar-expand-lg navbar-custom" id="mainNav" aria-label="Main navigation">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="index.html" aria-label="Leonex SSMS Home">
+          <div class="brand-icon">
+            <i class="fa-solid fa-building-user"></i>
+          </div>
+          <span>Society<span style="color: var(--accent-blue);">Hub</span></span>
+        </a>
+
+        <button class="navbar-toggler-custom" type="button" data-bs-toggle="collapse"
+          data-bs-target="#navMenuCollapse" aria-controls="navMenuCollapse"
+          aria-expanded="false" aria-label="Toggle navigation">
+          <span></span><span></span><span></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navMenuCollapse">
+          <ul class="nav-center-links mx-auto list-unstyled mb-0 d-flex flex-column flex-lg-row align-items-start align-items-lg-center gap-1 py-3 py-lg-0">
+            <li><a href="index.html" class="nav-pill"><i class="fa-solid fa-house"></i> Home</a></li>
+            <li><a href="index.html#features" class="nav-pill"><i class="fa-solid fa-grid-2"></i> Features</a></li>
+            <li><a href="docs.html" class="nav-pill active"><i class="fa-solid fa-book"></i> Documentation</a></li>
+            <li><a href="changelog.html" class="nav-pill"><i class="fa-solid fa-list-check"></i> Changelog</a></li>
+          </ul>
+
+          <div class="navbar-actions" role="group" aria-label="Navbar actions">
+            <button class="btn-pwa-install" id="pwaInstallBtn" onclick="installPWA()"
+              title="Install Leonex SSMS as a standalone app" aria-label="Install App" style="display:none;">
+              <i class="fa-solid fa-download" aria-hidden="true"></i>
+              <span>Install App</span>
+            </button>
+            <button class="btn-theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Theme" aria-label="Toggle theme">
+              <i class="fa-solid fa-sun" id="themeIcon" aria-hidden="true"></i>
+            </button>
+            <a href="login.html" class="btn-signin" aria-label="Sign In to Leonex SSMS">
+              <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>
+              <span>Sign In</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </div>
+
+  <!-- Documentation -->
+  <div class="container py-5 my-4">
+
+    <!-- Page header -->
+    <div class="sh-page-title">
+      <div>
+        <h1 class="sh-page-title__title"><i class="fa-solid fa-book me-2" style="color: var(--accent-primary);"></i> Documentation</h1>
+        <span class="sh-page-title__sub">Leonex SSMS v4.0 — modules, roles, demo accounts, tech stack &amp; API architecture</span>
+      </div>
+      <div class="sh-page-title__actions">
+        <a href="demo.html" class="btn btn-outline-primary rounded-pill px-4 text-decoration-none">
+          <i class="fa-solid fa-play me-2"></i> Explore Demo
+        </a>
+      </div>
+    </div>
+
+    <div class="row g-4">
+
+      <!-- Left Quick Index -->
+      <div class="col-lg-3">
+        <div class="sidebar-nav sticky-top" id="docIndexNav" style="top: 100px;">
+          <nav class="nav nav-pills flex-column gap-1">
+            <a class="nav-link active" href="#overview"><i class="fa-solid fa-rocket"></i> <span>Getting Started</span></a>
+            <a class="nav-link" href="#demo-accounts"><i class="fa-solid fa-key"></i> <span>Demo Accounts</span></a>
+            <a class="nav-link" href="#modules"><i class="fa-solid fa-cubes"></i> <span>Core Modules</span></a>
+            <a class="nav-link" href="#guide-admin"><i class="fa-solid fa-user-gear"></i> <span>Admin Guide</span></a>
+            <a class="nav-link" href="#guide-resident"><i class="fa-solid fa-house-user"></i> <span>Resident Guide</span></a>
+            <a class="nav-link" href="#guide-guard"><i class="fa-solid fa-user-shield"></i> <span>Guard Guide</span></a>
+            <a class="nav-link" href="#guide-committee"><i class="fa-solid fa-chart-pie"></i> <span>Committee Guide</span></a>
+            <a class="nav-link" href="#tech"><i class="fa-solid fa-layer-group"></i> <span>Tech Stack</span></a>
+            <a class="nav-link" href="#api"><i class="fa-solid fa-code"></i> <span>API &amp; Data</span></a>
+          </nav>
+        </div>
+      </div>
+
+      <!-- Right Detailed Manual -->
+      <div class="col-lg-9">
+
+        <!-- Getting Started -->
+        <div class="hub-card p-4 p-md-5 mb-4" id="overview">
+          <h2 class="fw-bold mb-3"><i class="fa-solid fa-rocket me-2" style="color: var(--accent-primary);"></i> Getting Started</h2>
+          <p class="body-text">
+            <strong>Leonex SSMS</strong> is a Smart Housing Society Management System. It digitises the daily operations of an
+            Indian housing society — maintenance billing, gate security, complaints, amenity bookings, notices, expenses,
+            polls, events, documents and emergency alerts — across four dedicated role portals.
+          </p>
+          <ol class="body-text mb-3">
+            <li class="mb-2">Open <a href="login.html" style="color: var(--accent-primary); font-weight: 700;">Sign In</a> and pick a <strong>1-Click Demo</strong> preset (Admin, Resident, Guard or Committee).</li>
+            <li class="mb-2">You land directly on that role&rsquo;s portal, pre-loaded with realistic demo society data.</li>
+            <li>Explore every module — payments are clearly marked simulations, so nothing costs real money.</li>
+          </ol>
+          <div class="doc-demo-note">
+            <i class="fa-solid fa-circle-info"></i>
+            <span>New self-registrations start in <strong>Pending</strong> status and must be approved by an Admin before the account can sign in — mirroring a real society&rsquo;s verification flow.</span>
+          </div>
+        </div>
+
+        <!-- Demo Accounts -->
+        <div class="hub-card p-4 p-md-5 mb-4" id="demo-accounts">
+          <h2 class="fw-bold mb-3"><i class="fa-solid fa-key me-2" style="color: var(--accent-warning);"></i> Demo Accounts</h2>
+          <p class="body-text">Use these seeded accounts to explore each portal. In demo mode the email (or its shorthand username) is enough — or simply use the 1-Click Demo buttons on the sign-in page.</p>
+          <div class="sh-table-wrap mb-3">
+            <table class="table-custom">
+              <thead>
+                <tr>
+                  <th>Role</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Shorthand</th>
+                  <th>Portal</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="sh-badge sh-badge--primary">Admin</span></td>
+                  <td>Jenil Barad</td>
+                  <td>jenilbarad089@gmail.com</td>
+                  <td><code>admin</code></td>
+                  <td>admin.html</td>
+                </tr>
+                <tr>
+                  <td><span class="sh-badge sh-badge--success">Resident</span></td>
+                  <td>Amit Patel (Flat A-302)</td>
+                  <td>amit.patel@gmail.com</td>
+                  <td><code>resident</code></td>
+                  <td>resident.html</td>
+                </tr>
+                <tr>
+                  <td><span class="sh-badge sh-badge--info">Security Guard</span></td>
+                  <td>Bahadur Singh (Gate 1)</td>
+                  <td>guard@smartsociety.com</td>
+                  <td><code>guard</code></td>
+                  <td>guard.html</td>
+                </tr>
+                <tr>
+                  <td><span class="sh-badge sh-badge--warning">Committee Member</span></td>
+                  <td>Suresh Kumar (Treasurer)</td>
+                  <td>suresh.treasurer@smartsociety.com</td>
+                  <td><code>committee</code></td>
+                  <td>committee.html</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="doc-demo-note">
+            <i class="fa-solid fa-user-clock"></i>
+            <span>Two pending registrations (<strong>Kiran Shah</strong>, <strong>Dev Malhotra</strong>) are seeded so you can demo the Admin approval workflow end-to-end.</span>
+          </div>
+        </div>
+
+        <!-- Core Modules -->
+        <div class="hub-card p-4 p-md-5 mb-4" id="modules">
+          <h2 class="fw-bold mb-4"><i class="fa-solid fa-cubes me-2" style="color: var(--accent-primary);"></i> Core Modules (v4.0)</h2>
+
+          <div class="doc-module-row">
+            <div class="doc-module-icon bg-icon-primary"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+            <div>
+              <h6>Maintenance &amp; Billing</h6>
+              <p>Admin generates monthly bills for all flats; residents pay via a clearly-labelled demo UPI/Card flow and receive printable receipts. Collection stats are tracked per month.</p>
+            </div>
+          </div>
+          <div class="doc-module-row">
+            <div class="doc-module-icon bg-icon-warning"><i class="fa-solid fa-headset"></i></div>
+            <div>
+              <h6>Complaints</h6>
+              <p>Residents raise complaints; Admin assigns staff and moves them through the lifecycle: <strong>Open → Assigned → In Progress → Resolved → Closed</strong>. Every step appends a timeline entry.</p>
+            </div>
+          </div>
+          <div class="doc-module-row">
+            <div class="doc-module-icon bg-icon-info"><i class="fa-solid fa-shield-halved"></i></div>
+            <div>
+              <h6>Visitor Security</h6>
+              <p>Guards log visitors of type <strong>Guest, Delivery, Cab, Service Provider, Staff or Other</strong> with the flow <strong>Pending → Approved → Checked In → Checked Out</strong> (or Rejected). Residents can pre-approve guests for faster entry.</p>
+            </div>
+          </div>
+          <div class="doc-module-row">
+            <div class="doc-module-icon bg-icon-success"><i class="fa-solid fa-calendar-check"></i></div>
+            <div>
+              <h6>Amenities</h6>
+              <p>Book the Clubhouse, Community Hall, Tennis Court and more with automatic double-booking prevention.</p>
+            </div>
+          </div>
+          <div class="doc-module-row">
+            <div class="doc-module-icon bg-icon-danger"><i class="fa-solid fa-bullhorn"></i></div>
+            <div>
+              <h6>Notices</h6>
+              <p>Official society circulars published by Admin/Committee and surfaced in every portal and the notification center.</p>
+            </div>
+          </div>
+          <div class="doc-module-row">
+            <div class="doc-module-icon bg-icon-primary"><i class="fa-solid fa-wallet"></i></div>
+            <div>
+              <h6>Expenses</h6>
+              <p>Society expense ledger with categories, amounts and monthly totals — visible to Admin and Committee for transparent accounting.</p>
+            </div>
+          </div>
+          <div class="doc-module-row">
+            <div class="doc-module-icon bg-icon-info"><i class="fa-solid fa-square-poll-vertical"></i></div>
+            <div>
+              <h6>Polls</h6>
+              <p>Community votes with double-voting blocked via a per-poll voter list. Results update live as members vote.</p>
+            </div>
+          </div>
+          <div class="doc-module-row">
+            <div class="doc-module-icon bg-icon-warning"><i class="fa-solid fa-calendar-days"></i></div>
+            <div>
+              <h6>Events</h6>
+              <p>Create and promote society gatherings, festivals and meets, with dates and venues visible to all residents.</p>
+            </div>
+          </div>
+          <div class="doc-module-row">
+            <div class="doc-module-icon bg-icon-success"><i class="fa-solid fa-folder-open"></i></div>
+            <div>
+              <h6>Documents</h6>
+              <p>Central repository for society records — bylaws, forms, circulars and certificates — managed by Admin.</p>
+            </div>
+          </div>
+          <div class="doc-module-row">
+            <div class="doc-module-icon bg-icon-danger"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div>
+              <h6>Emergency SOS</h6>
+              <p>Raise society-wide emergency alerts (fire, medical, security) and resolve them once handled. Alerts surface across portals.</p>
+            </div>
+          </div>
+          <div class="doc-module-row">
+            <div class="doc-module-icon bg-icon-primary"><i class="fa-solid fa-people-roof"></i></div>
+            <div>
+              <h6>Family &amp; Vehicles</h6>
+              <p>Residents maintain a family member registry and register their vehicles for gate and parking records.</p>
+            </div>
+          </div>
+          <div class="doc-module-row">
+            <div class="doc-module-icon bg-icon-info"><i class="fa-solid fa-square-parking"></i></div>
+            <div>
+              <h6>Parking Slots</h6>
+              <p>Visual slot grid — Admin assigns and releases slots, mapping vehicles to owners and flats.</p>
+            </div>
+          </div>
+          <div class="doc-module-row">
+            <div class="doc-module-icon bg-icon-warning"><i class="fa-solid fa-bell"></i></div>
+            <div>
+              <h6>Notifications</h6>
+              <p>A universal notification center: stored notifications plus derived ones (visitors at the gate, unpaid bills, pending approvals) with approve/deny actions and unread badges.</p>
+            </div>
+          </div>
+          <div class="doc-module-row">
+            <div class="doc-module-icon bg-icon-success"><i class="fa-solid fa-file-shield"></i></div>
+            <div>
+              <h6>Audit Logs &amp; Reports</h6>
+              <p>Every significant action is written to an audit trail (who, what, when). Monthly billing and collection stats power the committee reports, and global search spans all modules.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Admin Guide -->
+        <div class="hub-card p-4 p-md-5 mb-4" id="guide-admin">
+          <h2 class="fw-bold mb-3"><i class="fa-solid fa-user-gear me-2" style="color: var(--accent-primary);"></i> Admin Control Center</h2>
+          <p class="body-text">The Admin portal has full executive control over society operations:</p>
+          <ul class="body-text">
+            <li><strong>Registrations:</strong> Approve or reject pending accounts; allot towers, flats and roles.</li>
+            <li><strong>Billing:</strong> Generate monthly maintenance bills, track paid/unpaid dues and view collection stats.</li>
+            <li><strong>Complaints:</strong> Assign complaints to staff, add notes and move statuses along the timeline.</li>
+            <li><strong>Expenses &amp; Records:</strong> Record society expenses, manage notices, events, documents and parking slots.</li>
+            <li><strong>Oversight:</strong> Review the audit log, respond to emergency alerts and monitor every module.</li>
+          </ul>
+        </div>
+
+        <!-- Resident Guide -->
+        <div class="hub-card p-4 p-md-5 mb-4" id="guide-resident">
+          <h2 class="fw-bold mb-3"><i class="fa-solid fa-house-user me-2" style="color: var(--accent-success);"></i> Resident Portal</h2>
+          <p class="body-text">Residents manage their home, dues and community life:</p>
+          <ul class="body-text">
+            <li><strong>Maintenance:</strong> View monthly bills, pay via the demo payment flow and download receipts.</li>
+            <li><strong>Complaints:</strong> Raise issues and follow the resolution timeline from Open to Resolved.</li>
+            <li><strong>Visitors:</strong> Pre-register guests for quick gate entry and approve/deny gate requests in real time.</li>
+            <li><strong>Community:</strong> Book amenities, vote in polls, see notices and events, and manage family members &amp; vehicles.</li>
+            <li><strong>Emergency:</strong> Raise an SOS alert that reaches guards and admins immediately.</li>
+          </ul>
+        </div>
+
+        <!-- Guard Guide -->
+        <div class="hub-card p-4 p-md-5 mb-4" id="guide-guard">
+          <h2 class="fw-bold mb-3"><i class="fa-solid fa-user-shield me-2" style="color: var(--accent-info);"></i> Gate Security Guide</h2>
+          <p class="body-text">Security Guards run the gate from a focused console:</p>
+          <ul class="body-text">
+            <li><strong>Visitor passes:</strong> Register guests, deliveries, cabs, service providers and staff with destination flat and purpose.</li>
+            <li><strong>Approvals:</strong> Send entry requests to residents and watch approvals arrive live; pre-approved visitors skip the wait.</li>
+            <li><strong>Check-in / Check-out:</strong> One tap each way — the visitor log keeps exact in/out times.</li>
+            <li><strong>Vehicles &amp; SOS:</strong> Record vehicle entries and respond to emergency alerts raised in the society.</li>
+          </ul>
+        </div>
+
+        <!-- Committee Guide -->
+        <div class="hub-card p-4 p-md-5 mb-4" id="guide-committee">
+          <h2 class="fw-bold mb-3"><i class="fa-solid fa-chart-pie me-2" style="color: var(--accent-warning);"></i> Committee Member Dashboard</h2>
+          <p class="body-text">Committee members get governance-level visibility:</p>
+          <ul class="body-text">
+            <li><strong>Financials:</strong> Monthly collection stats and the society expense ledger at a glance.</li>
+            <li><strong>Engagement:</strong> Run polls, publish notices and oversee society events.</li>
+            <li><strong>Oversight:</strong> Browse complaint trends, visitor statistics and the full audit trail.</li>
+          </ul>
+        </div>
+
+        <!-- Tech Stack -->
+        <div class="hub-card p-4 p-md-5 mb-4" id="tech">
+          <h2 class="fw-bold mb-3"><i class="fa-solid fa-layer-group me-2" style="color: var(--accent-info);"></i> Tech Stack</h2>
+          <ul class="body-text">
+            <li><strong>Server:</strong> Node/Express (<code>server.js</code>) serving static pages plus optional API endpoints. No build step, no package installs needed to run.</li>
+            <li><strong>Frontend:</strong> Vanilla HTML/CSS/JavaScript multi-page app — no frameworks.</li>
+            <li><strong>UI libraries (CDN):</strong> Bootstrap 5.3.2, FontAwesome 6.4.2, Chart.js for dashboard charts.</li>
+            <li><strong>Data engine:</strong> <code>SystemDB</code> (<code>js/db.js</code>) — a localStorage-persisted store seeded from <code>data/seed.json</code>. Session user lives in <code>sessionStorage</code> under <code>ssm_current_user</code>.</li>
+            <li><strong>Auth:</strong> <code>js/firebase-auth.js</code> tries the Express <code>/api/auth/*</code> endpoints first, then falls back to a client-side demo login for static hosting. Firebase compat SDK powers Google Sign-In.</li>
+            <li><strong>PWA:</strong> Web manifest + service worker for installability and offline support.</li>
+            <li><strong>Design system:</strong> Deep navy/slate surfaces with a royal-blue accent, plus the SHUI component helpers in <code>js/ui.js</code> (tables, badges, toasts, confirm dialogs, KPI cards).</li>
+          </ul>
+        </div>
+
+        <!-- API & Data -->
+        <div class="hub-card p-4 p-md-5 mb-4" id="api">
+          <h2 class="fw-bold mb-3"><i class="fa-solid fa-code me-2" style="color: var(--accent-primary);"></i> API &amp; Data Architecture</h2>
+          <p class="body-text">The Express server exposes these endpoints:</p>
+
+          <div class="doc-endpoints mb-3">
+            <span class="m-get">GET</span>&nbsp;&nbsp;/api/health <span class="muted">— service health check</span><br>
+            <span class="m-post">POST</span> /api/auth/login <span class="muted">— email/username + password → JWT token + user</span><br>
+            <span class="m-post">POST</span> /api/auth/register <span class="muted">— create account (Pending until Admin approves)</span><br>
+            <span class="m-post">POST</span> /api/auth/google <span class="muted">— Google OAuth token exchange</span>
+          </div>
+
+          <div class="doc-demo-note mb-3">
+            <i class="fa-solid fa-arrows-rotate"></i>
+            <span><strong>Dual architecture:</strong> when the API is unreachable (e.g. static hosting), the auth layer transparently falls back to the local SystemDB demo mode, so the full product remains explorable without a server.</span>
+          </div>
+
+          <p class="body-text mb-2">Client-side, <code>SystemDB</code> manages these collections:</p>
+          <p class="body-text">
+            <span class="sh-badge sh-badge--secondary me-1 mb-1">users</span>
+            <span class="sh-badge sh-badge--secondary me-1 mb-1">complaints</span>
+            <span class="sh-badge sh-badge--secondary me-1 mb-1">maintenance</span>
+            <span class="sh-badge sh-badge--secondary me-1 mb-1">visitors</span>
+            <span class="sh-badge sh-badge--secondary me-1 mb-1">preApprovedVisitors</span>
+            <span class="sh-badge sh-badge--secondary me-1 mb-1">notices</span>
+            <span class="sh-badge sh-badge--secondary me-1 mb-1">amenities</span>
+            <span class="sh-badge sh-badge--secondary me-1 mb-1">bookings</span>
+            <span class="sh-badge sh-badge--secondary me-1 mb-1">towers</span>
+            <span class="sh-badge sh-badge--secondary me-1 mb-1">flats</span>
+            <span class="sh-badge sh-badge--secondary me-1 mb-1">polls</span>
+            <span class="sh-badge sh-badge--secondary me-1 mb-1">vehicles</span>
+            <span class="sh-badge sh-badge--secondary me-1 mb-1">expenses</span>
+            <span class="sh-badge sh-badge--secondary me-1 mb-1">events</span>
+            <span class="sh-badge sh-badge--secondary me-1 mb-1">documents</span>
+            <span class="sh-badge sh-badge--secondary me-1 mb-1">notifications</span>
+            <span class="sh-badge sh-badge--secondary me-1 mb-1">emergencyAlerts</span>
+            <span class="sh-badge sh-badge--secondary me-1 mb-1">familyMembers</span>
+            <span class="sh-badge sh-badge--secondary me-1 mb-1">parkingSlots</span>
+            <span class="sh-badge sh-badge--secondary me-1 mb-1">auditLogs</span>
+            <span class="sh-badge sh-badge--secondary me-1 mb-1">societySettings</span>
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer strip -->
+  <footer class="footer-premium" style="padding-top: 40px;">
+    <div class="footer-bottom-strip" style="margin-top: 0;">
+      <div class="container">
+        <div class="footer-bottom-content">
+          <div class="footer-bottom-left">
+            <span class="footer-copyright">&copy; 2026 Leonex SSMS Systems Inc.</span>
+          </div>
+          <div class="footer-bottom-center">
+            <span class="footer-creator-text">
+              <span class="footer-creator-dot" aria-hidden="true"></span>
+              Built by <span class="footer-creator-name">Jenil Barad</span>
+            </span>
+          </div>
+          <div class="footer-bottom-right">
+            <a href="privacy.html" class="footer-bottom-link">Privacy Policy</a>
+            <span class="footer-bottom-divider" aria-hidden="true">·</span>
+            <a href="terms.html" class="footer-bottom-link">Terms of Service</a>
+            <span class="footer-bottom-divider" aria-hidden="true">·</span>
+            <a href="cookies.html" class="footer-bottom-link">Cookie Preferences</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Navbar Scroll & PWA Handler -->
+  <script>
+    (function () {
+      const nav = document.getElementById('mainNav');
+      if (!nav) return;
+      window.addEventListener('scroll', function () {
+        nav.classList.toggle('navbar-scrolled', window.scrollY > 40);
+      });
+    })();
+
+    let deferredPrompt = null;
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      });
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const btn = document.getElementById('pwaInstallBtn');
+      if (btn) btn.style.display = 'inline-flex';
+    });
+
+    function installPWA() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
+      } else {
+        const note = document.createElement('div');
+        note.className = 'toast-custom info';
+        note.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:9999;';
+        note.innerHTML = '<i class="fa-solid fa-circle-info" style="color:var(--accent-info);"></i> Leonex SSMS is installable — open your browser menu and choose "Install app" or "Add to Home Screen".';
+        document.body.appendChild(note);
+        setTimeout(() => note.remove(), 4200);
+      }
+    }
+  </script>
+  <script src="js/vercel-tabs.js"></script>
+</body>
+</html>

@@ -1,0 +1,499 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   ReactBits Inspired Master Card & Table Design System
+   Source Inspiration: https://reactbits.dev/backgrounds/galaxy
+   Aesthetic:
+   - Deep Clean Canvas Background: #0e0e12 across all dashboards
+   - Master Outer Boxes / Cards: #141418 with 1px border rgba(255, 255, 255, 0.08)
+   - Inner Boxes / Item Tiles (like Floating Lines, Waves, Silk):
+     Default #17171e / rgba(255,255,255,0.025), Border 1px solid rgba(255,255,255,0.08)
+     Signature Hover: #252530 fill, crisp border rgba(255,255,255,0.20), text #FFF
+   - Tables: Elevated container #141418, subtle header, smooth row hover #23212d
+   ═══════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --rb-theme-bg: #0e0e12;
+  --rb-sidebar-bg: #141418;
+  --rb-card-bg: #141418;
+  --rb-card-surface: #17171e;
+  --rb-card-hover: #141418;
+  --rb-row-hover: transparent;
+  --rb-border: rgba(255, 255, 255, 0.08);
+  --rb-border-subtle: rgba(255, 255, 255, 0.05);
+  --rb-border-hover: #3b82f6;
+  --rb-border-active: #2563eb;
+  --rb-border-blue: #3b82f6;
+  --rb-blue-glow: 0 0 0 1px rgba(59, 130, 246, 0.38), 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 18px rgba(59, 130, 246, 0.25);
+  --rb-blue-glow-sm: 0 0 0 1px rgba(59, 130, 246, 0.35), 0 4px 18px rgba(0, 0, 0, 0.4), 0 0 14px rgba(59, 130, 246, 0.2);
+  --rb-text-main: #FFFFFF;
+  --rb-text-muted: rgba(255, 255, 255, 0.65);
+  --rb-text-dim: rgba(255, 255, 255, 0.45);
+  --rb-radius-container: 16px;
+  --rb-radius-inner: 12px;
+  --rb-radius-pill: 8px;
+  --rb-transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   0. MASTER CANVAS BACKGROUND (#0e0e12 across all dashboards)
+   ───────────────────────────────────────────────────────────────────── */
+html,
+body,
+body[data-theme="dark"],
+[data-theme="dark"] body,
+.leonex-main-wrapper,
+.leonex-layout,
+.admin-main,
+.dashboard-wrapper,
+.main-content,
+.demo-page,
+.app-container {
+  background-color: #0e0e12 !important;
+}
+
+/* Sidebar: #141418 strictly for dark theme; clean #FFFFFF for light theme */
+[data-theme="dark"] .leonex-sidebar,
+html[data-theme="dark"] .leonex-sidebar,
+body[data-theme="dark"] .leonex-sidebar {
+  background-color: #141418 !important;
+  background: #141418 !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .leonex-sidebar-footer,
+html[data-theme="dark"] .leonex-sidebar-footer,
+body[data-theme="dark"] .leonex-sidebar-footer {
+  background-color: #141418 !important;
+  background: #141418 !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="light"] .leonex-sidebar,
+html[data-theme="light"] .leonex-sidebar,
+body[data-theme="light"] .leonex-sidebar {
+  background-color: #FFFFFF !important;
+  background: #FFFFFF !important;
+  border-right: 1px solid #E2E8F0 !important;
+  box-shadow: 1px 0 3px 0 rgba(0, 0, 0, 0.03), 4px 0 16px 0 rgba(0, 0, 0, 0.02) !important;
+}
+
+[data-theme="light"] .leonex-sidebar-footer,
+html[data-theme="light"] .leonex-sidebar-footer,
+body[data-theme="light"] .leonex-sidebar-footer {
+  background-color: #FFFFFF !important;
+  background: #FFFFFF !important;
+  border-top: 1px solid #E2E8F0 !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   1. MASTER CARDS & CONTAINERS (Outer boxes matching Related Components)
+   ───────────────────────────────────────────────────────────────────── */
+.hub-card,
+.sa-card,
+.sa-kpi-card,
+.metric-card,
+.card,
+.card-box,
+.dash-card,
+.kpi-card,
+.stat-card,
+.table-responsive,
+.table-wrapper,
+.table-container {
+  background: #141418 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5) !important;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  position: relative;
+}
+
+/* Outer Card Hover Elevation — Keeps background unchanged and displays crisp bluish border hover effect */
+.hub-card:hover,
+.sa-card:hover,
+.sa-kpi-card:hover,
+.metric-card:hover,
+.card:hover,
+.dash-card:hover,
+.stat-card:hover {
+  background: #141418 !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.38), 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 18px rgba(59, 130, 246, 0.25) !important;
+  transform: translateY(-2px);
+}
+
+/* Card Header Actions & Title */
+.hub-card .card-title,
+.sa-card .card-title,
+.hub-card h3,
+.hub-card h4,
+.hub-card h5,
+.sa-card h3,
+.sa-card h4,
+.sa-card h5 {
+  color: #FFFFFF !important;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   2. INNER ITEM BOXES & GRID TILES (Matching Floating Lines / Waves / Silk)
+   ───────────────────────────────────────────────────────────────────── */
+.inner-box,
+.item-box,
+.tile-box,
+.quick-action-card,
+.action-box,
+.stat-box,
+.sa-kpi-card,
+.role-feature-box,
+.table-filter-box,
+.nav-pills .nav-link,
+.btn-neutral-box,
+.list-group-item,
+.veh-card,
+.pav-card,
+.filter-box,
+.stat-tile {
+  background: #17171e !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 12px !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+  padding: 14px 18px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* Inner Box Hover: Keeps background unchanged and displays crisp bluish border hover effect */
+.inner-box:hover,
+.item-box:hover,
+.tile-box:hover,
+.quick-action-card:hover,
+.action-box:hover,
+.stat-box:hover,
+.sa-kpi-card:hover,
+.nav-pills .nav-link:hover,
+.nav-pills .nav-link.active,
+.btn-neutral-box:hover,
+.list-group-item:hover,
+.veh-card:hover,
+.pav-card:hover,
+.filter-box:hover,
+.stat-tile:hover {
+  background: #17171e !important;
+  border-color: #3b82f6 !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.35), 0 4px 18px rgba(0, 0, 0, 0.4), 0 0 14px rgba(59, 130, 246, 0.2) !important;
+  transform: translateY(-1.5px);
+}
+
+/* Arrow / Icon micro-animation on inner box hover */
+.inner-box:hover i,
+.item-box:hover i,
+.tile-box:hover i,
+.quick-action-card:hover i,
+.action-box:hover i,
+.veh-card:hover i,
+.pav-card:hover i,
+.inner-box:hover svg,
+.item-box:hover svg {
+  color: #FFFFFF !important;
+  transform: translateX(3px);
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   3. TABLES (Matching ReactBits Props Table & Grid Design)
+   ───────────────────────────────────────────────────────────────────── */
+.table-responsive,
+.table-wrapper,
+.table-container {
+  background: #141418 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5) !important;
+  margin-bottom: 24px !important;
+  transition: border-color 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.table-responsive:hover,
+.table-wrapper:hover,
+.table-container:hover {
+  background: #141418 !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.38), 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 18px rgba(59, 130, 246, 0.25) !important;
+}
+
+.table,
+.sa-table,
+.table-custom,
+table.dataTable {
+  width: 100% !important;
+  margin-bottom: 0 !important;
+  background: transparent !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  color: #F1F5F9 !important;
+}
+
+/* Table Header — Subtle tinted header row */
+.table th,
+.sa-table th,
+.table-custom th,
+table.dataTable thead th {
+  background: rgba(255, 255, 255, 0.02) !important;
+  color: rgba(255, 255, 255, 0.55) !important;
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  padding: 14px 18px !important;
+  vertical-align: middle !important;
+  white-space: nowrap;
+}
+
+/* Table Cells */
+.table td,
+.sa-table td,
+.table-custom td,
+table.dataTable tbody td {
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.88) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  padding: 14px 18px !important;
+  font-size: 13.5px !important;
+  vertical-align: middle !important;
+  transition: background-color 0.18s cubic-bezier(0.16, 1, 0.3, 1), color 0.18s ease, border-color 0.18s ease !important;
+}
+
+/* Remove bottom border on last row */
+.table tbody tr:last-child td,
+.sa-table tbody tr:last-child td,
+.table-custom tbody tr:last-child td,
+table.dataTable tbody tr:last-child td {
+  border-bottom: none !important;
+}
+
+/* Table Row Hover — Retains natural row background without color flash, shows bluish border accent */
+.table tbody tr,
+.sa-table tbody tr,
+.table-custom tbody tr,
+table.dataTable tbody tr {
+  transition: border-color 0.18s cubic-bezier(0.16, 1, 0.3, 1), color 0.18s ease !important;
+}
+
+.table tbody tr:hover td,
+.sa-table tbody tr:hover td,
+.table-custom tbody tr:hover td,
+table.dataTable tbody tr:hover td {
+  background: transparent !important;
+  color: #FFFFFF !important;
+  border-bottom-color: rgba(59, 130, 246, 0.45) !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   4. BADGES, PILLS & CODE PILLS (Matching ReactBits Pill Badges like auto, '')
+   ───────────────────────────────────────────────────────────────────── */
+.table .badge,
+.sa-table .badge,
+.table-custom .badge,
+.badge-code,
+.status-pill,
+.table code,
+.sa-table code {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 4px 10px !important;
+  border-radius: 8px !important;
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em !important;
+  border: 1px solid rgba(255, 255, 255, 0.10) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  transition: all 0.2s ease !important;
+}
+
+.table tbody tr:hover .badge,
+.sa-table tbody tr:hover .badge,
+.table-custom tbody tr:hover .badge,
+.table tbody tr:hover .status-pill,
+.sa-table tbody tr:hover .status-pill,
+.table-custom tbody tr:hover .status-pill {
+  border-color: rgba(255, 255, 255, 0.22) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Action buttons in tables */
+.table .btn-sm,
+.sa-table .btn-sm,
+.table-custom .btn-sm {
+  border: 1px solid rgba(255, 255, 255, 0.10) !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-radius: 8px !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+  transition: all 0.2s ease !important;
+}
+
+.table .btn-sm:hover,
+.sa-table .btn-sm:hover,
+.table-custom .btn-sm:hover {
+  background: rgba(59, 130, 246, 0.12) !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.25) !important;
+  color: #FFFFFF !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   5. SPLIT & PAGINATION BOXES (Matching Previous / Next in Inspiration)
+   ───────────────────────────────────────────────────────────────────── */
+.pagination-split-box,
+.nav-split-box {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #141418;
+  margin-top: 24px;
+}
+
+.split-box-item {
+  padding: 16px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.split-box-item:first-child {
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.split-box-item:hover {
+  background: #141418;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.3);
+  color: #FFFFFF;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   6. INPUTS, SELECTS, & MODALS
+   ───────────────────────────────────────────────────────────────────── */
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select,
+[data-theme="dark"] .input-group-text {
+  background: #17171e !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 10px !important;
+  color: #FFFFFF !important;
+  transition: all 0.2s ease !important;
+}
+
+[data-theme="dark"] .form-control:focus,
+[data-theme="dark"] .form-select:focus {
+  background: #1c1c24 !important;
+  border-color: rgba(255, 255, 255, 0.22) !important;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.05) !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .modal-content {
+  background: #141418 !important;
+  border: 1px solid rgba(255, 255, 255, 0.10) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8) !important;
+}
+
+[data-theme="dark"] .modal-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .modal-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   7. LIGHT MODE COMPATIBILITY
+   ───────────────────────────────────────────────────────────────────── */
+[data-theme="light"] body {
+  background-color: #F8FAFC !important;
+}
+
+[data-theme="light"] .hub-card,
+[data-theme="light"] .sa-card,
+[data-theme="light"] .sa-kpi-card,
+[data-theme="light"] .metric-card,
+[data-theme="light"] .card,
+[data-theme="light"] .table-responsive,
+[data-theme="light"] .table-wrapper {
+  background: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04) !important;
+}
+
+[data-theme="light"] .hub-card:hover,
+[data-theme="light"] .sa-card:hover,
+[data-theme="light"] .sa-kpi-card:hover,
+[data-theme="light"] .metric-card:hover,
+[data-theme="light"] .card:hover,
+[data-theme="light"] .table-responsive:hover,
+[data-theme="light"] .table-wrapper:hover {
+  background: #FFFFFF !important;
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.28), 0 10px 25px rgba(15, 23, 42, 0.08), 0 0 14px rgba(37, 99, 235, 0.15) !important;
+}
+
+[data-theme="light"] .inner-box,
+[data-theme="light"] .item-box,
+[data-theme="light"] .tile-box,
+[data-theme="light"] .quick-action-card,
+[data-theme="light"] .action-box,
+[data-theme="light"] .stat-box {
+  background: #F8FAFC !important;
+  border: 1px solid #E2E8F0 !important;
+  color: #1E293B !important;
+}
+
+[data-theme="light"] .inner-box:hover,
+[data-theme="light"] .item-box:hover,
+[data-theme="light"] .tile-box:hover,
+[data-theme="light"] .quick-action-card:hover,
+[data-theme="light"] .action-box:hover {
+  background: #F8FAFC !important;
+  border-color: #2563eb !important;
+  color: #0F172A !important;
+  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.25), 0 4px 12px rgba(15, 23, 42, 0.05) !important;
+}
+
+[data-theme="light"] .table th,
+[data-theme="light"] .sa-table th,
+[data-theme="light"] .table-custom th {
+  background: #F8FAFC !important;
+  color: #64748B !important;
+  border-bottom: 1px solid #E2E8F0 !important;
+}
+
+[data-theme="light"] .table td,
+[data-theme="light"] .sa-table td,
+[data-theme="light"] .table-custom td {
+  color: #1E293B !important;
+  border-bottom: 1px solid #F1F5F9 !important;
+}
+
+[data-theme="light"] .table tbody tr:hover td,
+[data-theme="light"] .sa-table tbody tr:hover td,
+[data-theme="light"] .table-custom tbody tr:hover td {
+  background: transparent !important;
+  color: #0F172A !important;
+  border-bottom-color: rgba(37, 99, 235, 0.45) !important;
+}

@@ -1,0 +1,1694 @@
+/* =============================================================================
+   LEONEX SSMS — 21ST.DEV ANIMATED SIDEBAR & HOVER PILL DESIGN SYSTEM
+   Inspired by: 21st.dev / Be UI Animated Sidebar (@starc007)
+   Features:
+   - SharedLayoutBg Magic Gliding / Floating Pill Hover Effect
+   - Spring physics transitions (cubic-bezier(0.16, 1, 0.3, 1))
+   - While-tap / press micro-feedback (scale 0.975)
+   - Morphing desktop icon rail with smooth label enter/exit animations
+   - Accordion submenus with tree-line indicators & 90deg rotating chevrons
+   - Dual-layer vector icons (outline to filled transition)
+   - Interactive sidebar rail & dock toggle pill
+   - Global Ctrl+B / Cmd+B keyboard shortcut support
+   - Floating dark-glass tooltips in collapsed state
+   - Fully synchronized Light & Dark themes
+   ============================================================================= */
+
+/* Typography & Base Reset */
+.leonex-sidebar,
+.leonex-sidebar *,
+.leonex-main-wrapper,
+.leonex-tooltip {
+  font-family: "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  box-sizing: border-box;
+}
+
+/* Ensure FontAwesome icons keep their dedicated icon font */
+.leonex-sidebar i[class*="fa-"],
+.leonex-sidebar .fa,
+.leonex-sidebar .fa-solid,
+.leonex-sidebar .fa-regular,
+.leonex-sidebar .fa-brands,
+body:has(.leonex-layout) i[class*="fa-"],
+body:has(.leonex-layout) .fa,
+body:has(.leonex-layout) .fa-solid,
+body:has(.leonex-layout) .fa-regular,
+body:has(.leonex-layout) .fa-brands,
+body.leonex-page i[class*="fa-"],
+body.leonex-page .fa,
+body.leonex-page .fa-solid,
+body.leonex-page .fa-regular,
+body.leonex-page .fa-brands {
+  font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands", fontawesome !important;
+}
+
+/* =============================================================================
+   DESIGN TOKENS — 21ST.DEV CLEAN SAAS SPECIFICATION
+   ============================================================================= */
+
+:root {
+  --lx-w-expanded: 260px;
+  --lx-w-collapsed: 68px;
+  
+  /* Spring transitions matching 21st.dev Be UI ease physics */
+  --lx-ease-spring: 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  /* Shifting Gray Box Hover Animation Tokens (450ms fluid spring glide) */
+  --lx-pill-duration: 450ms;
+  --lx-ease-pill: var(--lx-pill-duration) cubic-bezier(0.22, 1, 0.36, 1);
+  --lx-transition: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* LIGHT THEME (Clean Shadcn / 21st Slate Palette) */
+  --lx-bg: #FFFFFF;
+  --lx-border: #E2E8F0;
+  --lx-text-head: #0F172A;
+  --lx-text-body: #334155;
+  --lx-text-muted: #64748B;
+  --lx-text-dim: #94A3B8;
+  --lx-section-title: #94A3B8;
+  --lx-shadow: 1px 0 3px 0 rgba(0, 0, 0, 0.03), 4px 0 16px 0 rgba(0, 0, 0, 0.02);
+
+  /* 21st.dev Floating Hover Pill Tokens */
+  --lx-hover-pill-bg: rgba(15, 23, 42, 0.05);
+  --lx-hover-pill-border: rgba(15, 23, 42, 0.06);
+  --lx-hover-pill-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --lx-hover-rail-color: rgba(15, 23, 42, 0.25);
+
+  /* Icon - Default */
+  --lx-icon-size: 32px;
+  --lx-icon-radius: 8px;
+  --lx-icon-color: #64748B;
+  --lx-icon-bg: transparent;
+  --lx-icon-border: transparent;
+  --lx-icon-cutout: #FFFFFF;
+
+  /* Icon - Hover */
+  --lx-icon-hover-bg: transparent;
+  --lx-icon-hover-border: transparent;
+  --lx-icon-hover-color: #0F172A;
+  --lx-icon-hover-shadow: none;
+
+  /* Active State (21st.dev bg-muted active indicator) */
+  --lx-active-bg: rgba(15, 23, 42, 0.08);
+  --lx-active-border: rgba(15, 23, 42, 0.09);
+  --lx-active-color: #0F172A;
+  --lx-active-indicator: #0F172A;
+
+  /* Toggle pill */
+  --lx-pill-bg: #FFFFFF;
+  --lx-pill-border: #CBD5E1;
+  --lx-pill-color: #64748B;
+  --lx-pill-hover-bg: #F8FAFC;
+  --lx-pill-hover-color: #0F172A;
+
+  /* Tooltip */
+  --lx-tooltip-bg: #0F172A;
+  --lx-tooltip-text: #FFFFFF;
+  --lx-tooltip-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
+
+  /* Labels */
+  --lx-label-color: #475569;
+  --lx-label-hover: #0F172A;
+  --lx-label-active: #0F172A;
+}
+
+/* DARK THEME (21st.dev Dark Modern Obsidian Palette) */
+[data-theme="dark"] {
+  --lx-bg: #141418;
+  --lx-border: rgba(255, 255, 255, 0.08);
+  --lx-text-head: #F8FAFC;
+  --lx-text-body: #CBD5E1;
+  --lx-text-muted: #94A3B8;
+  --lx-text-dim: #64748B;
+  --lx-section-title: #71717A;
+  --lx-shadow: 1px 0 0 0 rgba(255, 255, 255, 0.06);
+
+  /* 21st.dev Floating Hover Pill Tokens */
+  --lx-hover-pill-bg: rgba(255, 255, 255, 0.075);
+  --lx-hover-pill-border: rgba(255, 255, 255, 0.09);
+  --lx-hover-pill-shadow: 0 2px 8px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --lx-hover-rail-color: rgba(255, 255, 255, 0.35);
+
+  /* Icon - Default */
+  --lx-icon-color: #94A3B8;
+  --lx-icon-bg: transparent;
+  --lx-icon-border: transparent;
+  --lx-icon-cutout: #141418;
+
+  /* Icon - Hover */
+  --lx-icon-hover-bg: transparent;
+  --lx-icon-hover-border: transparent;
+  --lx-icon-hover-color: #FFFFFF;
+  --lx-icon-hover-shadow: none;
+
+  /* Active State (21st.dev bg-muted active indicator) */
+  --lx-active-bg: rgba(255, 255, 255, 0.11);
+  --lx-active-border: rgba(255, 255, 255, 0.13);
+  --lx-active-color: #FFFFFF;
+  --lx-active-indicator: #FFFFFF;
+
+  /* Toggle pill */
+  --lx-pill-bg: #141721;
+  --lx-pill-border: rgba(255, 255, 255, 0.12);
+  --lx-pill-color: #94A3B8;
+  --lx-pill-hover-bg: #1E222E;
+  --lx-pill-hover-color: #FFFFFF;
+
+  /* Tooltip */
+  --lx-tooltip-bg: #181B26;
+  --lx-tooltip-text: #F8FAFC;
+  --lx-tooltip-shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
+
+  /* Labels */
+  --lx-label-color: #94A3B8;
+  --lx-label-hover: #FFFFFF;
+  --lx-label-active: #FFFFFF;
+}
+
+/* =============================================================================
+   LAYOUT SHELL
+   ============================================================================= */
+
+.leonex-layout {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+  background-color: var(--bg-primary, #F8FAFC);
+  transition: background-color var(--lx-transition);
+}
+
+[data-theme="dark"] .leonex-layout {
+  background-color: #08090d;
+}
+
+/* =============================================================================
+   SIDEBAR CORE CONTAINER
+   ============================================================================= */
+
+.leonex-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--lx-w-expanded);
+  background: var(--lx-bg);
+  border-right: 1px solid var(--lx-border);
+  box-shadow: var(--lx-shadow);
+  display: flex;
+  flex-direction: column;
+  z-index: 1060;
+  overflow: visible;
+  user-select: none;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  will-change: width;
+  transition:
+    width var(--lx-ease-spring),
+    background-color var(--lx-transition),
+    border-color var(--lx-transition);
+}
+
+.leonex-sidebar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+body.leonex-collapsed .leonex-sidebar {
+  width: var(--lx-w-collapsed);
+}
+
+/* =============================================================================
+   ANIMATED SIDEBAR RAIL (21st.dev AnimatedSidebarRail)
+   Subtle hoverable edge strip that lights up and toggles on click
+   ============================================================================= */
+
+.leonex-sidebar-rail {
+  position: absolute;
+  top: 0;
+  right: -5px;
+  bottom: 0;
+  width: 10px;
+  cursor: col-resize;
+  z-index: 1045;
+  outline: none;
+  background: transparent;
+  border: none;
+  padding: 0;
+  display: none;
+}
+
+@media (min-width: 992px) {
+  .leonex-sidebar-rail {
+    display: block;
+  }
+}
+
+.leonex-sidebar-rail::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 4px;
+  width: 2px;
+  background: transparent;
+  transition: background-color 0.2s ease;
+}
+
+.leonex-sidebar-rail:hover::after {
+  background: var(--lx-hover-rail-color);
+}
+
+/* =============================================================================
+   EDGE DOCKED TOGGLE PILL
+   ============================================================================= */
+
+.leonex-toggle-pill {
+  position: absolute;
+  top: 20px;
+  right: -13px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--lx-pill-bg);
+  border: 1px solid var(--lx-pill-border);
+  color: var(--lx-pill-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  cursor: pointer;
+  z-index: 1050;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  padding: 0;
+  outline: none;
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease,
+    transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.18s ease;
+}
+
+.leonex-toggle-pill:hover {
+  background: var(--lx-pill-hover-bg);
+  color: var(--lx-pill-hover-color);
+  transform: scale(1.08);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.14);
+}
+
+.leonex-toggle-pill:active {
+  transform: scale(0.95);
+}
+
+.leonex-toggle-pill i {
+  transition: transform var(--lx-ease-spring);
+}
+
+body.leonex-collapsed .leonex-toggle-pill i {
+  transform: rotate(180deg);
+}
+
+/* =============================================================================
+   SIDEBAR BRAND / HEADER
+   ============================================================================= */
+
+.leonex-sidebar-header {
+  height: 64px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--lx-border);
+  flex-shrink: 0;
+  overflow: hidden;
+  transition: padding var(--lx-ease-spring), border-color var(--lx-transition);
+}
+
+body.leonex-collapsed .leonex-sidebar-header {
+  padding: 0;
+  justify-content: center;
+}
+
+.leonex-brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  text-decoration: none;
+  min-width: 0;
+  flex: 1;
+}
+
+.leonex-brand-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #0F172A;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.leonex-brand:hover .leonex-brand-logo {
+  transform: scale(1.04);
+}
+
+[data-theme="dark"] .leonex-brand-logo {
+  background: #181B26;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.leonex-brand-logo svg {
+  width: 18px;
+  height: 18px;
+  stroke: #FFFFFF;
+  stroke-width: 2.2;
+  fill: none;
+}
+
+.leonex-brand-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+body.leonex-collapsed .leonex-brand-info {
+  display: none;
+}
+
+.leonex-brand-title {
+  font-size: 14.5px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--lx-text-head);
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.leonex-brand-title span {
+  color: #64748B;
+  font-weight: 700;
+}
+
+[data-theme="dark"] .leonex-brand-title span {
+  color: #94A3B8;
+}
+
+.leonex-brand-sub {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--lx-text-muted);
+  letter-spacing: 0.02em;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* =============================================================================
+   NAVIGATION BODY & SECTIONS
+   ============================================================================= */
+
+.leonex-sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative; /* Anchor for .leonex-hover-pill */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+body.leonex-collapsed .leonex-sidebar-nav {
+  padding: 12px 6px;
+  gap: 8px;
+  align-items: center;
+}
+
+.leonex-sidebar-nav::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.leonex-sidebar-nav::-webkit-scrollbar-track,
+.leonex-sidebar-nav::-webkit-scrollbar-thumb {
+  display: none !important;
+  background: transparent !important;
+}
+
+/* =============================================================================
+   21ST.DEV MAGIC GLIDING ACTIVE SELECTED PILL (SharedLayoutBg)
+   Smooth spring-physics sliding background pill that tracks the active clicked page
+   ============================================================================= */
+
+.leonex-active-pill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 1;
+  border-radius: 10px;
+  background: var(--lx-active-bg);
+  border: 1px solid var(--lx-active-border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  opacity: 0;
+  transform: translate3d(0, 0, 0);
+  transition:
+    transform var(--lx-ease-pill),
+    width var(--lx-ease-pill),
+    height var(--lx-ease-pill),
+    border-radius var(--lx-ease-pill),
+    opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, width, height, opacity;
+}
+
+.leonex-active-pill.visible {
+  opacity: 1;
+}
+
+[data-theme="dark"] .leonex-active-pill {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* =============================================================================
+   21ST.DEV MAGIC GLIDING HOVER PILL (SharedLayoutBg)
+   Smooth spring-physics sliding background pill that tracks mouse across nav items
+   ============================================================================= */
+
+.leonex-hover-pill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 1;
+  border-radius: 10px;
+  background: var(--lx-hover-pill-bg);
+  border: 1px solid var(--lx-hover-pill-border);
+  box-shadow: var(--lx-hover-pill-shadow);
+  opacity: 0;
+  filter: blur(5px);
+  transform: translate3d(0, 0, 0) scale(0.96);
+  transition:
+    transform var(--lx-ease-pill),
+    width var(--lx-ease-pill),
+    height var(--lx-ease-pill),
+    border-radius var(--lx-ease-pill),
+    opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, width, height, opacity, filter;
+}
+
+.leonex-hover-pill.visible {
+  opacity: 1;
+  filter: blur(0px);
+}
+
+/* Press micro-feedback (whileTap: scale 0.975) */
+.leonex-nav-item:active,
+.leonex-sub-item:active,
+.leonex-user-card:active {
+  transform: scale(0.975);
+  transition: transform 0.08s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* =============================================================================
+   NAV SECTION & GROUP LABELS (21st.dev AnimatedSidebarGroupLabel)
+   ============================================================================= */
+
+.leonex-nav-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  position: relative;
+}
+
+.leonex-nav-section-title {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--lx-section-title);
+  padding: 8px 12px 4px;
+  white-space: nowrap;
+  user-select: none;
+  position: relative;
+  z-index: 2;
+  transition: opacity 0.18s ease, max-height 0.2s ease, padding 0.2s ease;
+}
+
+body.leonex-collapsed .leonex-nav-section-title {
+  opacity: 0;
+  max-height: 0;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* =============================================================================
+   NAV ITEM ROW (21st.dev AnimatedSidebarMenuItem & Button)
+   ============================================================================= */
+
+.leonex-nav-item-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+body.leonex-collapsed .leonex-nav-item-wrap {
+  align-items: center;
+  width: auto;
+}
+
+.leonex-nav-item {
+  display: flex;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+  min-height: 38px;
+  padding: 0 10px;
+  border-radius: 10px;
+  color: var(--lx-label-color);
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid transparent;
+  width: 100%;
+  text-align: left;
+  outline: none;
+  transition:
+    color 0.18s ease,
+    border-color 0.18s ease,
+    transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.leonex-collapsed .leonex-nav-item {
+  padding: 0;
+  width: 44px;
+  min-height: 44px;
+  justify-content: center;
+  border-radius: 10px;
+}
+
+/* Hover: text changes to high contrast hover color (gliding pill handles background) */
+.leonex-nav-item:hover {
+  color: var(--lx-label-hover);
+}
+
+.leonex-nav-item:focus-visible {
+  outline: 2px solid var(--lx-active-indicator);
+  outline-offset: 2px;
+}
+
+/* Active State — Text and Icon styles (Sliding .leonex-active-pill handles the background) */
+.leonex-nav-item.active {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--lx-label-active);
+  font-weight: 600;
+}
+
+body.leonex-collapsed .leonex-nav-item.active {
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+/* Clean active indicator (no thick harsh lines) */
+.leonex-nav-item.active::before,
+body.leonex-collapsed .leonex-nav-item.active::before {
+  display: none !important;
+  content: none !important;
+}
+
+/* =============================================================================
+   ICON CONTAINER & 21ST.DEV OUTLINED ANIMATED ICONS
+   Pure stroke-based vector icons with micro-animations on hover (Zero zoom)
+   ============================================================================= */
+
+.leonex-nav-icon {
+  width: var(--lx-icon-size);
+  height: var(--lx-icon-size);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--lx-icon-radius);
+  border: 1px solid var(--lx-icon-border);
+  background: var(--lx-icon-bg);
+  color: var(--lx-icon-color);
+  position: relative;
+  overflow: visible;
+  transform: none !important; /* NO ZOOM */
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease;
+}
+
+body.leonex-collapsed .leonex-nav-icon {
+  width: 36px;
+  height: 36px;
+}
+
+.lx-icon-layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  transform: none !important; /* NO ZOOM */
+}
+
+.lx-icon-layer svg,
+.lx-icon-layer .lx-icon,
+.lx-anim-icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+  stroke: currentColor;
+  stroke-width: 1.85px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+  transform: none !important; /* NO ZOOM */
+  transition: color 0.25s ease, stroke 0.25s ease;
+}
+
+/* Base geometry transition for buttery smooth outline <-> filled morphing */
+.lx-anim-icon path,
+.lx-anim-icon rect,
+.lx-anim-icon circle,
+.lx-anim-icon polygon,
+.lx-anim-icon line,
+.lx-anim-icon polyline {
+  fill: transparent;
+  transition:
+    fill 0.32s cubic-bezier(0.25, 1, 0.4, 1),
+    stroke 0.25s ease,
+    stroke-width 0.25s ease,
+    opacity 0.25s ease;
+}
+
+/* User Profile Action Logout icon sizing */
+.leonex-user-action .lx-icon-layer svg,
+.leonex-user-action .lx-icon-layer .lx-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Hover & Active Outlined Colors */
+.leonex-nav-item:hover .leonex-nav-icon,
+.leonex-user-action:hover .leonex-nav-icon {
+  color: var(--lx-icon-hover-color);
+}
+
+.leonex-nav-item.active .leonex-nav-icon {
+  color: var(--lx-active-color);
+}
+
+/* Fallback FontAwesome icons (Zero zoom) */
+.leonex-nav-icon i {
+  font-size: 14.5px;
+  color: inherit;
+  transform: none !important;
+  transition: color 0.2s ease;
+}
+
+/* =============================================================================
+   21ST.DEV OUTLINE DRAWING ANIMATION SYSTEM (OPTIMAL BALANCED HOVER SPEED)
+   Dynamic stroke line-drawing / outline tracing effect as seen on 21st.dev
+   Triggered on inactive page item hover (.leonex-nav-item:not(.active):hover)
+   ============================================================================= */
+
+.lx-anim-icon [pathLength="100"],
+.lx-anim-icon .lx-draw-main,
+.lx-anim-icon .lx-draw-sub {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 0;
+  will-change: stroke-dashoffset;
+}
+
+/* Primary outline strokes draw into view - crisp, smooth and responsive */
+.leonex-nav-item:not(.active):hover .lx-draw-main,
+.leonex-nav-icon:not(.active):hover .lx-draw-main,
+.leonex-user-action:hover .lx-draw-main {
+  animation: lxDrawOutlineMain 0.85s cubic-bezier(0.25, 1, 0.4, 1) forwards;
+}
+
+/* Secondary/inner outline strokes draw into view with a gentle stagger */
+.leonex-nav-item:not(.active):hover .lx-draw-sub,
+.leonex-nav-icon:not(.active):hover .lx-draw-sub,
+.leonex-user-action:hover .lx-draw-sub {
+  animation: lxDrawOutlineSub 0.95s cubic-bezier(0.25, 1, 0.4, 1) forwards;
+}
+
+/* Active icons remain solidly filled and do not re-trace on hover */
+.leonex-nav-item.active .lx-draw-main,
+.leonex-nav-item.active .lx-draw-sub,
+.leonex-nav-item.active:hover .lx-draw-main,
+.leonex-nav-item.active:hover .lx-draw-sub {
+  animation: none !important;
+  stroke-dashoffset: 0 !important;
+}
+
+/* =============================================================================
+   ACTIVE NAV ITEM: SAME-ICON OUTLINE TO FILLED MORPHING
+   When user is on any dashboard page, the corresponding icon seamlessly
+   transitions from an outline to a rich solid filled icon (same SVG geometry).
+   ============================================================================= */
+
+.leonex-nav-item.active .lx-anim-icon {
+  color: var(--lx-active-color);
+}
+
+/* 1. Dashboard: All 4 tiles fill solid */
+.leonex-nav-item.active .lx-icon-dashboard rect {
+  fill: currentColor;
+}
+
+/* 2. Residents: Main avatar head & body fill solid, secondary avatar soft filled */
+.leonex-nav-item.active .lx-icon-residents circle.lx-draw-main,
+.leonex-nav-item.active .lx-icon-residents path.lx-draw-main {
+  fill: currentColor;
+}
+.leonex-nav-item.active .lx-icon-residents path.lx-draw-sub {
+  fill: currentColor;
+  opacity: 0.65;
+}
+
+/* 3. Towers: Skyscrapers fill solid, window lines become crisp cutout slits */
+.leonex-nav-item.active .lx-icon-towers path.lx-draw-main {
+  fill: currentColor;
+}
+.leonex-nav-item.active .lx-icon-towers line.lx-draw-sub {
+  stroke: var(--lx-icon-cutout, #ffffff);
+  stroke-width: 2px;
+}
+
+/* 4. Family: House fills solid, doorway becomes clean cutout */
+.leonex-nav-item.active .lx-icon-family path.lx-draw-main {
+  fill: currentColor;
+}
+.leonex-nav-item.active .lx-icon-family path.lx-draw-sub {
+  fill: var(--lx-icon-cutout, #ffffff);
+  stroke: var(--lx-icon-cutout, #ffffff);
+}
+
+/* 5. Complaints: Headset dome & earcups fill solid */
+.leonex-nav-item.active .lx-icon-complaints path.lx-draw-main {
+  fill: currentColor;
+}
+.leonex-nav-item.active .lx-icon-complaints path.lx-draw-sub {
+  stroke-width: 2.4px;
+}
+
+/* 6. Visitors: Security shield fills solid, checkmark becomes clean cutout */
+.leonex-nav-item.active .lx-icon-visitors path.lx-draw-main {
+  fill: currentColor;
+}
+.leonex-nav-item.active .lx-icon-visitors path.lx-draw-sub {
+  stroke: var(--lx-icon-cutout, #ffffff);
+  stroke-width: 2.5px;
+}
+
+/* 7. Guard Entry: ID badge fills solid, photo avatar and lines become cutouts */
+.leonex-nav-item.active .lx-icon-guard-entry rect.lx-draw-main {
+  fill: currentColor;
+}
+.leonex-nav-item.active .lx-icon-guard-entry circle.lx-draw-sub {
+  fill: var(--lx-icon-cutout, #ffffff);
+  stroke: var(--lx-icon-cutout, #ffffff);
+}
+.leonex-nav-item.active .lx-icon-guard-entry line.lx-draw-sub,
+.leonex-nav-item.active .lx-icon-guard-entry path.lx-draw-main {
+  stroke: var(--lx-icon-cutout, #ffffff);
+}
+
+/* 8. Guard Pending: Hourglass bulbs fill solid */
+.leonex-nav-item.active .lx-icon-guard-pending path.lx-draw-sub {
+  fill: currentColor;
+}
+
+/* 9. Guard Deliveries: 3D box fills solid, seam lines become cutouts */
+.leonex-nav-item.active .lx-icon-deliveries path.lx-draw-main {
+  fill: currentColor;
+}
+.leonex-nav-item.active .lx-icon-deliveries path.lx-draw-sub {
+  stroke: var(--lx-icon-cutout, #ffffff);
+  stroke-width: 2px;
+}
+
+/* 10. Vehicles: Car chassis fills solid, wheels fill with cutout rims */
+.leonex-nav-item.active .lx-icon-vehicles path.lx-draw-main {
+  fill: currentColor;
+}
+.leonex-nav-item.active .lx-icon-vehicles circle.lx-draw-sub {
+  fill: currentColor;
+  stroke: var(--lx-icon-cutout, #ffffff);
+  stroke-width: 1.5px;
+}
+
+/* 11. Emergency: Hazard triangle fills solid, exclamation mark becomes cutout */
+.leonex-nav-item.active .lx-icon-emergency path.lx-draw-main {
+  fill: currentColor;
+}
+.leonex-nav-item.active .lx-icon-emergency line.lx-draw-sub {
+  stroke: var(--lx-icon-cutout, #ffffff);
+  stroke-width: 2.2px;
+}
+
+/* 12. Finance: Receipt fills solid, currency symbol becomes cutout */
+.leonex-nav-item.active .lx-icon-finance path.lx-draw-main {
+  fill: currentColor;
+}
+.leonex-nav-item.active .lx-icon-finance path.lx-draw-sub,
+.leonex-nav-item.active .lx-icon-finance line.lx-draw-sub {
+  stroke: var(--lx-icon-cutout, #ffffff);
+  stroke-width: 2px;
+}
+
+/* 13. Amenities: Calendar fills solid, checkmark and rings become cutouts */
+.leonex-nav-item.active .lx-icon-amenities rect.lx-draw-main {
+  fill: currentColor;
+}
+.leonex-nav-item.active .lx-icon-amenities line.lx-draw-sub,
+.leonex-nav-item.active .lx-icon-amenities path.lx-draw-main {
+  stroke: var(--lx-icon-cutout, #ffffff);
+  stroke-width: 2px;
+}
+
+/* 14. Notices: Bell body and clapper fill solid */
+.leonex-nav-item.active .lx-icon-notices path.lx-draw-main,
+.leonex-nav-item.active .lx-icon-notices path.lx-draw-sub {
+  fill: currentColor;
+}
+
+/* 15. Polls: Bar chart columns fill solid */
+.leonex-nav-item.active .lx-icon-polls rect.lx-draw-sub {
+  fill: currentColor;
+}
+
+/* 16. Documents: Folder body fills solid */
+.leonex-nav-item.active .lx-icon-documents path.lx-draw-main,
+.leonex-nav-item.active .lx-icon-documents path.lx-draw-sub {
+  fill: currentColor;
+}
+.leonex-nav-item.active .lx-icon-documents line.lx-draw-sub {
+  stroke: var(--lx-icon-cutout, #ffffff);
+  stroke-width: 2px;
+}
+
+/* 17. Reports: Pie chart segments fill solid */
+.leonex-nav-item.active .lx-icon-reports path.lx-draw-main,
+.leonex-nav-item.active .lx-icon-reports path.lx-draw-sub {
+  fill: currentColor;
+}
+
+/* 18. Audit: Clock circle fills solid, hands become clean cutouts */
+.leonex-nav-item.active .lx-icon-audit path.lx-draw-main {
+  fill: currentColor;
+}
+.leonex-nav-item.active .lx-icon-audit line.lx-draw-sub,
+.leonex-nav-item.active .lx-icon-audit path.lx-draw-sub {
+  stroke: var(--lx-icon-cutout, #ffffff);
+  stroke-width: 2px;
+}
+
+/* 19. Roles: Key fills solid, keyhole becomes cutout */
+.leonex-nav-item.active .lx-icon-roles path.lx-draw-main {
+  fill: currentColor;
+}
+.leonex-nav-item.active .lx-icon-roles circle.lx-draw-sub {
+  fill: var(--lx-icon-cutout, #ffffff);
+  stroke: var(--lx-icon-cutout, #ffffff);
+}
+
+/* 20. Profile: Avatar head and torso fill solid */
+.leonex-nav-item.active .lx-icon-profile circle.lx-draw-main,
+.leonex-nav-item.active .lx-icon-profile path.lx-draw-sub {
+  fill: currentColor;
+}
+
+@keyframes lxDrawOutlineMain {
+  0% {
+    stroke-dashoffset: 100;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes lxDrawOutlineSub {
+  0% {
+    stroke-dashoffset: 100;
+  }
+  16% {
+    stroke-dashoffset: 100;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* =============================================================================
+   TAILORED OUTLINED MICRO-INTERACTIONS (PAIRED WITH OUTLINE DRAWING)
+   ============================================================================= */
+
+/* 1. Dashboard: Staggered tiles micro-float */
+.leonex-nav-item:hover .lx-dash-1,
+.leonex-nav-icon:hover .lx-dash-1 {
+  transform: translate(-1px, -1px);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.leonex-nav-item:hover .lx-dash-2,
+.leonex-nav-icon:hover .lx-dash-2 {
+  transform: translate(1px, -1px);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.04s;
+}
+.leonex-nav-item:hover .lx-dash-3,
+.leonex-nav-icon:hover .lx-dash-3 {
+  transform: translate(1px, 1px);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.08s;
+}
+.leonex-nav-item:hover .lx-dash-4,
+.leonex-nav-icon:hover .lx-dash-4 {
+  transform: translate(-1px, 1px);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.12s;
+}
+
+/* 2. Residents / Users: Secondary avatar peeks outward */
+.leonex-nav-item:hover .lx-res-side-head,
+.leonex-nav-item:hover .lx-res-side-body,
+.leonex-nav-icon:hover .lx-res-side-head,
+.leonex-nav-icon:hover .lx-res-side-body {
+  transform: translate(2px, -0.5px);
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* 3. Towers: Skyscraper floor levels scan/pulse */
+.lx-tower-floors {
+  transform-origin: 12px 12px;
+}
+.leonex-nav-item:hover .lx-tower-floors,
+.leonex-nav-icon:hover .lx-tower-floors {
+  animation: lxTowerScan 0.72s ease-in-out infinite alternate;
+}
+@keyframes lxTowerScan {
+  0% { transform: scaleX(0.8); }
+  100% { transform: scaleX(1.2); }
+}
+
+/* 4. Family / Home: Roof floats */
+.leonex-nav-item:hover .lx-fam-roof,
+.leonex-nav-icon:hover .lx-fam-roof {
+  transform: translateY(-1.5px);
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* 5. Complaints: Headset microphone rotates */
+.lx-comp-mic {
+  transform-origin: 12px 18px;
+  transition: transform 0.42s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.leonex-nav-item:hover .lx-comp-mic,
+.leonex-nav-icon:hover .lx-comp-mic {
+  transform: rotate(-14deg);
+}
+
+/* 6. Guard Pending: Hourglass flips 180deg */
+.lx-icon-guard-pending {
+  transform-origin: 12px 12px;
+  transition: transform 0.68s cubic-bezier(0.34, 1.3, 0.64, 1);
+}
+.leonex-nav-item:hover .lx-icon-guard-pending,
+.leonex-nav-icon:hover .lx-icon-guard-pending {
+  transform: rotate(180deg);
+}
+
+/* 7. Guard Deliveries: Box floats */
+.leonex-nav-item:hover .lx-del-box,
+.leonex-nav-icon:hover .lx-del-box {
+  transform: translateY(-2px);
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* 8. Vehicles: Car wheels spin & chassis glides */
+.lx-veh-wheel-1 { transform-origin: 7px 17px; }
+.lx-veh-wheel-2 { transform-origin: 17px 17px; }
+.leonex-nav-item:hover .lx-veh-wheel-1,
+.leonex-nav-item:hover .lx-veh-wheel-2,
+.leonex-nav-icon:hover .lx-veh-wheel-1,
+.leonex-nav-icon:hover .lx-veh-wheel-2 {
+  animation: lxWheelSpin 0.85s linear infinite;
+}
+@keyframes lxWheelSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 9. Emergency: Hazard exclamation mark bounces */
+.leonex-nav-item:hover .lx-em-mark,
+.leonex-nav-icon:hover .lx-em-mark {
+  animation: lxExclBounce 0.6s ease-in-out infinite alternate;
+}
+@keyframes lxExclBounce {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-2px); }
+}
+
+/* 10. Finance: Currency symbol floats up */
+.leonex-nav-item:hover .lx-fin-curr,
+.leonex-nav-item:hover .lx-fin-bar,
+.leonex-nav-icon:hover .lx-fin-curr,
+.leonex-nav-icon:hover .lx-fin-bar {
+  transform: translateY(-2px);
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* 11. Notices: 21st.dev swinging bell chime */
+.lx-icon-notices {
+  transform-origin: 12px 3px;
+}
+.leonex-nav-item:hover .lx-icon-notices,
+.leonex-nav-icon:hover .lx-icon-notices {
+  animation: lxBellRing 0.88s ease-in-out;
+}
+@keyframes lxBellRing {
+  0% { transform: rotate(0deg); }
+  20% { transform: rotate(-14deg); }
+  40% { transform: rotate(12deg); }
+  60% { transform: rotate(-8deg); }
+  80% { transform: rotate(5deg); }
+  100% { transform: rotate(0deg); }
+}
+
+/* 12. Polls: Staggered bar chart columns rise */
+.lx-poll-bar-1, .lx-poll-bar-2, .lx-poll-bar-3 {
+  transform-origin: bottom;
+  transition: transform 0.42s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.leonex-nav-item:hover .lx-poll-bar-1,
+.leonex-nav-icon:hover .lx-poll-bar-1 {
+  transform: scaleY(1.3);
+}
+.leonex-nav-item:hover .lx-poll-bar-2,
+.leonex-nav-icon:hover .lx-poll-bar-2 {
+  transform: scaleY(1.2);
+  transition-delay: 0.05s;
+}
+.leonex-nav-item:hover .lx-poll-bar-3,
+.leonex-nav-icon:hover .lx-poll-bar-3 {
+  transform: scaleY(1.12);
+  transition-delay: 0.1s;
+}
+
+/* 13. Documents: Paper pulls out of folder */
+.leonex-nav-item:hover .lx-doc-paper,
+.leonex-nav-icon:hover .lx-doc-paper {
+  transform: translateY(-3px);
+  transition: transform 0.42s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* 14. Reports: Pie chart slice separates */
+.leonex-nav-item:hover .lx-rep-slice,
+.leonex-nav-icon:hover .lx-rep-slice {
+  transform: translate(2.5px, -2.5px);
+  transition: transform 0.42s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* 15. Audit: Clock hands spin 360deg */
+.lx-aud-hands {
+  transform-origin: 12px 12px;
+  transition: transform 0.85s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.leonex-nav-item:hover .lx-aud-hands,
+.leonex-nav-icon:hover .lx-aud-hands {
+  transform: rotate(360deg);
+}
+
+/* 16. Roles: Key unlocks 22deg */
+.lx-role-key {
+  transform-origin: 16.5px 7.5px;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.leonex-nav-item:hover .lx-role-key,
+.leonex-nav-icon:hover .lx-role-key {
+  transform: rotate(22deg);
+}
+
+/* 17. Logout: Arrow pushes through doorway */
+.lx-log-arrow {
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.leonex-nav-item:hover .lx-log-arrow,
+.leonex-user-action:hover .lx-log-arrow,
+.leonex-nav-icon:hover .lx-log-arrow {
+  transform: translateX(3.5px);
+}
+
+/* =============================================================================
+   NAV LABEL & CHEVRON
+   ============================================================================= */
+
+.leonex-nav-label {
+  margin-left: 9px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  color: inherit;
+  transition:
+    opacity 0.16s ease,
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    color 0.18s ease;
+}
+
+body.leonex-collapsed .leonex-nav-label {
+  display: none;
+}
+
+.leonex-nav-chevron {
+  font-size: 10px;
+  color: var(--lx-text-dim);
+  margin-left: auto;
+  padding-left: 6px;
+  flex-shrink: 0;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), color 0.18s ease;
+}
+
+body.leonex-collapsed .leonex-nav-chevron {
+  display: none;
+}
+
+/* 21st.dev rotating chevron (90deg rotation when open) */
+.leonex-nav-item[aria-expanded="true"] .leonex-nav-chevron {
+  transform: rotate(90deg);
+  color: var(--lx-label-active);
+}
+
+/* =============================================================================
+   ANIMATED SUBMENU (21st.dev AnimatedSidebarMenuSub)
+   ============================================================================= */
+
+.leonex-submenu {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 0 0 34px;
+  margin-left: 8px;
+  position: relative;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(-4px);
+  pointer-events: none;
+  transition:
+    max-height 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    padding 0.2s ease;
+}
+
+.leonex-submenu::before {
+  content: "";
+  position: absolute;
+  left: 18px;
+  top: 4px;
+  bottom: 6px;
+  width: 1px;
+  background: var(--lx-border);
+  opacity: 0.8;
+}
+
+.leonex-submenu.open {
+  max-height: 320px;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  padding: 4px 0 6px 34px;
+}
+
+body.leonex-collapsed .leonex-submenu {
+  display: none !important;
+}
+
+.leonex-sub-item {
+  display: flex;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+  min-height: 32px;
+  padding: 0 10px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--lx-text-muted);
+  text-decoration: none;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid transparent;
+  width: 100%;
+  transition:
+    color 0.16s ease,
+    border-color 0.16s ease,
+    transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.leonex-sub-item:hover {
+  color: var(--lx-text-head);
+}
+
+.leonex-sub-item.active {
+  color: var(--lx-label-active);
+  font-weight: 600;
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+/* =============================================================================
+   NAV BADGES
+   ============================================================================= */
+
+.leonex-nav-badge {
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 999px;
+  background: #EF4444;
+  color: #FFFFFF;
+  line-height: 1.4;
+  margin-left: 6px;
+  flex-shrink: 0;
+}
+
+body.leonex-collapsed .leonex-nav-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1.5px solid var(--lx-bg);
+  text-indent: -9999px;
+  overflow: hidden;
+}
+
+/* =============================================================================
+   USER PROFILE FOOTER
+   ============================================================================= */
+
+.leonex-sidebar-footer {
+  padding: 12px 10px;
+  border-top: 1px solid var(--lx-border);
+  background: var(--lx-bg);
+  flex-shrink: 0;
+  position: relative;
+  transition: padding var(--lx-ease-spring), border-color var(--lx-transition);
+}
+
+body.leonex-collapsed .leonex-sidebar-footer {
+  padding: 12px 6px;
+  display: flex;
+  justify-content: center;
+}
+
+.leonex-user-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 10px;
+  text-decoration: none;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  position: relative;
+  z-index: 2;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.leonex-user-card:hover {
+  background: var(--lx-hover-pill-bg);
+  border-color: var(--lx-hover-pill-border);
+}
+
+body.leonex-collapsed .leonex-user-card {
+  padding: 0;
+  width: 44px;
+  height: 44px;
+  justify-content: center;
+  border-radius: 10px;
+}
+
+.leonex-user-avatar-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.leonex-avatar-badge {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 14px;
+  height: 14px;
+  background: #6366F1;
+  color: #FFFFFF;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 7.5px;
+  border: 1.5px solid var(--lx-bg);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease;
+  pointer-events: none;
+}
+
+.leonex-user-card:hover .leonex-avatar-badge {
+  transform: scale(1.18) rotate(45deg);
+  background: #4F46E5;
+}
+
+.leonex-user-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--lx-border);
+  background: rgba(15, 23, 42, 0.05);
+}
+
+[data-theme="dark"] .leonex-user-avatar {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* =============================================================================
+   LEONEX PROFILE SETTINGS MODAL STYLES
+   ============================================================================= */
+.lx-profile-modal .modal-content {
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+}
+
+.lx-avatar-preview-wrap {
+  position: relative;
+  display: inline-block;
+  margin: 0 auto;
+}
+
+.lx-avatar-preview-img {
+  width: 86px;
+  height: 86px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #6366F1;
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.25);
+  background: rgba(125, 125, 125, 0.1);
+}
+
+.lx-avatar-upload-btn {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #6366F1;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 2px solid #FFFFFF;
+  font-size: 11px;
+  transition: transform 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="dark"] .lx-avatar-upload-btn {
+  border-color: #0F1626;
+}
+
+.lx-avatar-upload-btn:hover {
+  transform: scale(1.1);
+  background: #4F46E5;
+}
+
+.lx-preset-avatars {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.lx-preset-chip {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 1px;
+  transition: all 0.2s ease;
+  background: rgba(125, 125, 125, 0.1);
+}
+
+.lx-preset-chip:hover {
+  transform: scale(1.15);
+  border-color: #6366F1;
+}
+
+.lx-preset-chip.active {
+  border-color: #6366F1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.35);
+  transform: scale(1.08);
+}
+
+.leonex-user-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  padding-right: 6px;
+}
+
+body.leonex-collapsed .leonex-user-info {
+  display: none;
+}
+
+.leonex-user-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--lx-text-head);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+.leonex-user-role {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--lx-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+
+.leonex-user-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-left: auto;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 0;
+  background: transparent;
+  color: var(--lx-text-dim);
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.leonex-user-action:hover {
+  background: rgba(239, 68, 68, 0.14);
+  color: #EF4444;
+  transform: scale(1.08);
+}
+
+.leonex-user-action:active {
+  transform: scale(0.92);
+}
+
+.leonex-user-action svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+}
+
+body.leonex-collapsed .leonex-user-action {
+  display: none;
+}
+
+/* =============================================================================
+   FLOATING TOOLTIP (FOR COLLAPSED STATE)
+   ============================================================================= */
+
+.leonex-tooltip {
+  position: fixed;
+  z-index: 99999;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: var(--lx-tooltip-bg);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--lx-tooltip-text);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  box-shadow: var(--lx-tooltip-shadow);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(-4px) scale(0.96);
+  white-space: nowrap;
+  transition:
+    opacity 0.16s ease,
+    transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.leonex-tooltip.visible {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+}
+
+.leonex-tooltip::before {
+  content: "";
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 4px solid transparent;
+  border-right-color: var(--lx-tooltip-bg);
+}
+
+/* =============================================================================
+   MAIN VIEWPORT WRAPPER
+   ============================================================================= */
+
+.leonex-main-wrapper {
+  margin-left: var(--lx-w-expanded);
+  flex: 1;
+  min-width: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition: margin-left var(--lx-ease-spring);
+}
+
+body.leonex-collapsed .leonex-main-wrapper {
+  margin-left: var(--lx-w-collapsed);
+}
+
+/* =============================================================================
+   RESPONSIVE MOBILE DRAWER (21st.dev MobileSidebar Focus-Managed Sheet)
+   ============================================================================= */
+
+.leonex-mobile-toggle {
+  display: none !important;
+  background: transparent;
+  border: 1px solid var(--lx-border);
+  color: var(--lx-text-head);
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+@media (max-width: 991.98px) {
+  .leonex-sidebar {
+    transform: translateX(-100%);
+    width: var(--lx-w-expanded) !important;
+    transition: transform var(--lx-ease-spring);
+  }
+
+  body.leonex-mobile-open .leonex-sidebar {
+    transform: translateX(0);
+    box-shadow: 6px 0 32px rgba(0, 0, 0, 0.3);
+  }
+
+  .leonex-toggle-pill,
+  .leonex-sidebar-rail {
+    display: none !important;
+  }
+
+  .leonex-main-wrapper {
+    margin-left: 0 !important;
+  }
+
+  .leonex-mobile-toggle {
+    display: inline-flex !important;
+    align-items: center;
+  }
+
+  .leonex-sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(4px);
+    z-index: 1035;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--lx-ease-spring);
+  }
+
+  body.leonex-mobile-open .leonex-sidebar-backdrop {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}

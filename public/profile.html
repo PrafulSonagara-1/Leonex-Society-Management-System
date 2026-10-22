@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile | SocietyHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="js/theme.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+  <link href="css/reactbits-theme.css" rel="stylesheet">
+  <link rel="manifest" href="manifest.json">
+  <style>
+    .profile-hero { background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%); border-bottom: 1px solid var(--border-color); }
+    .avatar-upload-wrap { position: relative; display: inline-block; }
+    .avatar-upload-wrap .avatar-edit-btn {
+      position: absolute; bottom: 4px; right: 4px;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--accent-orange); color: white; border: 2px solid var(--bg-card);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 13px; transition: transform 0.2s;
+    }
+    .avatar-upload-wrap .avatar-edit-btn:hover { transform: scale(1.1); }
+    .avatar-preview { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent-orange); }
+    .role-badge-pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 16px; border-radius: 50px; font-size: 13px; font-weight: 600; border: 1px solid var(--border-color); background: var(--surface-active); color: var(--text-primary); }
+    .info-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-color); }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+    .info-value { font-size: 14px; font-weight: 600; color: var(--text-heading); }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark navbar-custom navbar-dashboard">
+    <div class="container-fluid px-4">
+      <a class="navbar-brand" href="javascript:history.back()">
+        <i class="fa-solid fa-arrow-left me-2 text-warning"></i>
+        <span>Back to Dashboard</span>
+      </a>
+      <div class="d-flex align-items-center gap-3">
+        <button class="btn-nav-icon position-relative" title="Notifications" onclick="toggleNotificationPanel(this)" aria-label="Notifications">
+          <svg class="animate-bell-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path class="animate-bell-clapper" d="M10.268 21a2 2 0 0 0 3.464 0" />
+            <path class="animate-bell-body" d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" />
+          </svg>
+          <span class="notif-dot"></span>
+        </button>
+        <button class="btn-theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
+          <i class="fa-solid fa-sun" id="themeIcon"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Profile Hero -->
+  <div class="profile-hero py-5">
+    <div class="container" style="max-width: 780px;">
+      <div class="d-flex align-items-center gap-4 flex-wrap">
+        <div class="avatar-upload-wrap">
+          <img id="profileAvatarPreview" src="https://api.dicebear.com/7.x/avataaars/svg?seed=User" class="avatar-preview" alt="Avatar">
+          <label for="avatarFileInput" class="avatar-edit-btn" title="Change photo">
+            <i class="fa-solid fa-camera"></i>
+          </label>
+          <input type="file" id="avatarFileInput" accept="image/*" class="d-none">
+        </div>
+        <div>
+          <h2 class="fw-bold mb-1" id="profileDisplayName">Loading…</h2>
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <span class="role-badge-pill" id="profileRoleBadge"><i class="fa-solid fa-user-tag"></i> Role</span>
+            <span class="caption-text text-muted" id="profileFlatBadge"></span>
+          </div>
+          <p class="text-muted fs-7 mt-2 mb-0" id="profileEmail">—</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Content -->
+  <div class="container py-5" style="max-width: 780px;">
+    <div class="row g-4">
+
+      <!-- Edit Form -->
+      <div class="col-lg-7">
+        <div class="hub-card p-4">
+          <h5 class="fw-bold mb-4"><i class="fa-solid fa-pen-to-square text-warning me-2"></i>Edit Profile Information</h5>
+          <form id="profileForm">
+            <div class="mb-3">
+              <label class="form-label caption-text fw-semibold">Full Name</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+                <input type="text" class="form-control" id="pfName" placeholder="Your full name" required>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label caption-text fw-semibold">Email Address</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
+                <input type="email" class="form-control" id="pfEmail" placeholder="your@email.com" required>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label caption-text fw-semibold">Phone Number</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
+                <input type="tel" class="form-control" id="pfPhone" placeholder="10-digit mobile number">
+              </div>
+            </div>
+            <div class="mb-4">
+              <label class="form-label caption-text fw-semibold">Bio / Short Note</label>
+              <textarea class="form-control" id="pfBio" rows="2" placeholder="Tell your neighbors something about yourself…"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary-custom w-100 py-2 fw-semibold">
+              <i class="fa-solid fa-floppy-disk me-2"></i>Save Profile Changes
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Role-specific Info -->
+      <div class="col-lg-5">
+        <div class="hub-card p-4 mb-3">
+          <h6 class="fw-bold mb-3"><i class="fa-solid fa-id-card text-info me-2"></i>Account Details</h6>
+          <div id="roleInfoPanel">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <div class="hub-card p-4">
+          <h6 class="fw-bold mb-3"><i class="fa-solid fa-shield-halved text-success me-2"></i>Security</h6>
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="metric-icon bg-icon-success" style="width:36px;height:36px;font-size:14px;"><i class="fa-solid fa-check"></i></div>
+            <div>
+              <div class="fw-semibold fs-7">Account Status</div>
+              <span class="badge bg-success fs-8" id="profileStatus">Approved</span>
+            </div>
+          </div>
+          <div class="d-flex align-items-center gap-3">
+            <div class="metric-icon bg-icon-warning" style="width:36px;height:36px;font-size:14px;"><i class="fa-solid fa-calendar"></i></div>
+            <div>
+              <div class="fw-semibold fs-7">Member Since</div>
+              <span class="caption-text" id="profileJoined">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/firebase-auth.js"></script>
+  <script src="js/notifications.js"></script>
+  <script>
+    let currentUser = null;
+    let pendingAvatarBase64 = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await SystemDB.init();
+      currentUser = SystemDB.getCurrentUser();
+      if (!currentUser) { window.location.href = 'index.html'; return; }
+
+      // Populate display
+      document.getElementById('profileDisplayName').textContent = currentUser.name;
+      document.getElementById('profileEmail').textContent = currentUser.email || '—';
+      document.getElementById('profileAvatarPreview').src = currentUser.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(currentUser.name)}`;
+      document.getElementById('pfName').value = currentUser.name || '';
+      document.getElementById('pfEmail').value = currentUser.email || '';
+      document.getElementById('pfPhone').value = currentUser.phone || '';
+      document.getElementById('pfBio').value = currentUser.bio || '';
+      document.getElementById('profileStatus').textContent = currentUser.status || 'Approved';
+      document.getElementById('profileStatus').className = `badge fs-8 ${currentUser.status === 'Approved' ? 'bg-success' : 'bg-warning text-dark'}`;
+      document.getElementById('profileJoined').textContent = currentUser.registeredAt || '—';
+
+      // Role badge
+      const roleBadge = document.getElementById('profileRoleBadge');
+      const roleIcons = { Admin: 'fa-user-gear', Resident: 'fa-house-user', 'Security Guard': 'fa-shield-halved', 'Committee Member': 'fa-chart-pie' };
+      roleBadge.innerHTML = `<i class="fa-solid ${roleIcons[currentUser.role] || 'fa-user'} me-1"></i>${currentUser.role}`;
+
+      const flatBadge = document.getElementById('profileFlatBadge');
+      if (currentUser.flat) flatBadge.textContent = `· ${currentUser.role === 'Security Guard' ? 'Gate: ' : 'Flat: '}${currentUser.flat}`;
+
+      // Role info panel
+      renderRoleInfo();
+    });
+
+    function renderRoleInfo() {
+      const panel = document.getElementById('roleInfoPanel');
+      const u = currentUser;
+      let rows = [];
+      if (u.role === 'Resident') {
+        rows = [
+          { label: 'Flat No.', value: u.flat || '—' },
+          { label: 'Tower', value: u.tower || '—' },
+          { label: 'Block', value: u.block || '—' },
+          { label: 'Resident Type', value: u.residentType || '—' },
+          { label: 'Parking Slot', value: u.parkingSlot || '—' },
+          { label: 'Move-In Date', value: u.moveInDate || '—' },
+          { label: 'Monthly Dues', value: u.maintenanceDues || '—' }
+        ];
+      } else if (u.role === 'Security Guard') {
+        rows = [
+          { label: 'Employee ID', value: u.empId || '—' },
+          { label: 'Gate Assigned', value: u.gateAssigned || '—' },
+          { label: 'Shift', value: u.shift || '—' },
+          { label: 'Salary', value: u.salary || '—' }
+        ];
+      } else if (u.role === 'Committee Member') {
+        rows = [
+          { label: 'Flat No.', value: u.flat || '—' },
+          { label: 'Designation', value: u.designation || 'Committee Member' }
+        ];
+      } else if (u.role === 'Admin') {
+        rows = [
+          { label: 'Flat No.', value: u.flat || '—' },
+          { label: 'Access Level', value: 'Full Admin Access' }
+        ];
+      }
+      panel.innerHTML = rows.map(r => `
+        <div class="info-row">
+          <span class="info-label">${r.label}</span>
+          <span class="info-value">${r.value}</span>
+        </div>`).join('') || '<p class="text-muted caption-text">No additional info.</p>';
+    }
+
+    // Avatar file upload
+    document.getElementById('avatarFileInput').addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        pendingAvatarBase64 = ev.target.result;
+        document.getElementById('profileAvatarPreview').src = pendingAvatarBase64;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Save form
+    document.getElementById('profileForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const updates = {
+        name: document.getElementById('pfName').value.trim(),
+        email: document.getElementById('pfEmail').value.trim(),
+        phone: document.getElementById('pfPhone').value.trim(),
+        bio: document.getElementById('pfBio').value.trim()
+      };
+      if (pendingAvatarBase64) updates.avatar = pendingAvatarBase64;
+
+      const res = SystemDB.updateProfile(updates);
+      if (res.success) {
+        currentUser = SystemDB.getCurrentUser();
+        document.getElementById('profileDisplayName').textContent = currentUser.name;
+        document.getElementById('profileEmail').textContent = currentUser.email;
+        if (typeof showToast === 'function') showToast('Profile updated successfully!', 'success');
+        pendingAvatarBase64 = null;
+      } else {
+        if (typeof showToast === 'function') showToast(res.message || 'Failed to save.', 'error');
+      }
+    });
+
+    function logout() {
+      if (typeof firebaseSignOut === 'function') firebaseSignOut();
+      SystemDB.logout();
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>
