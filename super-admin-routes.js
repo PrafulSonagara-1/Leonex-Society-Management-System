@@ -256,7 +256,7 @@ router.get('/verify', (req, res) => {
     clerkUserId: req.clerkUserId,
     user: {
       id: req.clerkUserId,
-      name: 'Leonex System Owner',
+      name: config.superAdminUsername || 'King',
       role: 'SUPER_ADMIN',
       isSuperAdmin: true
     },

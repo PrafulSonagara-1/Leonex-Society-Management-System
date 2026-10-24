@@ -214,9 +214,14 @@ async function handleSecurityGateLogin(event) {
         authProvider: 'system_owner'
       }));
 
-      if (remember) {
-        localStorage.setItem('ssm_super_admin_token', data.token);
-        localStorage.setItem('ssm_super_admin_user', JSON.stringify(data.user));
+      // Always persist master session in localStorage and sessionStorage
+      localStorage.setItem('ssm_super_admin_token', data.token);
+      localStorage.setItem('ssm_super_admin_user', JSON.stringify(data.user));
+
+      if (window.location.search) {
+        try {
+          window.history.replaceState(null, '', window.location.pathname);
+        } catch (e) {}
       }
 
       showToast(`Master access granted! Welcome, ${data.user.name}`, 'success');
@@ -1184,6 +1189,8 @@ async function loadContactInquiries() {
     const total = allContactInquiries.length;
     setText('kpiTotalContacts', total);
     setText('badgeContactsCount', total);
+    setText('kpiOverviewContacts', total);
+    setText('overviewContactsCount', total);
 
     // Calculate today's inquiries
     const todayStr = new Date().toISOString().slice(0, 10);
@@ -1192,6 +1199,7 @@ async function loadContactInquiries() {
       return String(dt).startsWith(todayStr);
     }).length;
     setText('kpiTodayContacts', todayCount);
+    setText('kpiOverviewContactsSub', `${todayCount} Today`);
 
     // Calculate unique societies
     const societies = new Set(allContactInquiries.map(c => (c.society_name || c.societyName || '').trim()).filter(Boolean));
@@ -1208,63 +1216,103 @@ async function loadContactInquiries() {
 }
 
 function renderContactInquiries(contacts, highlightId = null) {
+  // 1. Render in dedicated Contact Inquiries Tab (#contactsTableBody)
   const tbody = document.getElementById('contactsTableBody');
   const countEl = document.getElementById('contactsFilteredCount');
   if (countEl) countEl.textContent = contacts ? contacts.length : 0;
-  if (!tbody) return;
+  if (tbody) {
+    if (!contacts || contacts.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-secondary">
+        <div class="mb-2"><i class="fa-solid fa-inbox fs-3 text-secondary opacity-50"></i></div>
+        <div class="fw-semibold">No contact inquiries found</div>
+        <div class="fs-9 text-muted mt-1">Inquiries submitted via the website contact form will appear here in real time.</div>
+      </td></tr>`;
+    } else {
+      tbody.innerHTML = contacts.map((c, idx) => {
+        const dt = formatDateTime(c.created_at || c.createdAt);
+        const name = escapeHtml(c.name || 'Anonymous');
+        const society = escapeHtml(c.society_name || c.societyName || 'General Inquiry');
+        const email = escapeHtml(c.email || '—');
+        const phone = escapeHtml(c.phone || '—');
+        const message = escapeHtml(c.message || '—');
+        const id = c.id;
+        const isHighlighted = highlightId && (String(c.id) === String(highlightId));
 
-  if (!contacts || contacts.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-secondary">
-      <div class="mb-2"><i class="fa-solid fa-inbox fs-3 text-secondary opacity-50"></i></div>
-      <div class="fw-semibold">No contact inquiries found</div>
-      <div class="fs-9 text-muted mt-1">Inquiries submitted via the website contact form will appear here in real time.</div>
-    </td></tr>`;
-    return;
+        return `
+          <tr class="${isHighlighted ? 'sa-new-entry-highlight' : ''}">
+            <td class="text-secondary fs-8">${idx + 1}</td>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <i class="fa-regular fa-clock text-warning fs-9"></i>
+                <span class="fw-semibold text-white fs-8">${dt}</span>
+                ${isHighlighted ? '<span class="badge bg-warning text-dark fs-9 ms-1 live-pulse-badge"><i class="fa-solid fa-bolt me-1"></i>JUST NOW</span>' : ''}
+              </div>
+            </td>
+            <td>
+              <div class="fw-bold text-white fs-8">${name}</div>
+            </td>
+            <td>
+              <span class="badge bg-dark border border-secondary text-light fs-8 px-2 py-1">
+                <i class="fa-solid fa-building me-1 text-primary"></i> ${society}
+              </span>
+            </td>
+            <td>
+              <div class="fs-8 text-white"><i class="fa-regular fa-envelope me-1 text-secondary"></i><a href="mailto:${email}" class="text-decoration-none text-white hover-gold">${email}</a></div>
+              ${phone !== '—' && phone ? `<div class="fs-9 text-secondary mt-1"><i class="fa-solid fa-phone me-1 text-secondary"></i><a href="tel:${phone}" class="text-decoration-none text-secondary hover-gold">${phone}</a></div>` : ''}
+            </td>
+            <td style="max-width: 320px;">
+              <div class="text-light fs-8" style="white-space: pre-wrap; word-break: break-word; line-height: 1.4;">${message}</div>
+            </td>
+            <td class="text-end">
+              <button class="btn btn-sm btn-outline-danger rounded-pill px-2 py-1 fs-9" onclick="deleteContactInquiry('${id}')" title="Delete Inquiry">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
   }
 
-  tbody.innerHTML = contacts.map((c, idx) => {
-    const dt = formatDateTime(c.created_at || c.createdAt);
-    const name = escapeHtml(c.name || 'Anonymous');
-    const society = escapeHtml(c.society_name || c.societyName || 'General Inquiry');
-    const email = escapeHtml(c.email || '—');
-    const phone = escapeHtml(c.phone || '—');
-    const message = escapeHtml(c.message || '—');
-    const id = c.id;
-    const isHighlighted = highlightId && (String(c.id) === String(highlightId));
+  // 2. Render in Overview Dashboard Tab (#overviewContactsTableBody)
+  const overviewTbody = document.getElementById('overviewContactsTableBody');
+  const overviewCount = document.getElementById('overviewContactsCount');
+  if (overviewCount) overviewCount.textContent = contacts ? contacts.length : 0;
+  if (overviewTbody) {
+    if (!contacts || contacts.length === 0) {
+      overviewTbody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-secondary">
+        <div class="fs-8">No contact inquiries received yet. Inquiries from the website will appear here instantly.</div>
+      </td></tr>`;
+    } else {
+      overviewTbody.innerHTML = contacts.slice(0, 8).map(c => {
+        const dt = formatDateTime(c.created_at || c.createdAt);
+        const name = escapeHtml(c.name || 'Anonymous');
+        const society = escapeHtml(c.society_name || c.societyName || 'General Inquiry');
+        const email = escapeHtml(c.email || '—');
+        const message = escapeHtml(c.message || '—');
+        const isHighlighted = highlightId && (String(c.id) === String(highlightId));
 
-    return `
-      <tr class="${isHighlighted ? 'sa-new-entry-highlight' : ''}">
-        <td class="text-secondary fs-8">${idx + 1}</td>
-        <td>
-          <div class="d-flex align-items-center gap-2">
-            <i class="fa-regular fa-clock text-warning fs-9"></i>
-            <span class="fw-semibold text-white fs-8">${dt}</span>
-            ${isHighlighted ? '<span class="badge bg-warning text-dark fs-9 ms-1 live-pulse-badge"><i class="fa-solid fa-bolt me-1"></i>JUST NOW</span>' : ''}
-          </div>
-        </td>
-        <td>
-          <div class="fw-bold text-white fs-8">${name}</div>
-        </td>
-        <td>
-          <span class="badge bg-dark border border-secondary text-light fs-8 px-2 py-1">
-            <i class="fa-solid fa-building me-1 text-primary"></i> ${society}
-          </span>
-        </td>
-        <td>
-          <div class="fs-8 text-white"><i class="fa-regular fa-envelope me-1 text-secondary"></i><a href="mailto:${email}" class="text-decoration-none text-white hover-gold">${email}</a></div>
-          ${phone !== '—' && phone ? `<div class="fs-9 text-secondary mt-1"><i class="fa-solid fa-phone me-1 text-secondary"></i><a href="tel:${phone}" class="text-decoration-none text-secondary hover-gold">${phone}</a></div>` : ''}
-        </td>
-        <td style="max-width: 320px;">
-          <div class="text-light fs-8" style="white-space: pre-wrap; word-break: break-word; line-height: 1.4;">${message}</div>
-        </td>
-        <td class="text-end">
-          <button class="btn btn-sm btn-outline-danger rounded-pill px-2 py-1 fs-9" onclick="deleteContactInquiry('${id}')" title="Delete Inquiry">
-            <i class="fa-solid fa-trash-can"></i>
-          </button>
-        </td>
-      </tr>
-    `;
-  }).join('');
+        return `
+          <tr class="${isHighlighted ? 'sa-new-entry-highlight' : ''}">
+            <td style="white-space: nowrap;">
+              <span class="fs-9 text-secondary"><i class="fa-regular fa-clock me-1 text-warning"></i>${dt}</span>
+              ${isHighlighted ? '<span class="badge bg-warning text-dark fs-9 ms-1 live-pulse-badge">NEW</span>' : ''}
+            </td>
+            <td>
+              <div class="fw-bold text-white fs-8">${name}</div>
+            </td>
+            <td>
+              <span class="badge bg-dark border border-secondary text-light fs-9">${society}</span>
+            </td>
+            <td>
+              <div class="fs-8 text-gold fw-semibold mb-1"><i class="fa-regular fa-envelope me-1"></i>${email}</div>
+              <div class="fs-9 text-secondary text-truncate" style="max-width: 280px;" title="${message}">${message}</div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+  }
 }
 
 function filterContactInquiries() {
@@ -1301,6 +1349,8 @@ async function deleteContactInquiry(id) {
       renderContactInquiries(allContactInquiries);
       setText('kpiTotalContacts', allContactInquiries.length);
       setText('badgeContactsCount', allContactInquiries.length);
+      setText('kpiOverviewContacts', allContactInquiries.length);
+      setText('overviewContactsCount', allContactInquiries.length);
       updateSidebarBadge('nav-sa-contacts', allContactInquiries.length, 'bg-warning text-dark');
     } else {
       showToast(data.message || 'Failed to delete contact inquiry.', 'danger');
@@ -1346,6 +1396,8 @@ async function loadSubscribers() {
     const total = allSubscribers.length;
     setText('kpiTotalSubscribers', total);
     setText('badgeSubscribersCount', total);
+    setText('kpiOverviewSubscribers', total);
+    setText('overviewSubscribersCount', total);
 
     const todayStr = new Date().toISOString().slice(0, 10);
     const todayCount = allSubscribers.filter(s => {
@@ -1353,6 +1405,7 @@ async function loadSubscribers() {
       return String(dt).startsWith(todayStr);
     }).length;
     setText('kpiTodaySubscribers', todayCount);
+    setText('kpiOverviewSubscribersSub', `${todayCount} Today`);
 
     updateSidebarBadge('nav-sa-subscribers', total, 'bg-success text-white');
     renderSubscribers(allSubscribers);
@@ -1365,59 +1418,97 @@ async function loadSubscribers() {
 }
 
 function renderSubscribers(subscribers, highlightId = null) {
+  // 1. Render in dedicated Subscribers Tab (#subscribersTableBody)
   const tbody = document.getElementById('subscribersTableBody');
   const countEl = document.getElementById('subscribersFilteredCount');
   if (countEl) countEl.textContent = subscribers ? subscribers.length : 0;
-  if (!tbody) return;
+  if (tbody) {
+    if (!subscribers || subscribers.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5 text-secondary">
+        <div class="mb-2"><i class="fa-solid fa-envelope-circle-check fs-3 text-secondary opacity-50"></i></div>
+        <div class="fw-semibold">No subscribers yet</div>
+        <div class="fs-9 text-muted mt-1">When users enter their email in the footer subscribe box, they will appear here in real time.</div>
+      </td></tr>`;
+    } else {
+      tbody.innerHTML = subscribers.map((s, idx) => {
+        const dt = formatDateTime(s.created_at || s.createdAt);
+        const email = escapeHtml(s.email || '—');
+        const status = escapeHtml(s.status || 'ACTIVE');
+        const id = s.id;
+        const isHighlighted = highlightId && (
+          String(s.id) === String(highlightId) ||
+          (s.email && String(highlightId).toLowerCase() === s.email.toLowerCase())
+        );
 
-  if (!subscribers || subscribers.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5 text-secondary">
-      <div class="mb-2"><i class="fa-solid fa-envelope-circle-check fs-3 text-secondary opacity-50"></i></div>
-      <div class="fw-semibold">No subscribers yet</div>
-      <div class="fs-9 text-muted mt-1">When users enter their email in the footer subscribe box, they will appear here in real time.</div>
-    </td></tr>`;
-    return;
+        return `
+          <tr class="${isHighlighted ? 'sa-new-entry-highlight' : ''}">
+            <td class="text-secondary fs-8">${idx + 1}</td>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <i class="fa-regular fa-clock text-success fs-9"></i>
+                <span class="fw-semibold text-white fs-8">${dt}</span>
+                ${isHighlighted ? '<span class="badge bg-success text-white fs-9 ms-1 live-pulse-badge"><i class="fa-solid fa-bolt me-1"></i>JUST NOW</span>' : ''}
+              </div>
+            </td>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <i class="fa-solid fa-envelope text-warning fs-9"></i>
+                <a href="mailto:${email}" class="text-decoration-none text-white fw-bold fs-8 hover-gold">${email}</a>
+              </div>
+            </td>
+            <td>
+              <span class="status-pill active">
+                <span class="live-dot" style="width:6px;height:6px;"></span> ${status}
+              </span>
+            </td>
+            <td class="text-end">
+              <button class="btn btn-sm btn-outline-danger rounded-pill px-2 py-1 fs-9" onclick="deleteSubscriber('${id}')" title="Delete Subscriber">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
   }
 
-  tbody.innerHTML = subscribers.map((s, idx) => {
-    const dt = formatDateTime(s.created_at || s.createdAt);
-    const email = escapeHtml(s.email || '—');
-    const status = escapeHtml(s.status || 'ACTIVE');
-    const id = s.id;
-    const isHighlighted = highlightId && (
-      String(s.id) === String(highlightId) ||
-      (s.email && String(highlightId).toLowerCase() === s.email.toLowerCase())
-    );
+  // 2. Render in Overview Dashboard Tab (#overviewSubscribersTableBody)
+  const overviewTbody = document.getElementById('overviewSubscribersTableBody');
+  const overviewCount = document.getElementById('overviewSubscribersCount');
+  if (overviewCount) overviewCount.textContent = subscribers ? subscribers.length : 0;
+  if (overviewTbody) {
+    if (!subscribers || subscribers.length === 0) {
+      overviewTbody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-secondary">
+        <div class="fs-8">No subscribers yet. Subscribed emails will appear here instantly in real time.</div>
+      </td></tr>`;
+    } else {
+      overviewTbody.innerHTML = subscribers.slice(0, 8).map(s => {
+        const dt = formatDateTime(s.created_at || s.createdAt);
+        const email = escapeHtml(s.email || '—');
+        const isHighlighted = highlightId && (
+          String(s.id) === String(highlightId) ||
+          (s.email && String(highlightId).toLowerCase() === s.email.toLowerCase())
+        );
 
-    return `
-      <tr class="${isHighlighted ? 'sa-new-entry-highlight' : ''}">
-        <td class="text-secondary fs-8">${idx + 1}</td>
-        <td>
-          <div class="d-flex align-items-center gap-2">
-            <i class="fa-regular fa-clock text-success fs-9"></i>
-            <span class="fw-semibold text-white fs-8">${dt}</span>
-            ${isHighlighted ? '<span class="badge bg-success text-white fs-9 ms-1 live-pulse-badge"><i class="fa-solid fa-bolt me-1"></i>JUST NOW</span>' : ''}
-          </div>
-        </td>
-        <td>
-          <div class="d-flex align-items-center gap-2">
-            <i class="fa-solid fa-envelope text-warning fs-9"></i>
-            <a href="mailto:${email}" class="text-decoration-none text-white fw-bold fs-8 hover-gold">${email}</a>
-          </div>
-        </td>
-        <td>
-          <span class="status-pill active">
-            <span class="live-dot" style="width:6px;height:6px;"></span> ${status}
-          </span>
-        </td>
-        <td class="text-end">
-          <button class="btn btn-sm btn-outline-danger rounded-pill px-2 py-1 fs-9" onclick="deleteSubscriber('${id}')" title="Delete Subscriber">
-            <i class="fa-solid fa-trash-can"></i>
-          </button>
-        </td>
-      </tr>
-    `;
-  }).join('');
+        return `
+          <tr class="${isHighlighted ? 'sa-new-entry-highlight' : ''}">
+            <td style="white-space: nowrap;">
+              <span class="fs-9 text-secondary"><i class="fa-regular fa-clock me-1 text-success"></i>${dt}</span>
+              ${isHighlighted ? '<span class="badge bg-success text-white fs-9 ms-1 live-pulse-badge">NEW</span>' : ''}
+            </td>
+            <td>
+              <div class="fs-8 text-white fw-bold"><i class="fa-solid fa-envelope text-warning me-1"></i>${email}</div>
+            </td>
+            <td>
+              <span class="status-pill active fs-9 py-0 px-2">
+                <span class="live-dot" style="width:5px;height:5px;"></span> ACTIVE
+              </span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+  }
 }
 
 function filterSubscribers() {
@@ -1589,6 +1680,8 @@ function handleIncomingRealtimeContact(contact, triggerNotification = true) {
   const total = allContactInquiries.length;
   setText('kpiTotalContacts', total);
   setText('badgeContactsCount', total);
+  setText('kpiOverviewContacts', total);
+  setText('overviewContactsCount', total);
 
   const todayStr = new Date().toISOString().slice(0, 10);
   const todayCount = allContactInquiries.filter(c => {
@@ -1596,6 +1689,7 @@ function handleIncomingRealtimeContact(contact, triggerNotification = true) {
     return String(dt).startsWith(todayStr);
   }).length;
   setText('kpiTodayContacts', todayCount);
+  setText('kpiOverviewContactsSub', `${todayCount} Today`);
 
   const societies = new Set(allContactInquiries.map(c => (c.society_name || c.societyName || '').trim()).filter(Boolean));
   setText('kpiUniqueSocieties', societies.size);
@@ -1638,6 +1732,8 @@ function handleIncomingRealtimeSubscriber(subscriber, triggerNotification = true
   const total = allSubscribers.length;
   setText('kpiTotalSubscribers', total);
   setText('badgeSubscribersCount', total);
+  setText('kpiOverviewSubscribers', total);
+  setText('overviewSubscribersCount', total);
 
   const todayStr = new Date().toISOString().slice(0, 10);
   const todayCount = allSubscribers.filter(s => {
@@ -1645,6 +1741,7 @@ function handleIncomingRealtimeSubscriber(subscriber, triggerNotification = true
     return String(dt).startsWith(todayStr);
   }).length;
   setText('kpiTodaySubscribers', todayCount);
+  setText('kpiOverviewSubscribersSub', `${todayCount} Today`);
 
   updateSidebarBadge('nav-sa-subscribers', total, 'bg-success text-white');
   renderSubscribers(allSubscribers, subscriber.id || cleanEmail);

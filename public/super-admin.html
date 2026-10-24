@@ -424,7 +424,7 @@
         </div>
 
         <!-- Login Form -->
-        <form id="saGateLoginForm" onsubmit="handleSecurityGateLogin(event); return false;">
+        <form id="saGateLoginForm" action="javascript:void(0);" method="POST" onsubmit="event.preventDefault(); handleSecurityGateLogin(event); return false;">
           <div class="mb-3">
             <label class="form-label text-secondary fs-8 fw-semibold">Super Admin Name or Username</label>
             <div class="input-group">
@@ -437,13 +437,12 @@
             <label class="form-label text-secondary fs-8 fw-semibold">Strong Password</label>
             <div class="input-group">
               <span class="input-group-text bg-dark border-secondary text-secondary"><i class="fa-solid fa-lock"></i></span>
-              <input type="password" class="form-control text-white bg-dark border-secondary" id="gatePassword" placeholder="Enter strong password" required autocomplete="current-password" onkeydown="if(event.key==='Enter'){event.preventDefault();handleSecurityGateLogin(event);}">
+              <input type="password" class="form-control text-white bg-dark border-secondary" id="gatePassword" placeholder="Enter strong password" required autocomplete="current-password" onkeydown="if(event.key==='Enter'){event.preventDefault();event.stopPropagation();handleSecurityGateLogin(event);return false;}">
               <button class="btn btn-outline-secondary" type="button" onclick="togglePassVisibility('gatePassword', this)" title="Show/Hide Password">
                 <i class="fa-solid fa-eye"></i>
               </button>
             </div>
           </div>
-
 
           <div class="d-flex align-items-center justify-content-between mb-4">
             <div class="form-check">
@@ -592,8 +591,9 @@
             </div>
 
             <!-- Master KPIs -->
+            <!-- Master KPIs -->
             <div class="row g-3 mb-4">
-              <div class="col-6 col-lg-3">
+              <div class="col-6 col-md-4 col-xl-2">
                 <div class="sa-kpi-card">
                   <div class="sa-kpi-icon" style="background: rgba(212, 149, 90, 0.15); color: #D4955A;">
                     <i class="fa-solid fa-building-circle-check"></i>
@@ -604,7 +604,7 @@
                 </div>
               </div>
 
-              <div class="col-6 col-lg-3">
+              <div class="col-6 col-md-4 col-xl-2">
                 <div class="sa-kpi-card">
                   <div class="sa-kpi-icon" style="background: rgba(99, 102, 241, 0.15); color: #818CF8;">
                     <i class="fa-solid fa-users"></i>
@@ -615,7 +615,35 @@
                 </div>
               </div>
 
-              <div class="col-6 col-lg-3">
+              <!-- KPI 3: Live Contact Inquiries -->
+              <div class="col-6 col-md-4 col-xl-2">
+                <div class="sa-kpi-card" role="button" onclick="triggerNavTab('tab-sa-contacts-btn')" title="Click to view all Contact Inquiries" style="cursor: pointer;">
+                  <div class="sa-kpi-icon" style="background: rgba(245, 158, 11, 0.15); color: #F59E0B;">
+                    <i class="fa-solid fa-envelope-open-text"></i>
+                  </div>
+                  <div class="sa-kpi-val" id="kpiOverviewContacts">0</div>
+                  <div class="sa-kpi-label">Contact Inquiries</div>
+                  <div class="text-warning fs-9 mt-2 d-flex align-items-center gap-1">
+                    <span class="live-dot" style="width:5px;height:5px;"></span> <span id="kpiOverviewContactsSub">0 Today</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- KPI 4: Live Newsletter Subscribers -->
+              <div class="col-6 col-md-4 col-xl-2">
+                <div class="sa-kpi-card" role="button" onclick="triggerNavTab('tab-sa-subscribers-btn')" title="Click to view all Subscribers" style="cursor: pointer;">
+                  <div class="sa-kpi-icon" style="background: rgba(16, 185, 129, 0.15); color: #10B981;">
+                    <i class="fa-solid fa-bell"></i>
+                  </div>
+                  <div class="sa-kpi-val" id="kpiOverviewSubscribers">0</div>
+                  <div class="sa-kpi-label">Newsletter Subscribers</div>
+                  <div class="text-success fs-9 mt-2 d-flex align-items-center gap-1">
+                    <span class="live-dot" style="width:5px;height:5px;"></span> <span id="kpiOverviewSubscribersSub">0 Today</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-6 col-md-4 col-xl-2">
                 <div class="sa-kpi-card">
                   <div class="sa-kpi-icon" style="background: rgba(16, 185, 129, 0.15); color: #34D399;">
                     <i class="fa-solid fa-server"></i>
@@ -626,7 +654,7 @@
                 </div>
               </div>
 
-              <div class="col-6 col-lg-3">
+              <div class="col-6 col-md-4 col-xl-2">
                 <div class="sa-kpi-card">
                   <div class="sa-kpi-icon" style="background: rgba(245, 158, 11, 0.15); color: #FBBF24;">
                     <i class="fa-solid fa-gauge-high"></i>
@@ -661,6 +689,74 @@
                     <span class="badge bg-dark text-secondary border border-secondary">Distribution</span>
                   </div>
                   <div style="height: 270px;"><canvas id="chartSocietiesType"></canvas></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- REAL-TIME CONTACT INQUIRIES & NEWSLETTER LEADS (LIVE ON DASHBOARD) -->
+            <div class="row g-4 mb-4">
+              <!-- Left: Real-time Inquiries -->
+              <div class="col-lg-7">
+                <div class="sa-card h-100">
+                  <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                      <h5 class="fw-bold text-white mb-0">
+                        <i class="fa-solid fa-envelope-open-text text-warning me-2"></i>Recent Contact Inquiries
+                      </h5>
+                      <span class="badge bg-warning-subtle text-warning border border-warning-subtle fs-9 rounded-pill" id="overviewContactsCount">0</span>
+                      <span class="badge bg-success text-white fs-9 rounded-pill live-pulse-badge">LIVE</span>
+                    </div>
+                    <button class="btn btn-sm btn-outline-warning rounded-pill px-3 py-1 fs-9" onclick="triggerNavTab('tab-sa-contacts-btn')">
+                      Open Inquiries Hub &rarr;
+                    </button>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="table sa-table mb-0">
+                      <thead>
+                        <tr>
+                          <th style="min-width: 140px;">Time</th>
+                          <th style="min-width: 120px;">Sender</th>
+                          <th style="min-width: 130px;">Society</th>
+                          <th style="min-width: 220px;">Email &amp; Message</th>
+                        </tr>
+                      </thead>
+                      <tbody id="overviewContactsTableBody">
+                        <!-- Real-time dynamic rows -->
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right: Real-time Newsletter Subscribers -->
+              <div class="col-lg-5">
+                <div class="sa-card h-100">
+                  <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                      <h5 class="fw-bold text-white mb-0">
+                        <i class="fa-solid fa-bell text-success me-2"></i>Live Subscribers
+                      </h5>
+                      <span class="badge bg-success-subtle text-success border border-success-subtle fs-9 rounded-pill" id="overviewSubscribersCount">0</span>
+                      <span class="badge bg-success text-white fs-9 rounded-pill live-pulse-badge">LIVE</span>
+                    </div>
+                    <button class="btn btn-sm btn-outline-success rounded-pill px-3 py-1 fs-9" onclick="triggerNavTab('tab-sa-subscribers-btn')">
+                      Open Subscribers &rarr;
+                    </button>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="table sa-table mb-0">
+                      <thead>
+                        <tr>
+                          <th style="min-width: 130px;">Time</th>
+                          <th style="min-width: 170px;">Subscriber Gmail / Email</th>
+                          <th style="min-width: 80px;">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody id="overviewSubscribersTableBody">
+                        <!-- Real-time dynamic rows -->
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>

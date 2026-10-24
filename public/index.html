@@ -1122,6 +1122,23 @@
       }
     }
 
+    // Explicitly bind to window and DOM elements for fail-safe form handling
+    window.handleContactSubmit = handleContactSubmit;
+    window.handleNewsletterSubmit = handleNewsletterSubmit;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const cForm = document.getElementById('contactForm');
+      if (cForm) {
+        cForm.onsubmit = handleContactSubmit;
+        cForm.addEventListener('submit', handleContactSubmit);
+      }
+      const nForm = document.getElementById('newsletterForm');
+      if (nForm) {
+        nForm.onsubmit = handleNewsletterSubmit;
+        nForm.addEventListener('submit', handleNewsletterSubmit);
+      }
+    });
+
     function toggleFaqItem(itemId) {
       const item = document.getElementById(itemId);
       if (!item) return;
