@@ -174,68 +174,192 @@
     <span id="benefits" style="position:relative; top:-80px; display:block; visibility:hidden;" aria-hidden="true"></span>
     <div class="container mx-auto px-6 max-w-6xl">
       <div class="cosmic-benefits-layout">
-        <!-- Left Sticky Header -->
-        <div class="cosmic-benefits-left">
-          <span class="cosmic-eyebrow--section">About Us</span>
-          <h2 class="cosmic-section-title">What Do We Bring to You?</h2>
-          <p class="cosmic-section-sub">
-            All the innovative solutions you need to manage and grow your residential community are here! We add value
-            with features that simplify your workflow, increase efficiency, and strengthen governance.
-          </p>
+        <!-- Left Column (Stretches full row height so sticky header remains pinned) -->
+        <div class="cosmic-benefits-left-col">
+          <!-- Left Sticky Header -->
+          <div class="cosmic-benefits-left">
+            <div class="cosmic-benefits-eyebrow">
+              <span class="cosmic-benefits-dot"></span>
+              <span>Benefits &amp; Capabilities</span>
+            </div>
+            <h2 class="cosmic-section-title">What Do We Bring to You?</h2>
+            <p class="cosmic-section-sub">
+              All the innovative solutions you need to manage and grow your residential community are here! We add value
+              with features that simplify your workflow, increase efficiency, and strengthen governance.
+            </p>
+
+            <div class="cosmic-benefits-highlights">
+              <div class="cosmic-benefits-highlight-item">
+                <span class="cosmic-benefits-highlight-icon"><i class="fa-solid fa-check"></i></span>
+                <span>Automated dues generation &amp; digital gate passes</span>
+              </div>
+              <div class="cosmic-benefits-highlight-item">
+                <span class="cosmic-benefits-highlight-icon"><i class="fa-solid fa-check"></i></span>
+                <span>100% audit-ready society accounting &amp; bank ledger</span>
+              </div>
+              <div class="cosmic-benefits-highlight-item">
+                <span class="cosmic-benefits-highlight-icon"><i class="fa-solid fa-check"></i></span>
+                <span>Dedicated role portals for residents, guards &amp; admins</span>
+              </div>
+            </div>
+
+            <div class="cosmic-benefits-action">
+              <a href="demo.html?role=Admin" class="cosmic-benefits-cta-btn">
+                <span>Explore Interactive Demo</span>
+                <i class="fa-solid fa-arrow-right"></i>
+              </a>
+            </div>
+          </div>
         </div>
 
-        <!-- Right Stacked Cards -->
-        <div class="cosmic-benefits-right">
+        <!-- Right Stacked Cards (Slides bottom-to-top on scroll, inspired by cosmic.shadcnuikit.com) -->
+        <div class="cosmic-benefits-right" id="cosmicBenefitsCards">
           <!-- Card 01 -->
-          <div class="cosmic-bcard">
-            <div class="cosmic-bcard__header">
-              <div class="cosmic-bcard__icon">
-                <i class="fa-solid fa-cubes"></i>
+          <div class="cosmic-bcard-wrap" id="about-card-wrap-1" style="--card-index: 0;">
+            <div class="cosmic-bcard" id="about-card-1">
+              <div class="cosmic-bcard__glow-line"></div>
+              <div class="cosmic-bcard__header">
+                <div class="cosmic-bcard__icon-wrap">
+                  <div class="cosmic-bcard__icon">
+                    <i class="fa-solid fa-cubes"></i>
+                  </div>
+                  <span class="cosmic-bcard__tag"><i class="fa-solid fa-bolt"></i> AUTOMATION</span>
+                </div>
+                <span class="cosmic-bcard__num">01 <span>/ 04</span></span>
               </div>
-              <span class="cosmic-bcard__num">01</span>
+
+              <h3 class="cosmic-bcard__title">Intelligent Automation</h3>
+              <p class="cosmic-bcard__text">
+                Eliminate repetitive administrative chores. Automate monthly maintenance billing, late fee penalties, digital payment receipts, and instant WhatsApp alerts in real time.
+              </p>
+
+              <!-- Feature Chips Inside Card -->
+              <div class="cosmic-bcard__chips">
+                <span class="cosmic-bcard__chip"><i class="fa-solid fa-file-invoice-dollar"></i> Auto Invoicing</span>
+                <span class="cosmic-bcard__chip"><i class="fa-solid fa-qrcode"></i> Digital Gate Pass</span>
+                <span class="cosmic-bcard__chip"><i class="fa-brands fa-whatsapp"></i> WhatsApp Dues</span>
+              </div>
+
+              <!-- Metric Highlight Bar Inside Card -->
+              <div class="cosmic-bcard__meta">
+                <div class="cosmic-bcard__metric">
+                  <span class="cosmic-bcard__metric-val"><i class="fa-solid fa-gauge-high"></i> 85% Less Admin Overhead</span>
+                  <span class="cosmic-bcard__metric-lbl">Fully autonomous monthly billing cycle for all flats</span>
+                </div>
+                <span class="cosmic-bcard__status-badge"><span class="cosmic-bcard__pulse"></span> Instant Sync</span>
+              </div>
             </div>
-            <h3 class="cosmic-bcard__title">Intelligent Automation</h3>
-            <p class="cosmic-bcard__text">Save time and increase your efficiency by automating recurring maintenance
-              bills, visitor validation, and receipt generation.</p>
           </div>
 
           <!-- Card 02 -->
-          <div class="cosmic-bcard">
-            <div class="cosmic-bcard__header">
-              <div class="cosmic-bcard__icon">
-                <i class="fa-solid fa-chart-line"></i>
+          <div class="cosmic-bcard-wrap" id="about-card-wrap-2" style="--card-index: 1;">
+            <div class="cosmic-bcard" id="about-card-2">
+              <div class="cosmic-bcard__glow-line"></div>
+              <div class="cosmic-bcard__header">
+                <div class="cosmic-bcard__icon-wrap">
+                  <div class="cosmic-bcard__icon">
+                    <i class="fa-solid fa-chart-line"></i>
+                  </div>
+                  <span class="cosmic-bcard__tag"><i class="fa-solid fa-chart-pie"></i> ANALYTICS</span>
+                </div>
+                <span class="cosmic-bcard__num">02 <span>/ 04</span></span>
               </div>
-              <span class="cosmic-bcard__num">02</span>
+
+              <h3 class="cosmic-bcard__title">Real Time Data Analytics</h3>
+              <p class="cosmic-bcard__text">
+                Empower your management committee with live financial health dashboards, collection trends, visitor traffic feeds, and audit-ready balance sheets with 1-click exports.
+              </p>
+
+              <!-- Feature Chips Inside Card -->
+              <div class="cosmic-bcard__chips">
+                <span class="cosmic-bcard__chip"><i class="fa-solid fa-indian-rupee-sign"></i> Dues Collection</span>
+                <span class="cosmic-bcard__chip"><i class="fa-solid fa-user-shield"></i> Live Guard Logs</span>
+                <span class="cosmic-bcard__chip"><i class="fa-solid fa-file-excel"></i> Audit Balance Sheet</span>
+              </div>
+
+              <!-- Metric Highlight Bar Inside Card -->
+              <div class="cosmic-bcard__meta">
+                <div class="cosmic-bcard__metric">
+                  <span class="cosmic-bcard__metric-val"><i class="fa-solid fa-arrow-trend-up"></i> 98.4% On-Time Collection</span>
+                  <span class="cosmic-bcard__metric-lbl">Faster dues recovery &amp; zero bookkeeping discrepancies</span>
+                </div>
+                <span class="cosmic-bcard__status-badge"><span class="cosmic-bcard__pulse"></span> Live Stream</span>
+              </div>
             </div>
-            <h3 class="cosmic-bcard__title">Real Time Data Analytics</h3>
-            <p class="cosmic-bcard__text">We help you make more informed and strategic committee decisions by instantly
-              tracking maintenance collections and visitor footfalls.</p>
           </div>
 
           <!-- Card 03 -->
-          <div class="cosmic-bcard">
-            <div class="cosmic-bcard__header">
-              <div class="cosmic-bcard__icon">
-                <i class="fa-solid fa-wallet"></i>
+          <div class="cosmic-bcard-wrap" id="about-card-wrap-3" style="--card-index: 2;">
+            <div class="cosmic-bcard" id="about-card-3">
+              <div class="cosmic-bcard__glow-line"></div>
+              <div class="cosmic-bcard__header">
+                <div class="cosmic-bcard__icon-wrap">
+                  <div class="cosmic-bcard__icon">
+                    <i class="fa-solid fa-wallet"></i>
+                  </div>
+                  <span class="cosmic-bcard__tag"><i class="fa-solid fa-users"></i> EXPERIENCE</span>
+                </div>
+                <span class="cosmic-bcard__num">03 <span>/ 04</span></span>
               </div>
-              <span class="cosmic-bcard__num">03</span>
+
+              <h3 class="cosmic-bcard__title">Personalized Experience</h3>
+              <p class="cosmic-bcard__text">
+                Dedicated interfaces for Residents, Society Secretaries, Security Guards, and Committee Members — featuring 1-tap amenity bookings, online dues, and ticket resolution.
+              </p>
+
+              <!-- Feature Chips Inside Card -->
+              <div class="cosmic-bcard__chips">
+                <span class="cosmic-bcard__chip"><i class="fa-solid fa-house-user"></i> Resident Portal</span>
+                <span class="cosmic-bcard__chip"><i class="fa-solid fa-user-tie"></i> Secretary Hub</span>
+                <span class="cosmic-bcard__chip"><i class="fa-solid fa-shield-halved"></i> Guard Tablet Kiosk</span>
+              </div>
+
+              <!-- Metric Highlight Bar Inside Card -->
+              <div class="cosmic-bcard__meta">
+                <div class="cosmic-bcard__metric">
+                  <span class="cosmic-bcard__metric-val"><i class="fa-solid fa-star text-warning"></i> 4.9/5 Resident Rating</span>
+                  <span class="cosmic-bcard__metric-lbl">Loved by residents &amp; committee across 50+ societies</span>
+                </div>
+                <span class="cosmic-bcard__status-badge"><span class="cosmic-bcard__pulse"></span> 4 Portals</span>
+              </div>
             </div>
-            <h3 class="cosmic-bcard__title">Personalized Experience</h3>
-            <p class="cosmic-bcard__text">Tailored role-based dashboards for residents, committee members, security
-              guards, and administrators for seamless interaction.</p>
           </div>
 
           <!-- Card 04 -->
-          <div class="cosmic-bcard">
-            <div class="cosmic-bcard__header">
-              <div class="cosmic-bcard__icon">
-                <i class="fa-solid fa-wand-magic-sparkles"></i>
+          <div class="cosmic-bcard-wrap" id="about-card-wrap-4" style="--card-index: 3;">
+            <div class="cosmic-bcard" id="about-card-4">
+              <div class="cosmic-bcard__glow-line"></div>
+              <div class="cosmic-bcard__header">
+                <div class="cosmic-bcard__icon-wrap">
+                  <div class="cosmic-bcard__icon">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                  </div>
+                  <span class="cosmic-bcard__tag"><i class="fa-solid fa-shield-halved"></i> SCALABILITY</span>
+                </div>
+                <span class="cosmic-bcard__num">04 <span>/ 04</span></span>
               </div>
-              <span class="cosmic-bcard__num">04</span>
+
+              <h3 class="cosmic-bcard__title">Scalable Structure</h3>
+              <p class="cosmic-bcard__text">
+                Future-proof residential administration. Our modern cloud architecture scales smoothly from a 20-flat boutique apartment to multi-tower 2,000+ unit townships with 99.99% uptime.
+              </p>
+
+              <!-- Feature Chips Inside Card -->
+              <div class="cosmic-bcard__chips">
+                <span class="cosmic-bcard__chip"><i class="fa-solid fa-server"></i> Multi-Society Cloud</span>
+                <span class="cosmic-bcard__chip"><i class="fa-solid fa-lock"></i> Bank-Grade AES-256</span>
+                <span class="cosmic-bcard__chip"><i class="fa-solid fa-cloud-arrow-up"></i> 99.99% Cloud Uptime</span>
+              </div>
+
+              <!-- Metric Highlight Bar Inside Card -->
+              <div class="cosmic-bcard__meta">
+                <div class="cosmic-bcard__metric">
+                  <span class="cosmic-bcard__metric-val"><i class="fa-solid fa-shield-heart"></i> Enterprise Reliability</span>
+                  <span class="cosmic-bcard__metric-lbl">Automated daily backups &amp; ISO-grade security</span>
+                </div>
+                <span class="cosmic-bcard__status-badge"><span class="cosmic-bcard__pulse"></span> 99.99% SLA</span>
+              </div>
             </div>
-            <h3 class="cosmic-bcard__title">Scalable Structure</h3>
-            <p class="cosmic-bcard__text">Move forward into the future with confidence, with a secure cloud
-              infrastructure that easily scales from 20 flats to 2,000+ units.</p>
           </div>
         </div>
       </div>

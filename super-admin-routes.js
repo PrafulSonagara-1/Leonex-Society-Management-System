@@ -32,7 +32,7 @@ function getSuperAdminCredentials() {
     console.error('Error reading Super Admin credentials:', e);
   }
   // Default strong password: "SuperAdmin@2026!"
-  const defaultHash = bcrypt.hashSync('SuperAdmin@2026!', 10);
+  const defaultHash = bcrypt.hashSync('Kingpsleonex', 10);
   const defaultCreds = {
     username: 'superadmin',
     name: 'Leonex System Owner',

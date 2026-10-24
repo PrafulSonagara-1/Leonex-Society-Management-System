@@ -106,6 +106,9 @@
     // Interactive mouse spotlight tracking for benefit & role cards
     initSpotlightCards();
 
+    // Stacked Cards Depth & Scroll Interaction (Inspired by cosmic.shadcnuikit.com)
+    initBenefitCardStacking();
+
     // Single Shared Sliding Hover Background on Feature Cards (Inspired by cosmic.shadcnuikit.com)
     initFeatureSharedHover();
 
@@ -255,6 +258,87 @@
       card.addEventListener('pointermove', updateCoords, { passive: true });
       card.addEventListener('pointerenter', updateCoords, { passive: true });
     });
+  }
+
+  function initBenefitCardStacking() {
+    const container = document.getElementById('cosmicBenefitsCards');
+    if (!container) return;
+
+    const wraps = Array.from(container.querySelectorAll('.cosmic-bcard-wrap'));
+    if (!wraps.length) return;
+
+    const isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let ticking = false;
+
+    function updateStackProgress() {
+      ticking = false;
+      if (window.innerWidth < 992 || isReducedMotion) {
+        wraps.forEach(w => {
+          const card = w.querySelector('.cosmic-bcard');
+          if (card) {
+            card.style.transform = '';
+            card.style.filter = '';
+          }
+        });
+        return;
+      }
+
+      // Stacking depth calculation: as each subsequent card enters and slides up,
+      // the card beneath it scales down slightly (e.g. 1.0 -> 0.96 -> 0.92) and dims softly
+      // Note: transforms are applied strictly to inner .cosmic-bcard so sticky positioning on .cosmic-bcard-wrap is never disturbed!
+      for (let i = 0; i < wraps.length - 1; i++) {
+        const currentWrap = wraps[i];
+        const nextWrap = wraps[i + 1];
+        const card = currentWrap.querySelector('.cosmic-bcard');
+        if (!card) continue;
+
+        const nextRect = nextWrap.getBoundingClientRect();
+        const stickyTop = 130 + (i * 22);
+        const distance = nextRect.top - stickyTop;
+        const totalTravel = Math.max(160, window.innerHeight * 0.42);
+
+        if (distance < totalTravel && distance > 0) {
+          // Progress from 0 (just entering range) to 1 (fully arrived at sticky stack)
+          const p = 1 - (distance / totalTravel);
+          const scale = 1 - (p * 0.038);
+          const brightness = 1 - (p * 0.14);
+          card.style.transform = `scale(${scale.toFixed(4)})`;
+          card.style.filter = `brightness(${brightness.toFixed(3)})`;
+        } else if (distance <= 0) {
+          // Fully covered / stacked by next card(s)
+          const remainingCards = (wraps.length - 1 - i);
+          const scale = Math.max(0.88, 1 - (0.038 * remainingCards));
+          const brightness = Math.max(0.68, 1 - (0.12 * remainingCards));
+          card.style.transform = `scale(${scale.toFixed(4)})`;
+          card.style.filter = `brightness(${brightness.toFixed(3)})`;
+        } else {
+          // Normal state before next card arrives
+          card.style.transform = 'scale(1)';
+          card.style.filter = 'brightness(1)';
+        }
+      }
+
+      // The topmost / last card always remains 100% full scale and bright
+      const lastWrap = wraps[wraps.length - 1];
+      if (lastWrap) {
+        const lastCard = lastWrap.querySelector('.cosmic-bcard');
+        if (lastCard) {
+          lastCard.style.transform = 'scale(1)';
+          lastCard.style.filter = 'brightness(1)';
+        }
+      }
+    }
+
+    function onScroll() {
+      if (!ticking) {
+        requestAnimationFrame(updateStackProgress);
+        ticking = true;
+      }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    updateStackProgress();
   }
 
   function resize() {
