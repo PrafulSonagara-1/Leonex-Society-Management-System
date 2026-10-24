@@ -62,6 +62,9 @@ module.exports = {
   clerkSecretKey: process.env.CLERK_SECRET_KEY || '',
   clerkPublishableKey: process.env.CLERK_PUBLISHABLE_KEY || '',
   superAdminClerkUserId: (process.env.SUPER_ADMIN_CLERK_USER_ID || '').trim(),
+  // Super Admin Master Credentials (Configurable manually right here in code or via .env)
+  superAdminUsername: (process.env.SUPER_ADMIN_USERNAME || 'King').trim(),
+  superAdminPassword: process.env.SUPER_ADMIN_PASSWORD || 'K!ngpr@ful.',
   superAdminPasswordHash: process.env.SUPER_ADMIN_PASSWORD_HASH || '',
   allowedOrigins: getAllowedOrigins()
 };

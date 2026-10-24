@@ -140,9 +140,58 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Smart Society Management System API active' });
 });
 
-// Dedicated private route for Super Admin Portal
+// Public Contact Form Submission Endpoint
+app.post('/api/contact', async (req, res) => {
+  try {
+    const { name, societyName, society, email, phone, message } = req.body;
+    if (!name || !email || !message) {
+      return res.status(400).json({ success: false, message: 'Name, email, and message are required.' });
+    }
+    const saved = await db.saveContactMessage({
+      name,
+      society_name: societyName || society || '',
+      email,
+      phone: phone || '',
+      message
+    });
+    return res.status(201).json({
+      success: true,
+      message: 'Thank you! Your message has been received. Our team will contact you shortly.',
+      contact: saved
+    });
+  } catch (err) {
+    console.error('Contact submission error:', err);
+    return res.status(500).json({ success: false, message: 'Failed to process contact message.' });
+  }
+});
+
+// Public Newsletter Subscription Endpoint
+app.post('/api/subscribe', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email || !email.includes('@')) {
+      return res.status(400).json({ success: false, message: 'A valid email address is required.' });
+    }
+    const saved = await db.saveSubscriber(email);
+    return res.status(201).json({
+      success: true,
+      message: 'Successfully subscribed to society updates and announcements!',
+      subscriber: saved
+    });
+  } catch (err) {
+    console.error('Newsletter subscribe error:', err);
+    return res.status(500).json({ success: false, message: 'Failed to process subscription.' });
+  }
+});
+
+// Dedicated private route for Super Admin Portal (manual URL access only)
 app.get(['/super-admin', '/super-admin/'], (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'super-admin.html'));
+});
+
+// Block direct access to super-admin.html (Must manually type /super-admin instead)
+app.all(['/super-admin.html', '/public/super-admin.html'], (req, res) => {
+  res.status(404).send('Not Found');
 });
 
 // Unauthorized landing

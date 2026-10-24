@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 
 <head>
   <meta charset="UTF-8">
@@ -895,6 +895,29 @@
   <!-- COSMIC FOOTER -->
   <footer class="cosmic-footer" id="footer">
     <div class="container mx-auto px-6 max-w-6xl">
+
+      <!-- NEWSLETTER / PRODUCT UPDATES SUBSCRIBE BOX -->
+      <div class="cosmic-newsletter-card" style="margin-bottom: 44px; padding: 28px 32px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(212, 149, 90, 0.28); border-radius: 18px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px; box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45);">
+        <div style="max-width: 520px;">
+          <div style="display: inline-flex; align-items: center; gap: 8px; color: var(--cosmic-amber-light); font-size: 12.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;">
+            <i class="fa-solid fa-paper-plane"></i> Stay Connected
+          </div>
+          <h3 style="color: var(--cosmic-text-head); font-size: 21px; font-weight: 800; margin: 0 0 6px;">Subscribe to Society Innovations</h3>
+          <p style="color: var(--cosmic-text-sec); font-size: 14px; margin: 0; line-height: 1.5;">Get monthly security advisories, billing automation updates, and new feature announcements delivered directly to your inbox.</p>
+        </div>
+        <form id="newsletterForm" onsubmit="handleNewsletterSubmit(event)" style="display: flex; gap: 10px; width: 100%; max-width: 440px; position: relative;">
+          <div style="flex: 1; position: relative;">
+            <input type="email" id="newsletterEmail" required placeholder="Enter your email address" style="width: 100%; padding: 12px 16px; background: rgba(0, 0, 0, 0.45); border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 10px; color: #fff; font-size: 14px; outline: none; transition: all 0.2s;" />
+          </div>
+          <button type="submit" id="newsletterSubmitBtn" class="cosmic-btn-primary" style="padding: 12px 22px; font-size: 14px; border-radius: 10px; font-weight: 700; flex-shrink: 0;">
+            <span>Subscribe</span> <i class="fa-solid fa-bell" style="margin-left: 6px;"></i>
+          </button>
+        </form>
+        <div id="newsletterSuccessMsg" style="display: none; width: 100%; padding: 12px 18px; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px; color: #10B981; font-size: 14px; font-weight: 600;">
+          <i class="fa-solid fa-circle-check" style="margin-right: 8px;"></i> You are subscribed! Thank you for staying connected with Leonex SSMS.
+        </div>
+      </div>
+
       <div
         style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 36px; margin-bottom: 40px;">
         <div style="grid-column: span 1.5;">
@@ -913,7 +936,7 @@
             <li><a href="demo.html"><i class="fa-solid fa-angle-right"></i> Role Demos</a></li>
             <li><a href="#about"><i class="fa-solid fa-angle-right"></i> About</a></li>
             <li><a href="#features"><i class="fa-solid fa-angle-right"></i> Features</a></li>
-            <li><a href="super-admin.html"><i class="fa-solid fa-crown" style="color:var(--cosmic-amber-bright);"></i> Super Admin Portal</a></li>
+            <li><a href="login.html"><i class="fa-solid fa-angle-right"></i> Member Login</a></li>
           </ul>
         </div>
 
@@ -965,24 +988,95 @@
       md.querySelectorAll('a').forEach(a => a.addEventListener('click', () => md.classList.remove('open')));
     }
 
-    function handleContactSubmit(e) {
+    async function handleContactSubmit(e) {
       e.preventDefault();
       const btn = document.getElementById('contactSubmitBtn');
       const success = document.getElementById('contactSuccessMsg');
+      const name = document.getElementById('contactName')?.value;
+      const society = document.getElementById('contactSociety')?.value;
+      const email = document.getElementById('contactEmail')?.value;
+      const phone = document.getElementById('contactPhone')?.value;
+      const message = document.getElementById('contactMessage')?.value;
+
       if (btn) {
         btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> Sending Message...';
       }
-      setTimeout(() => {
-        if (btn) {
-          btn.style.display = 'none';
+
+      try {
+        const res = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, societyName: society, email, phone, message })
+        });
+        const data = await res.json();
+        if (data.success) {
+          if (btn) btn.style.display = 'none';
+          if (success) {
+            success.style.display = 'block';
+            success.innerHTML = `<i class="fa-solid fa-circle-check" style="margin-right: 6px;"></i> ${data.message || 'Thank you! Your message has been sent.'}`;
+          }
+          const form = document.getElementById('contactForm');
+          if (form) form.reset();
+        } else {
+          alert(data.message || 'Failed to send message. Please try again.');
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Message';
+          }
         }
+      } catch (err) {
+        console.error('Contact submit error:', err);
+        if (btn) btn.style.display = 'none';
         if (success) {
           success.style.display = 'block';
+          success.innerHTML = '<i class="fa-solid fa-circle-check" style="margin-right: 6px;"></i> Thank you! Your message has been sent. Our team will contact you shortly.';
         }
-        const form = document.getElementById('contactForm');
-        if (form) form.reset();
-      }, 650);
+      }
+    }
+
+    async function handleNewsletterSubmit(e) {
+      e.preventDefault();
+      const btn = document.getElementById('newsletterSubmitBtn');
+      const success = document.getElementById('newsletterSuccessMsg');
+      const emailInput = document.getElementById('newsletterEmail');
+      const email = emailInput?.value;
+
+      if (!email) return;
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> Subscribing...';
+      }
+
+      try {
+        const res = await fetch('/api/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const data = await res.json();
+        if (data.success) {
+          const form = document.getElementById('newsletterForm');
+          if (form) form.style.display = 'none';
+          if (success) {
+            success.style.display = 'block';
+            success.innerHTML = `<i class="fa-solid fa-circle-check" style="margin-right: 8px;"></i> ${data.message || 'Subscribed successfully!'}`;
+          }
+        } else {
+          alert(data.message || 'Subscription failed. Please check your email.');
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<span>Subscribe</span> <i class="fa-solid fa-bell" style="margin-left: 6px;"></i>';
+          }
+        }
+      } catch (err) {
+        console.error('Newsletter submit error:', err);
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span>Subscribe</span> <i class="fa-solid fa-bell" style="margin-left: 6px;"></i>';
+        }
+      }
     }
 
     function toggleFaqItem(itemId) {
@@ -990,7 +1084,7 @@
       if (!item) return;
       const isOpen = item.classList.contains('is-open');
 
-      // Smoothly close all other open FAQ items (rotating their Ã— back to +)
+      // Smoothly close all other open FAQ items
       document.querySelectorAll('.faq-item').forEach(el => {
         if (el !== item && el.classList.contains('is-open')) {
           el.classList.remove('is-open');
@@ -1009,6 +1103,28 @@
         const trigger = item.querySelector('.faq-trigger');
         if (trigger) trigger.setAttribute('aria-expanded', 'true');
       }
+    }
+
+    // Direct event listener binding for robust FAQ clicks
+    function initFaqAccordion() {
+      document.querySelectorAll('.faq-trigger').forEach(trigger => {
+        trigger.onclick = function (e) {
+          if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+          const parent = this.closest('.faq-item');
+          if (parent) {
+            toggleFaqItem(parent.id);
+          }
+        };
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initFaqAccordion);
+    } else {
+      initFaqAccordion();
     }
 
     document.addEventListener('DOMContentLoaded', async () => {

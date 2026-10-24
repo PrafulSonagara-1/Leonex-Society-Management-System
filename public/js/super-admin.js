@@ -124,6 +124,8 @@ function revealDashboard(data) {
   // Load initial data
   refreshDashboardData();
   loadSocietiesDropdowns();
+  loadContactInquiries();
+  loadSubscribers();
 }
 
 /**
@@ -138,6 +140,11 @@ async function showSecurityGate() {
   if (denied) denied.style.display = 'none';
   if (gate) gate.style.display = 'flex';
 
+  const passInput = document.getElementById('gatePassword');
+  if (passInput && !passInput.value && document.activeElement !== passInput) {
+    passInput.focus();
+  }
+
   // Fetch configured username/name for pre-fill
   try {
     const res = await fetch('/api/super-admin/auth/status');
@@ -151,19 +158,16 @@ async function showSecurityGate() {
       }
     }
   } catch (e) {}
-
-  const passInput = document.getElementById('gatePassword');
-  if (passInput) {
-    passInput.value = '';
-    setTimeout(() => passInput.focus(), 150);
-  }
 }
 
 /**
  * Handle Super Admin Login from Master Security Gate
  */
 async function handleSecurityGateLogin(event) {
-  event.preventDefault();
+  if (event) {
+    if (typeof event.preventDefault === 'function') event.preventDefault();
+    if (typeof event.stopPropagation === 'function') event.stopPropagation();
+  }
   const username = document.getElementById('gateUsername')?.value.trim();
   const password = document.getElementById('gatePassword')?.value;
   const remember = document.getElementById('gateRememberMe')?.checked;
@@ -235,6 +239,7 @@ async function handleSecurityGateLogin(event) {
     }
   }
 }
+window.handleSecurityGateLogin = handleSecurityGateLogin;
 
 
 /**
@@ -1157,15 +1162,349 @@ function toggleMaintenanceMode(isLocked) {
   showToast(isLocked ? 'Maintenance Lock Activated. Society members will see a maintenance notice.' : 'Maintenance Lock Deactivated. Platform operational.', isLocked ? 'warning' : 'success');
 }
 
+// ══════════════════════════════════════════════════════════════
+// CONTACT INQUIRIES & MESSAGES CONTROLLER
+// ══════════════════════════════════════════════════════════════
+let allContactInquiries = [];
+
+async function loadContactInquiries() {
+  const tbody = document.getElementById('contactsTableBody');
+  if (tbody) {
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-secondary"><i class="fa-solid fa-spinner fa-spin me-2"></i>Loading inquiries...</td></tr>`;
+  }
+
+  try {
+    const res = await fetch('/api/super-admin/contacts', { headers: getAuthHeaders() });
+    if (!res.ok) throw new Error('Failed to fetch contact inquiries');
+    const data = await res.json();
+    allContactInquiries = data.contacts || [];
+
+    // Update KPI metrics
+    const total = allContactInquiries.length;
+    setText('kpiTotalContacts', total);
+    setText('badgeContactsCount', total);
+
+    // Calculate today's inquiries
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const todayCount = allContactInquiries.filter(c => {
+      const dt = c.created_at || c.createdAt || '';
+      return dt.startsWith(todayStr);
+    }).length;
+    setText('kpiTodayContacts', todayCount);
+
+    // Calculate unique societies
+    const societies = new Set(allContactInquiries.map(c => (c.society_name || c.societyName || '').trim()).filter(Boolean));
+    setText('kpiUniqueSocieties', societies.size);
+
+    renderContactInquiries(allContactInquiries);
+  } catch (err) {
+    console.error('Error loading contacts:', err);
+    if (tbody) {
+      tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i>Failed to load inquiries: ${escapeHtml(err.message)}</td></tr>`;
+    }
+  }
+}
+
+function renderContactInquiries(contacts) {
+  const tbody = document.getElementById('contactsTableBody');
+  const countEl = document.getElementById('contactsFilteredCount');
+  if (countEl) countEl.textContent = contacts ? contacts.length : 0;
+  if (!tbody) return;
+
+  if (!contacts || contacts.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-secondary">
+      <div class="mb-2"><i class="fa-solid fa-inbox fs-3 text-secondary opacity-50"></i></div>
+      <div class="fw-semibold">No contact inquiries found</div>
+      <div class="fs-9 text-muted mt-1">Inquiries submitted via the website contact form will appear here with full timestamps.</div>
+    </td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = contacts.map((c, idx) => {
+    const dt = formatDateTime(c.created_at || c.createdAt);
+    const name = escapeHtml(c.name || 'Anonymous');
+    const society = escapeHtml(c.society_name || c.societyName || 'Not specified');
+    const email = escapeHtml(c.email || '—');
+    const phone = escapeHtml(c.phone || '—');
+    const message = escapeHtml(c.message || '—');
+    const id = c.id;
+
+    return `
+      <tr>
+        <td class="text-secondary fs-8">${idx + 1}</td>
+        <td>
+          <div class="d-flex align-items-center gap-2">
+            <i class="fa-regular fa-clock text-warning fs-9"></i>
+            <span class="fw-semibold text-white fs-8">${dt}</span>
+          </div>
+        </td>
+        <td>
+          <div class="fw-bold text-white fs-8">${name}</div>
+        </td>
+        <td>
+          <span class="badge bg-dark border border-secondary text-light fs-8 px-2 py-1">
+            <i class="fa-solid fa-building me-1 text-primary"></i> ${society}
+          </span>
+        </td>
+        <td>
+          <div class="fs-8 text-white"><i class="fa-regular fa-envelope me-1 text-secondary"></i><a href="mailto:${email}" class="text-decoration-none text-white hover-gold">${email}</a></div>
+          ${phone !== '—' ? `<div class="fs-9 text-secondary mt-1"><i class="fa-solid fa-phone me-1 text-secondary"></i><a href="tel:${phone}" class="text-decoration-none text-secondary hover-gold">${phone}</a></div>` : ''}
+        </td>
+        <td style="max-width: 320px;">
+          <div class="text-light fs-8" style="white-space: pre-wrap; word-break: break-word; line-height: 1.4;">${message}</div>
+        </td>
+        <td class="text-end">
+          <button class="btn btn-sm btn-outline-danger rounded-pill px-2 py-1 fs-9" onclick="deleteContactInquiry('${id}')" title="Delete Inquiry">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function filterContactInquiries() {
+  const query = (document.getElementById('searchContactInput')?.value || '').toLowerCase().trim();
+  if (!query) {
+    renderContactInquiries(allContactInquiries);
+    return;
+  }
+
+  const filtered = allContactInquiries.filter(c => {
+    const name = (c.name || '').toLowerCase();
+    const society = (c.society_name || c.societyName || '').toLowerCase();
+    const email = (c.email || '').toLowerCase();
+    const phone = (c.phone || '').toLowerCase();
+    const message = (c.message || '').toLowerCase();
+    return name.includes(query) || society.includes(query) || email.includes(query) || phone.includes(query) || message.includes(query);
+  });
+
+  renderContactInquiries(filtered);
+}
+
+async function deleteContactInquiry(id) {
+  if (!confirm('Are you sure you want to delete this contact inquiry?')) return;
+
+  try {
+    const res = await fetch(`/api/super-admin/contacts/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast('Contact inquiry deleted.', 'success');
+      allContactInquiries = allContactInquiries.filter(c => String(c.id) !== String(id));
+      renderContactInquiries(allContactInquiries);
+      setText('kpiTotalContacts', allContactInquiries.length);
+      setText('badgeContactsCount', allContactInquiries.length);
+    } else {
+      showToast(data.message || 'Failed to delete contact inquiry.', 'danger');
+    }
+  } catch (err) {
+    console.error('Delete contact error:', err);
+    showToast('Failed to delete inquiry.', 'danger');
+  }
+}
+
+function exportContactsJSON() {
+  if (!allContactInquiries || allContactInquiries.length === 0) {
+    showToast('No inquiries available to export.', 'warning');
+    return;
+  }
+  const blob = new Blob([JSON.stringify(allContactInquiries, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Leonex_Contact_Inquiries_${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Contact inquiries exported successfully.', 'success');
+}
+
+// ══════════════════════════════════════════════════════════════
+// NEWSLETTER SUBSCRIBERS CONTROLLER
+// ══════════════════════════════════════════════════════════════
+let allSubscribers = [];
+
+async function loadSubscribers() {
+  const tbody = document.getElementById('subscribersTableBody');
+  if (tbody) {
+    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-secondary"><i class="fa-solid fa-spinner fa-spin me-2"></i>Loading subscribers...</td></tr>`;
+  }
+
+  try {
+    const res = await fetch('/api/super-admin/subscribers', { headers: getAuthHeaders() });
+    if (!res.ok) throw new Error('Failed to fetch subscribers');
+    const data = await res.json();
+    allSubscribers = data.subscribers || [];
+
+    const total = allSubscribers.length;
+    setText('kpiTotalSubscribers', total);
+    setText('badgeSubscribersCount', total);
+
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const todayCount = allSubscribers.filter(s => {
+      const dt = s.created_at || s.createdAt || '';
+      return dt.startsWith(todayStr);
+    }).length;
+    setText('kpiTodaySubscribers', todayCount);
+
+    renderSubscribers(allSubscribers);
+  } catch (err) {
+    console.error('Error loading subscribers:', err);
+    if (tbody) {
+      tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i>Failed to load subscribers: ${escapeHtml(err.message)}</td></tr>`;
+    }
+  }
+}
+
+function renderSubscribers(subscribers) {
+  const tbody = document.getElementById('subscribersTableBody');
+  const countEl = document.getElementById('subscribersFilteredCount');
+  if (countEl) countEl.textContent = subscribers ? subscribers.length : 0;
+  if (!tbody) return;
+
+  if (!subscribers || subscribers.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5 text-secondary">
+      <div class="mb-2"><i class="fa-solid fa-envelope-circle-check fs-3 text-secondary opacity-50"></i></div>
+      <div class="fw-semibold">No subscribers yet</div>
+      <div class="fs-9 text-muted mt-1">When users enter their email in the footer subscribe box, they will appear here.</div>
+    </td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = subscribers.map((s, idx) => {
+    const dt = formatDateTime(s.created_at || s.createdAt);
+    const email = escapeHtml(s.email || '—');
+    const status = escapeHtml(s.status || 'ACTIVE');
+    const id = s.id;
+
+    return `
+      <tr>
+        <td class="text-secondary fs-8">${idx + 1}</td>
+        <td>
+          <div class="d-flex align-items-center gap-2">
+            <i class="fa-regular fa-clock text-success fs-9"></i>
+            <span class="fw-semibold text-white fs-8">${dt}</span>
+          </div>
+        </td>
+        <td>
+          <div class="d-flex align-items-center gap-2">
+            <i class="fa-solid fa-envelope text-warning fs-9"></i>
+            <a href="mailto:${email}" class="text-decoration-none text-white fw-bold fs-8 hover-gold">${email}</a>
+          </div>
+        </td>
+        <td>
+          <span class="status-pill active">
+            <span class="live-dot" style="width:6px;height:6px;"></span> ${status}
+          </span>
+        </td>
+        <td class="text-end">
+          <button class="btn btn-sm btn-outline-danger rounded-pill px-2 py-1 fs-9" onclick="deleteSubscriber('${id}')" title="Delete Subscriber">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function filterSubscribers() {
+  const query = (document.getElementById('searchSubscriberInput')?.value || '').toLowerCase().trim();
+  if (!query) {
+    renderSubscribers(allSubscribers);
+    return;
+  }
+
+  const filtered = allSubscribers.filter(s => {
+    const email = (s.email || '').toLowerCase();
+    return email.includes(query);
+  });
+
+  renderSubscribers(filtered);
+}
+
+async function deleteSubscriber(id) {
+  if (!confirm('Are you sure you want to remove this subscriber?')) return;
+
+  try {
+    const res = await fetch(`/api/super-admin/subscribers/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast('Subscriber removed.', 'success');
+      allSubscribers = allSubscribers.filter(s => String(s.id) !== String(id));
+      renderSubscribers(allSubscribers);
+      setText('kpiTotalSubscribers', allSubscribers.length);
+      setText('badgeSubscribersCount', allSubscribers.length);
+    } else {
+      showToast(data.message || 'Failed to delete subscriber.', 'danger');
+    }
+  } catch (err) {
+    console.error('Delete subscriber error:', err);
+    showToast('Failed to delete subscriber.', 'danger');
+  }
+}
+
+function exportSubscribersCSV() {
+  if (!allSubscribers || allSubscribers.length === 0) {
+    showToast('No subscribers available to export.', 'warning');
+    return;
+  }
+  let csv = 'ID,Email,Subscribed_At,Status\n';
+  allSubscribers.forEach(s => {
+    csv += `"${s.id}","${s.email || ''}","${s.created_at || s.createdAt || ''}","${s.status || 'ACTIVE'}"\n`;
+  });
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Leonex_Subscribers_${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Subscribers exported as CSV successfully.', 'success');
+}
+
+function formatDateTime(val) {
+  if (!val) return '—';
+  try {
+    const d = new Date(val);
+    if (isNaN(d.getTime())) return String(val);
+    return d.toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  } catch (e) {
+    return String(val);
+  }
+}
+
+function refreshSuperAdminData() {
+  refreshDashboardData();
+  loadContactInquiries();
+  loadSubscribers();
+  showToast('Metrics, contacts & subscribers refreshed.', 'info');
+}
+
 // Hook up tab change listeners to auto-load tab content
 document.addEventListener('DOMContentLoaded', () => {
   const socTabBtn = document.getElementById('tab-sa-societies-btn');
   const usrTabBtn = document.getElementById('tab-sa-users-btn');
   const logTabBtn = document.getElementById('tab-sa-logs-btn');
+  const contactsTabBtn = document.getElementById('tab-sa-contacts-btn');
+  const subsTabBtn = document.getElementById('tab-sa-subscribers-btn');
 
   if (socTabBtn) socTabBtn.addEventListener('shown.bs.tab', loadSocietiesView);
   if (usrTabBtn) usrTabBtn.addEventListener('shown.bs.tab', loadUsersView);
   if (logTabBtn) logTabBtn.addEventListener('shown.bs.tab', loadLoginActivityView);
+  if (contactsTabBtn) contactsTabBtn.addEventListener('shown.bs.tab', loadContactInquiries);
+  if (subsTabBtn) subsTabBtn.addEventListener('shown.bs.tab', loadSubscribers);
 });
 
 // Explicitly bind to window for HTML onclick and sidebar interaction
@@ -1181,8 +1520,20 @@ window.loadSocietiesView = loadSocietiesView;
 window.loadUsersView = loadUsersView;
 window.loadLoginActivityView = loadLoginActivityView;
 window.refreshDashboardData = refreshDashboardData;
+window.refreshSuperAdminData = refreshSuperAdminData;
+window.loadContactInquiries = loadContactInquiries;
+window.renderContactInquiries = renderContactInquiries;
+window.filterContactInquiries = filterContactInquiries;
+window.deleteContactInquiry = deleteContactInquiry;
+window.exportContactsJSON = exportContactsJSON;
+window.loadSubscribers = loadSubscribers;
+window.renderSubscribers = renderSubscribers;
+window.filterSubscribers = filterSubscribers;
+window.deleteSubscriber = deleteSubscriber;
+window.exportSubscribersCSV = exportSubscribersCSV;
 window.toggleMaintenanceMode = toggleMaintenanceMode;
 window.handleCreateSociety = handleCreateSociety;
 window.loginAsDevSuperAdmin = loginAsDevSuperAdmin;
 window.triggerClerkSignIn = triggerClerkSignIn;
+
 

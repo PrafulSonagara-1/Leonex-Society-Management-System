@@ -85,10 +85,18 @@ function initThemeToggleButtons() {
       const maskId = `theme-toggle-mask-${idx}-${Math.random().toString(36).substr(2, 5)}`;
       btn.innerHTML = createThemeToggleSvg(maskId);
     }
+    btn.onclick = function (e) {
+      if (e) {
+        if (typeof e.preventDefault === 'function') e.preventDefault();
+        if (typeof e.stopPropagation === 'function') e.stopPropagation();
+      }
+      toggleTheme(e);
+    };
   });
 
-  const pref = window.__ssmTheme ? window.__ssmTheme.getStoredPref() : 'dark';
-  updateThemeIcon(pref);
+  const activeTheme = document.documentElement.getAttribute('data-theme') ||
+    (window.__ssmTheme ? window.__ssmTheme.getStoredPref() : 'dark');
+  updateThemeIcon(activeTheme);
 }
 
 /**
@@ -96,11 +104,14 @@ function initThemeToggleButtons() {
  * Eliminates browser view-transition freezing/stuttering
  */
 function toggleTheme(event) {
-  const t = window.__ssmTheme;
-  if (!t) return;
+  if (event) {
+    if (typeof event.preventDefault === 'function') event.preventDefault();
+    if (typeof event.stopPropagation === 'function') event.stopPropagation();
+  }
 
-  const current = t.getStoredPref();
-  const next = (current === 'dark') ? 'light' : 'dark';
+  const current = document.documentElement.getAttribute('data-theme') ||
+    (window.__ssmTheme ? window.__ssmTheme.getStoredPref() : 'dark');
+  const next = (current === 'light') ? 'dark' : 'light';
 
   const root = document.documentElement;
 
@@ -108,10 +119,16 @@ function toggleTheme(event) {
   root.classList.add('theme-transitioning');
 
   try {
-    localStorage.setItem(t.STORAGE_KEY, next);
+    localStorage.setItem('ssm_theme_preference', next);
   } catch (e) { /* storage unavailable */ }
 
-  t.applyTheme(next);
+  if (window.__ssmTheme && typeof window.__ssmTheme.applyTheme === 'function') {
+    window.__ssmTheme.applyTheme(next);
+  } else {
+    document.documentElement.setAttribute('data-theme', next);
+    document.documentElement.setAttribute('data-theme-mode', next);
+  }
+
   updateThemeIcon(next);
 
   // Notify any active listeners of theme change

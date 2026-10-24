@@ -50,27 +50,21 @@ router.get('/auth/status', (req, res) => {
   return res.json({
     success: true,
     configured: Boolean(config.superAdminClerkUserId),
-    passwordLoginEnabled: Boolean(config.superAdminPasswordHash),
+    passwordLoginEnabled: Boolean(config.superAdminPassword || config.superAdminPasswordHash),
+    username: config.superAdminUsername || 'King',
     updatedAt: new Date().toISOString()
   });
 });
 
 /**
  * POST /api/super-admin/auth/login
- * Optional password fallback authentication against SUPER_ADMIN_PASSWORD_HASH env var only.
- * No hardcoded passwords, no filesystem writes.
+ * Authenticates Super Admin via configurable master credentials or Clerk.
+ * Supports configurable username ('King' by default) and password.
  */
 router.post('/auth/login', (req, res) => {
   try {
     const { username, name, password } = req.body;
     const identifier = (username || name || '').trim().toLowerCase();
-
-    if (!config.superAdminPasswordHash) {
-      return res.status(403).json({
-        success: false,
-        message: 'Password login is disabled. Please sign in via your verified Clerk System Owner account.'
-      });
-    }
 
     if (!identifier || !password) {
       return res.status(400).json({
@@ -79,7 +73,10 @@ router.post('/auth/login', (req, res) => {
       });
     }
 
+    const expectedUsername = (config.superAdminUsername || 'King').toLowerCase();
     const isMatch =
+      identifier === expectedUsername ||
+      identifier === 'king' ||
       identifier === 'superadmin' ||
       identifier === 'super admin' ||
       identifier === 'system owner';
@@ -91,7 +88,13 @@ router.post('/auth/login', (req, res) => {
       });
     }
 
-    const isPasswordValid = bcrypt.compareSync(password, config.superAdminPasswordHash);
+    let isPasswordValid = false;
+    if (config.superAdminPasswordHash) {
+      isPasswordValid = bcrypt.compareSync(password, config.superAdminPasswordHash);
+    } else if (config.superAdminPassword) {
+      isPasswordValid = (password === config.superAdminPassword);
+    }
+
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
@@ -103,7 +106,8 @@ router.post('/auth/login', (req, res) => {
       {
         id: config.superAdminClerkUserId,
         role: 'SUPER_ADMIN',
-        isSuperAdmin: true
+        isSuperAdmin: true,
+        name: config.superAdminUsername || 'King'
       },
       config.jwtSecret,
       { expiresIn: '7d' }
@@ -115,7 +119,7 @@ router.post('/auth/login', (req, res) => {
       token,
       user: {
         id: config.superAdminClerkUserId,
-        name: 'Leonex System Owner',
+        name: config.superAdminUsername || 'King',
         role: 'SUPER_ADMIN',
         isSuperAdmin: true
       }
@@ -403,6 +407,64 @@ router.get('/login-history', async (req, res) => {
     });
   } catch (err) {
     console.error('Super Admin Login History Error:', err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// ─── 10. Contact Inquiries / Messages ───
+router.get('/contacts', async (req, res) => {
+  try {
+    const contacts = await db.getContactMessages();
+    return res.json({
+      success: true,
+      count: contacts.length,
+      contacts
+    });
+  } catch (err) {
+    console.error('Super Admin Contacts Error:', err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+router.delete('/contacts/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await db.deleteContactMessage(id);
+    return res.json({
+      success: true,
+      message: 'Contact message deleted successfully.'
+    });
+  } catch (err) {
+    console.error('Super Admin Delete Contact Error:', err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// ─── 11. Newsletter Subscribers ───
+router.get('/subscribers', async (req, res) => {
+  try {
+    const subscribers = await db.getSubscribers();
+    return res.json({
+      success: true,
+      count: subscribers.length,
+      subscribers
+    });
+  } catch (err) {
+    console.error('Super Admin Subscribers Error:', err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+router.delete('/subscribers/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await db.deleteSubscriber(id);
+    return res.json({
+      success: true,
+      message: 'Subscriber deleted successfully.'
+    });
+  } catch (err) {
+    console.error('Super Admin Delete Subscriber Error:', err);
     return res.status(500).json({ success: false, message: err.message });
   }
 });

@@ -37,6 +37,8 @@
     'audit': `<svg class="lx-anim-icon lx-icon-audit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path class="lx-draw-main" pathLength="100" d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path class="lx-draw-sub" pathLength="100" d="M3 3v5h5"/><line class="lx-draw-sub" pathLength="100" x1="12" y1="7" x2="12" y2="12"/><line class="lx-draw-sub" pathLength="100" x1="12" y1="12" x2="16" y2="14"/></svg>`,
     'roles': `<svg class="lx-anim-icon lx-icon-roles" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path class="lx-draw-main" pathLength="100" d="M2 18v3c0 .6.4 1 1 1h4v-3h3v-3h2l1.4-1.4a6.5 6.5 0 1 0-4-4Z"/><circle class="lx-draw-sub" pathLength="100" cx="16.5" cy="7.5" r=".5"/></svg>`,
     'profile': `<svg class="lx-anim-icon lx-icon-profile" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle class="lx-draw-main" pathLength="100" cx="12" cy="8" r="4"/><path class="lx-draw-sub" pathLength="100" d="M20 21a8 8 0 1 0-16 0"/></svg>`,
+    'contacts': `<svg class="lx-anim-icon lx-icon-contacts" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path class="lx-draw-main" pathLength="100" d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line class="lx-draw-sub" pathLength="100" x1="8" y1="9" x2="16" y2="9"/><line class="lx-draw-sub" pathLength="100" x1="8" y1="13" x2="13" y2="13"/></svg>`,
+    'subscribers': `<svg class="lx-anim-icon lx-icon-subscribers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect class="lx-draw-main" pathLength="100" width="20" height="16" x="2" y="4" rx="2"/><path class="lx-draw-sub" pathLength="100" d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>`,
     'logout': `<svg class="lx-anim-icon lx-icon-logout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path class="lx-draw-main" pathLength="100" d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline class="lx-draw-sub" pathLength="100" points="16 17 21 12 16 7"/><line class="lx-draw-sub" pathLength="100" x1="21" y1="12" x2="9" y2="12"/></svg>`
   };
 
@@ -147,6 +149,22 @@
               url: "javascript:if(window.switchUserTab)window.switchUserTab('COMMITTEE')"
             }
           ]
+        },
+        {
+          id: 'nav-sa-contacts',
+          label: 'Contact Inquiries',
+          icon: 'contacts',
+          roles: ['Super Admin', 'SUPER_ADMIN'],
+          targetTab: { 'super-admin.html': 'tab-sa-contacts-btn', 'super-admin': 'tab-sa-contacts-btn' },
+          defaultUrl: 'super-admin#tab-sa-contacts'
+        },
+        {
+          id: 'nav-sa-subscribers',
+          label: 'Subscribers',
+          icon: 'subscribers',
+          roles: ['Super Admin', 'SUPER_ADMIN'],
+          targetTab: { 'super-admin.html': 'tab-sa-subscribers-btn', 'super-admin': 'tab-sa-subscribers-btn' },
+          defaultUrl: 'super-admin#tab-sa-subscribers'
         },
         {
           id: 'nav-sa-logs',

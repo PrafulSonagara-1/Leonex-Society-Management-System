@@ -399,7 +399,9 @@ class DatabaseManager {
       otps: new Map(),
       societies: [],
       users: [],
-      login_history: []
+      login_history: [],
+      contacts: [],
+      subscribers: []
     };
     this.initFallbackStore();
   }
@@ -414,6 +416,8 @@ class DatabaseManager {
         this.fallbackStore.societies = data.societies || [];
         this.fallbackStore.users = data.users || [];
         this.fallbackStore.login_history = data.login_history || [];
+        this.fallbackStore.contacts = data.contacts || [];
+        this.fallbackStore.subscribers = data.subscribers || [];
       } catch (e) {
         console.warn('[Store load warning]', e.message);
       }
@@ -423,6 +427,44 @@ class DatabaseManager {
       this.fallbackStore.societies = initial.societies;
       this.fallbackStore.users = initial.users;
       this.fallbackStore.login_history = initial.login_history;
+      if (!this.fallbackStore.contacts || !this.fallbackStore.contacts.length) {
+        this.fallbackStore.contacts = [
+          {
+            id: 1,
+            name: 'Ramesh Patel',
+            society_name: 'Sunrise Residency, Surat',
+            email: 'ramesh.patel@gmail.com',
+            phone: '+91 98250 12345',
+            message: 'We have 120 flats and want to automate our maintenance billing and digital gate passes.',
+            created_at: '2026-10-24 10:15:00'
+          },
+          {
+            id: 2,
+            name: 'Vikram Mehta',
+            society_name: 'Palm Grove Enclave, Ahmedabad',
+            email: 'vikram.mehta@palmgrove.in',
+            phone: '+91 98980 67890',
+            message: 'Interested in on-site onboarding demonstration for our management committee.',
+            created_at: '2026-10-24 11:30:00'
+          }
+        ];
+      }
+      if (!this.fallbackStore.subscribers || !this.fallbackStore.subscribers.length) {
+        this.fallbackStore.subscribers = [
+          {
+            id: 1,
+            email: 'secretary@sunriseresidency.org',
+            status: 'ACTIVE',
+            created_at: '2026-10-24 09:00:00'
+          },
+          {
+            id: 2,
+            email: 'info@housingfederation.in',
+            status: 'ACTIVE',
+            created_at: '2026-10-24 10:00:00'
+          }
+        ];
+      }
       this.saveFallbackStore();
     }
   }
@@ -433,6 +475,8 @@ class DatabaseManager {
         societies: this.fallbackStore.societies,
         users: this.fallbackStore.users,
         login_history: this.fallbackStore.login_history,
+        contacts: this.fallbackStore.contacts || [],
+        subscribers: this.fallbackStore.subscribers || [],
         updatedAt: new Date().toISOString()
       };
       fs.writeFileSync(STORE_PATH, JSON.stringify(data, null, 2), 'utf8');
@@ -561,12 +605,40 @@ class DatabaseManager {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `;
 
+    // Contact messages table
+    const contactMessagesTableSql = `
+      CREATE TABLE IF NOT EXISTS contact_messages (
+        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        society_name VARCHAR(255) NULL,
+        email VARCHAR(255) NOT NULL,
+        phone VARCHAR(64) NULL,
+        message TEXT NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_contact_created (created_at),
+        INDEX idx_contact_email (email)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `;
+
+    // Newsletter subscribers table
+    const subscribersTableSql = `
+      CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        status VARCHAR(32) NOT NULL DEFAULT 'ACTIVE',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_subscriber_created (created_at)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `;
+
     await this.pool.query(societiesTableSql);
     await this.pool.query(usersTableSql);
     await this.pool.query(loginHistoryTableSql);
     await this.pool.query(otpTableSql);
+    await this.pool.query(contactMessagesTableSql);
+    await this.pool.query(subscribersTableSql);
 
-    console.log('\x1b[32m✔ [MySQL] Verified 3 core tables: `societies`, `users`, `login_history`\x1b[0m');
+    console.log('\x1b[32m✔ [MySQL] Verified core tables including `contact_messages` and `newsletter_subscribers`\x1b[0m');
   }
 
   async seedTables() {
@@ -1280,6 +1352,132 @@ class DatabaseManager {
     }
 
     return valid;
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  // CONTACT INQUIRIES & MESSAGES
+  // ══════════════════════════════════════════════════════════════
+
+  async saveContactMessage({ name, society_name, email, phone, message }) {
+    const contact = {
+      id: Date.now(),
+      name: (name || '').trim(),
+      society_name: (society_name || '').trim(),
+      email: (email || '').trim(),
+      phone: (phone || '').trim(),
+      message: (message || '').trim(),
+      created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
+    };
+
+    if (!this.fallbackStore.contacts) this.fallbackStore.contacts = [];
+    this.fallbackStore.contacts.unshift(contact);
+    this.saveFallbackStore();
+
+    if (this.isOnline && this.pool) {
+      try {
+        await this.pool.query(
+          `INSERT INTO contact_messages (name, society_name, email, phone, message, created_at)
+           VALUES (?, ?, ?, ?, ?, ?)`,
+          [contact.name, contact.society_name, contact.email, contact.phone, contact.message, contact.created_at]
+        );
+      } catch (e) {
+        console.warn('[MySQL saveContactMessage error]', e.message);
+      }
+    }
+
+    return contact;
+  }
+
+  async getContactMessages() {
+    if (this.isOnline && this.pool) {
+      try {
+        const [rows] = await this.pool.query(
+          `SELECT * FROM contact_messages ORDER BY created_at DESC`
+        );
+        return rows;
+      } catch (e) {
+        console.warn('[MySQL getContactMessages error]', e.message);
+      }
+    }
+    if (!this.fallbackStore.contacts) this.fallbackStore.contacts = [];
+    return this.fallbackStore.contacts;
+  }
+
+  async deleteContactMessage(id) {
+    if (!this.fallbackStore.contacts) this.fallbackStore.contacts = [];
+    this.fallbackStore.contacts = this.fallbackStore.contacts.filter(c => String(c.id) !== String(id));
+    this.saveFallbackStore();
+
+    if (this.isOnline && this.pool) {
+      try {
+        await this.pool.query(`DELETE FROM contact_messages WHERE id = ?`, [id]);
+      } catch (e) {}
+    }
+    return true;
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  // NEWSLETTER SUBSCRIBERS
+  // ══════════════════════════════════════════════════════════════
+
+  async saveSubscriber(email) {
+    const cleanEmail = (email || '').trim().toLowerCase();
+    const subscriber = {
+      id: Date.now(),
+      email: cleanEmail,
+      status: 'ACTIVE',
+      created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
+    };
+
+    if (!this.fallbackStore.subscribers) this.fallbackStore.subscribers = [];
+    const exists = this.fallbackStore.subscribers.find(s => s.email.toLowerCase() === cleanEmail);
+    if (!exists) {
+      this.fallbackStore.subscribers.unshift(subscriber);
+      this.saveFallbackStore();
+    }
+
+    if (this.isOnline && this.pool) {
+      try {
+        await this.pool.query(
+          `INSERT INTO newsletter_subscribers (email, status, created_at)
+           VALUES (?, ?, ?)
+           ON DUPLICATE KEY UPDATE status = 'ACTIVE'`,
+          [subscriber.email, subscriber.status, subscriber.created_at]
+        );
+      } catch (e) {
+        console.warn('[MySQL saveSubscriber error]', e.message);
+      }
+    }
+
+    return exists || subscriber;
+  }
+
+  async getSubscribers() {
+    if (this.isOnline && this.pool) {
+      try {
+        const [rows] = await this.pool.query(
+          `SELECT * FROM newsletter_subscribers ORDER BY created_at DESC`
+        );
+        return rows;
+      } catch (e) {
+        console.warn('[MySQL getSubscribers error]', e.message);
+      }
+    }
+    if (!this.fallbackStore.subscribers) this.fallbackStore.subscribers = [];
+    return this.fallbackStore.subscribers;
+  }
+
+  async deleteSubscriber(id) {
+    if (!this.fallbackStore.subscribers) this.fallbackStore.subscribers = [];
+    this.fallbackStore.subscribers = this.fallbackStore.subscribers.filter(s => String(s.id) !== String(id));
+    this.saveFallbackStore();
+
+    if (this.isOnline && this.pool) {
+      try {
+        await this.pool.query(`DELETE FROM newsletter_subscribers WHERE id = ?`, [id]);
+      } catch (e) {}
+    }
+    return true;
   }
 }
 

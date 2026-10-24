@@ -2677,8 +2677,9 @@ html[data-theme="light"] .cosmic-role-cta:hover i,
 .faq-content-wrapper {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows 0.38s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.32s ease;
+  transition: grid-template-rows 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
   opacity: 0;
+  overflow: hidden;
 }
 
 .faq-item.is-open .faq-content-wrapper {
@@ -2687,6 +2688,7 @@ html[data-theme="light"] .cosmic-role-cta:hover i,
 }
 
 .faq-content-inner {
+  min-height: 0;
   overflow: hidden;
 }
 
