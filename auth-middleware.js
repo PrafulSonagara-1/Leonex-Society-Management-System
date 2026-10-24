@@ -3,8 +3,9 @@
  */
 
 const jwt = require('jsonwebtoken');
+const config = require('./config');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'ssm_jwt_secret_2026';
+const JWT_SECRET = config.jwtSecret;
 
 // Verify JWT token from Authorization header
 function authenticateToken(req, res, next) {

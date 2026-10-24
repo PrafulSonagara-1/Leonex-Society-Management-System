@@ -1,6 +1,9 @@
 require('dotenv').config();
+const config = require('./config');
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const path = require('path');
 const fs = require('fs');
 const authRoutes = require('./auth-routes');
@@ -13,18 +16,124 @@ const db = require('./mysql');
 db.init().catch(err => console.warn('[DB Init Warning]', err.message));
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = config.port;
 
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Security Headers & Content Security Policy (M7, H3)
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          "'unsafe-eval'",
+          "https://cdn.jsdelivr.net",
+          "https://cdnjs.cloudflare.com",
+          "https://unpkg.com",
+          "https://cdn.tailwindcss.com",
+          "https://*.clerk.accounts.dev",
+          "https://clerk.*",
+          "https://accounts.google.com",
+          "https://www.gstatic.com"
+        ],
+        styleSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          "https://cdn.jsdelivr.net",
+          "https://cdnjs.cloudflare.com",
+          "https://fonts.googleapis.com",
+          "https://unpkg.com"
+        ],
+        fontSrc: [
+          "'self'",
+          "https://fonts.gstatic.com",
+          "https://cdnjs.cloudflare.com",
+          "https://cdn.jsdelivr.net",
+          "data:"
+        ],
+        imgSrc: [
+          "'self'",
+          "data:",
+          "blob:",
+          "https:"
+        ],
+        connectSrc: [
+          "'self'",
+          "https://*.clerk.accounts.dev",
+          "https://clerk.*",
+          "https://api.clerk.com",
+          "https://firestore.googleapis.com",
+          "https://identitytoolkit.googleapis.com",
+          "https://*.firebaseio.com"
+        ],
+        frameSrc: [
+          "'self'",
+          "https://*.clerk.accounts.dev",
+          "https://clerk.*",
+          "https://accounts.google.com"
+        ],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: config.isProduction ? [] : null
+      }
+    },
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+  })
+);
+
+// Restricted CORS (H3)
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow non-browser agents (origin is undefined) or allowed origins from env/config
+      if (!origin || config.allowedOrigins.includes('*') || config.allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Blocked by CORS policy'));
+      }
+    },
+    credentials: true
+  })
+);
+
+// Rate Limiting (H3)
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later.' }
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many authentication attempts. Please try again after 15 minutes.' }
+});
+
+// Parse payloads
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(clerkMiddleware());
+
+// Apply strict rate limiting to authentication endpoints
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/register', authLimiter);
+app.use('/api/auth/send-otp', authLimiter);
+app.use('/api/auth/verify-otp', authLimiter);
+app.use('/api/super-admin/auth/login', authLimiter);
 
 // Super Admin API routes (Strictly protected by Clerk authentication & SUPER_ADMIN_CLERK_USER_ID)
 app.use('/api/super-admin', superAdminRoutes);
 
 // Auth API routes (must be before static file middleware)
 app.use('/api/auth', authRoutes);
+
+// General API rate limiting
+app.use('/api', apiLimiter);
 
 // Health check API
 app.get('/api/health', (req, res) => {
@@ -64,18 +173,35 @@ app.get('/unauthorized', (req, res) => {
   `);
 });
 
-// Serve static frontend files
-app.use(express.static(path.join(__dirname, 'public')));
-app.use('/data', express.static(path.join(__dirname, 'data')));
+// Explicitly deny /data route (C6)
+app.use('/data', (req, res) => {
+  res.status(404).json({ error: 'Not found' });
+});
 
-// Fallback to index.html for SPA routing
+// Serve public static frontend files (data/ directory is intentionally NOT served - C6)
+const publicDir = path.resolve(__dirname, 'public');
+app.use(express.static(publicDir));
+
+// Fallback to index.html for SPA routing with path traversal protection (M5)
 app.get('*', (req, res) => {
-  const filePath = path.join(__dirname, 'public', req.path);
-  if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
-    res.sendFile(filePath);
-  } else {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  const safePath = path.normalize(req.path).replace(/^(\.\.[\/\\])+/, '');
+  const resolvedPath = path.resolve(publicDir, '.' + safePath);
+
+  // Security guard: verify the resolved path remains strictly within publicDir
+  if (!resolvedPath.startsWith(publicDir)) {
+    return res.status(403).send('Forbidden');
   }
+
+  if (fs.existsSync(resolvedPath) && fs.statSync(resolvedPath).isFile()) {
+    return res.sendFile(resolvedPath);
+  }
+
+  // If the request targets a specific missing asset file, data path, or API, return 404 instead of index.html
+  if (path.extname(req.path) || req.path.startsWith('/api') || req.path.startsWith('/data')) {
+    return res.status(404).send('Not Found');
+  }
+
+  res.sendFile(path.join(publicDir, 'index.html'));
 });
 
 if (!process.env.VERCEL) {

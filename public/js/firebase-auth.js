@@ -139,10 +139,23 @@ function __authUsers() {
   return (SystemDB.data && SystemDB.data.users) ? SystemDB.data.users : [];
 }
 
+// Demo mode validator — restricts client-side fallback & demo presets strictly to demo environments (H1)
+function __isDemoMode() {
+  try {
+    const isDemoPage = window.location.pathname.endsWith('demo.html') || window.location.search.includes('demo=true');
+    const isDemoFlag = sessionStorage.getItem('ssm_demo_mode') === 'true';
+    const hostname = window.location.hostname || '';
+    const isLocal = hostname === 'localhost' || hostname === '127.0.0.1';
+    return isDemoPage || isDemoFlag || (isLocal && sessionStorage.getItem('ssm_allow_local_demo') === 'true');
+  } catch (e) {
+    return false;
+  }
+}
+
 /* ────────────────────────────────────────────────
    POST /api/auth/login  —  Email/username + password
-   Server-first; falls back to the client-side demo
-   login when the backend is unavailable (static hosting).
+   Server-first; strictly authenticated. Demo fallback
+   only active on explicit demo pages/environments.
    ──────────────────────────────────────────────── */
 async function firebaseLoginWithEmail(email, password) {
   // 1) Try the Express backend first
@@ -170,15 +183,23 @@ async function firebaseLoginWithEmail(email, password) {
       if (status === 'Pending' || status === 'Rejected' || status === 'Suspended') {
         return { success: false, message: data.message || __authStatusMessage(status), status: status };
       }
-      // Any other result (400/401/500 or unexpected body) falls through to the
-      // client-side demo fallback below — preserving the dual architecture where
-      // static hosts and demo presets still authenticate via SystemDB.
+      // If login failed (e.g. 400/401), do NOT fall back to client passwordless login in production (H1)
+      if (!__isDemoMode()) {
+        return { success: false, message: data?.message || 'Invalid email or password. Please check your credentials.' };
+      }
     }
   } catch (err) {
-    console.warn('Backend API login unavailable, using SystemDB fallback:', err);
+    console.warn('Backend API login unavailable:', err);
+    if (!__isDemoMode()) {
+      return { success: false, message: 'Authentication service unavailable. Please try again later.' };
+    }
   }
 
-  // 2) Client-side fallback for demo logins & static (Vercel) deployments
+  // 2) Client-side fallback: strictly restricted to demo mode (demo.html or isolated local demo)
+  if (!__isDemoMode()) {
+    return { success: false, message: 'Invalid credentials. Demo fallback is disabled in production.' };
+  }
+
   const lookup = (email || '').toLowerCase().trim();
   const users = __authUsers();
 
@@ -231,6 +252,10 @@ async function firebaseLoginWithEmail(email, password) {
    ──────────────────────────────────────────────── */
 function demoLogin(role) {
   try {
+    if (!__isDemoMode()) {
+      return { success: false, message: 'Demo logins are disabled in production mode.' };
+    }
+
     const canonicalEmail = DEMO_ACCOUNTS[role];
     if (!canonicalEmail) {
       return { success: false, message: 'No demo account is configured for this role.' };

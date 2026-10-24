@@ -10,58 +10,13 @@ const express = require('express');
 const { getAuth, verifyToken } = require('@clerk/express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const fs = require('fs');
-const path = require('path');
-const { JWT_SECRET } = require('./auth-middleware');
+const config = require('./config');
 const db = require('./mysql');
 
 const router = express.Router();
-const CREDS_PATH = path.join(__dirname, 'data', 'super-admin-credentials.json');
 
 /**
- * Super Admin Credentials Management
- */
-function getSuperAdminCredentials() {
-  try {
-    if (fs.existsSync(CREDS_PATH)) {
-      const content = fs.readFileSync(CREDS_PATH, 'utf8');
-      const parsed = JSON.parse(content);
-      if (parsed && parsed.passwordHash) return parsed;
-    }
-  } catch (e) {
-    console.error('Error reading Super Admin credentials:', e);
-  }
-  // Default strong password: "SuperAdmin@2026!"
-  const defaultHash = bcrypt.hashSync('Kingpsleonex', 10);
-  const defaultCreds = {
-    username: 'superadmin',
-    name: 'Leonex System Owner',
-    passwordHash: defaultHash,
-    updatedAt: new Date().toISOString()
-  };
-  saveSuperAdminCredentials(defaultCreds);
-  return defaultCreds;
-}
-
-function saveSuperAdminCredentials(creds) {
-  try {
-    const dir = path.dirname(CREDS_PATH);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(CREDS_PATH, JSON.stringify(creds, null, 2), 'utf8');
-    return true;
-  } catch (e) {
-    console.error('Error saving Super Admin credentials:', e);
-    return false;
-  }
-}
-
-/**
- * Strong Password Policy Validator:
- * - Minimum 8 characters
- * - At least one uppercase letter (A-Z)
- * - At least one lowercase letter (a-z)
- * - At least one number (0-9)
- * - At least one special character (!@#$%^&* etc.)
+ * Strong Password Policy Validator
  */
 function validatePasswordStrength(password) {
   if (!password || typeof password !== 'string') {
@@ -89,42 +44,42 @@ function validatePasswordStrength(password) {
 
 /**
  * GET /api/super-admin/auth/status
- * Check Super Admin initialization status and configured display name
+ * Check Super Admin initialization status without exposing credentials
  */
 router.get('/auth/status', (req, res) => {
-  const creds = getSuperAdminCredentials();
   return res.json({
     success: true,
-    configured: true,
-    username: creds.username,
-    name: creds.name,
-    updatedAt: creds.updatedAt
+    configured: Boolean(config.superAdminClerkUserId),
+    passwordLoginEnabled: Boolean(config.superAdminPasswordHash),
+    updatedAt: new Date().toISOString()
   });
 });
 
 /**
  * POST /api/super-admin/auth/login
- * Log in to Super Admin Panel with Name/Username + Strong Password
+ * Optional password fallback authentication against SUPER_ADMIN_PASSWORD_HASH env var only.
+ * No hardcoded passwords, no filesystem writes.
  */
 router.post('/auth/login', (req, res) => {
   try {
     const { username, name, password } = req.body;
     const identifier = (username || name || '').trim().toLowerCase();
 
-    if (!identifier || !password) {
-      return res.status(400).json({
+    if (!config.superAdminPasswordHash) {
+      return res.status(403).json({
         success: false,
-        message: 'Super Admin Name/Username and password are required.'
+        message: 'Password login is disabled. Please sign in via your verified Clerk System Owner account.'
       });
     }
 
-    const creds = getSuperAdminCredentials();
-    const storedUser = (creds.username || '').toLowerCase();
-    const storedName = (creds.name || '').toLowerCase();
+    if (!identifier || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Super Admin identifier and password are required.'
+      });
+    }
 
     const isMatch =
-      identifier === storedUser ||
-      identifier === storedName ||
       identifier === 'superadmin' ||
       identifier === 'super admin' ||
       identifier === 'system owner';
@@ -132,27 +87,25 @@ router.post('/auth/login', (req, res) => {
     if (!isMatch) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid Super Admin name or username.'
+        message: 'Invalid Super Admin identifier.'
       });
     }
 
-    const isPasswordValid = bcrypt.compareSync(password, creds.passwordHash);
+    const isPasswordValid = bcrypt.compareSync(password, config.superAdminPasswordHash);
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid strong password. Please check your credentials.'
+        message: 'Invalid credentials. Access denied.'
       });
     }
 
     const token = jwt.sign(
       {
-        id: process.env.SUPER_ADMIN_CLERK_USER_ID || 'user_2superadminowner',
-        username: creds.username,
-        name: creds.name,
+        id: config.superAdminClerkUserId,
         role: 'SUPER_ADMIN',
         isSuperAdmin: true
       },
-      JWT_SECRET,
+      config.jwtSecret,
       { expiresIn: '7d' }
     );
 
@@ -161,9 +114,8 @@ router.post('/auth/login', (req, res) => {
       message: 'Super Admin authentication successful.',
       token,
       user: {
-        id: process.env.SUPER_ADMIN_CLERK_USER_ID || 'user_2superadminowner',
-        username: creds.username,
-        name: creds.name,
+        id: config.superAdminClerkUserId,
+        name: 'Leonex System Owner',
         role: 'SUPER_ADMIN',
         isSuperAdmin: true
       }
@@ -179,90 +131,98 @@ router.post('/auth/login', (req, res) => {
 
 /**
  * Super Admin Authorization Middleware
- * Supports:
- * 1. Super Admin JWT token signed with JWT_SECRET (role: SUPER_ADMIN)
- * 2. Clerk User authentication (SUPER_ADMIN_CLERK_USER_ID)
+ * Strictly accepts:
+ * 1. Cryptographically verified Clerk session token whose 'sub' matches SUPER_ADMIN_CLERK_USER_ID
+ * 2. Pre-verified Clerk request session (req.auth) whose 'userId' matches SUPER_ADMIN_CLERK_USER_ID
+ * 3. App JWT signed with validated JWT_SECRET whose 'id' explicitly matches SUPER_ADMIN_CLERK_USER_ID
+ * 
+ * Any custom headers (e.g. x-clerk-user-id), raw user_ token strings, or mismatched IDs are rejected.
  */
 async function requireSuperAdmin(req, res, next) {
   try {
-    let clerkUserId = null;
+    const configuredSuperAdminId = config.superAdminClerkUserId;
 
-    // 1. Check Authorization header
+    if (!configuredSuperAdminId) {
+      return res.status(500).json({
+        success: false,
+        error: 'ConfigurationError',
+        message: 'Server configuration error: SUPER_ADMIN_CLERK_USER_ID is not set.'
+      });
+    }
+
+    let verifiedUserId = null;
+
+    // 1. Check Authorization Bearer header
     const authHeader = req.headers['authorization'];
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.substring(7).trim();
       if (token) {
-        // A. Check for signed Super Admin JWT
+        // A. Verify if it's an app-signed JWT (e.g., from password login)
         try {
-          const decoded = jwt.verify(token, JWT_SECRET);
+          const decoded = jwt.verify(token, config.jwtSecret);
           if (decoded && (decoded.role === 'SUPER_ADMIN' || decoded.isSuperAdmin)) {
-            req.superAdmin = decoded;
-            req.clerkUserId = decoded.id || process.env.SUPER_ADMIN_CLERK_USER_ID || 'user_2superadminowner';
-            return next();
+            // FIX C4: Explicitly enforce that decoded.id equals configuredSuperAdminId!
+            if (decoded.id === configuredSuperAdminId) {
+              verifiedUserId = decoded.id;
+            }
           }
         } catch (jwtErr) {
-          // not app JWT, fallback to Clerk verify
+          // Not an internal app JWT, proceed to Clerk verification
         }
 
-        // B. Check Clerk token
-        try {
-          const verified = await verifyToken(token, {
-            secretKey: process.env.CLERK_SECRET_KEY
-          });
-          if (verified && verified.sub) {
-            clerkUserId = verified.sub;
-          }
-        } catch (err) {
-          if (token.startsWith('user_')) {
-            clerkUserId = token;
+        // B. Verify as Clerk session token if not yet verified
+        if (!verifiedUserId && config.clerkSecretKey) {
+          try {
+            const verified = await verifyToken(token, {
+              secretKey: config.clerkSecretKey
+            });
+            if (verified && verified.sub) {
+              verifiedUserId = verified.sub;
+            }
+          } catch (clerkErr) {
+            // Token verification failed.
+            // FIX C3: Never fall back to accepting raw token strings starting with 'user_'!
           }
         }
       }
     }
 
     // 2. Check req.auth attached by @clerk/express clerkMiddleware()
-    if (!clerkUserId && req.auth && req.auth.userId) {
-      clerkUserId = req.auth.userId;
+    if (!verifiedUserId && req.auth && req.auth.userId) {
+      verifiedUserId = req.auth.userId;
     }
 
     // 3. Check getAuth helper
-    if (!clerkUserId) {
+    if (!verifiedUserId) {
       try {
         const auth = getAuth(req);
-        if (auth && auth.userId) clerkUserId = auth.userId;
+        if (auth && auth.userId) verifiedUserId = auth.userId;
       } catch (e) {}
     }
 
-    // 4. Custom header fallback for testing
-    if (!clerkUserId) {
-      const customId = req.headers['x-clerk-user-id'];
-      if (customId && customId.startsWith('user_')) {
-        clerkUserId = customId;
-      }
-    }
+    // FIX C2: The unverified x-clerk-user-id header fallback has been removed completely.
 
     // Unauthenticated check
-    if (!clerkUserId) {
+    if (!verifiedUserId) {
       return res.status(401).json({
         success: false,
         error: 'Unauthorized',
-        message: 'Authentication required. Please enter Super Admin credentials.'
+        message: 'Authentication required. Please provide a verified Super Admin token.'
       });
     }
 
     // Super Admin Authorization check against environment variable
-    const configuredSuperAdminId = (process.env.SUPER_ADMIN_CLERK_USER_ID || '').trim();
-
-    if (!configuredSuperAdminId || clerkUserId !== configuredSuperAdminId) {
+    if (verifiedUserId !== configuredSuperAdminId) {
       return res.status(403).json({
         success: false,
         error: 'Forbidden',
-        message: 'Access Denied. You are not authorized to access this portal.'
+        message: 'Access Denied. Only the verified System Owner can access this portal.'
       });
     }
 
-    req.clerkUserId = clerkUserId;
-    next();
+    req.superAdmin = { id: verifiedUserId, role: 'SUPER_ADMIN' };
+    req.clerkUserId = verifiedUserId;
+    return next();
   } catch (err) {
     console.error('[Super Admin Auth Error]', err);
     return res.status(500).json({
@@ -276,94 +236,23 @@ async function requireSuperAdmin(req, res, next) {
 // Apply Super Admin protection across all remaining routes
 router.use(requireSuperAdmin);
 
-// ─── PROTECTED ENDPOINT: Change Super Admin Credentials & Password ───
+// ─── PROTECTED ENDPOINT: Change Super Admin Credentials ───
 router.post('/auth/change-credentials', (req, res) => {
-  try {
-    const { currentPassword, newName, newUsername, newPassword } = req.body;
-
-    if (!currentPassword) {
-      return res.status(400).json({
-        success: false,
-        message: 'Current password is required to verify identity.'
-      });
-    }
-
-    const creds = getSuperAdminCredentials();
-    const isCurrentValid = bcrypt.compareSync(currentPassword, creds.passwordHash);
-    if (!isCurrentValid) {
-      return res.status(401).json({
-        success: false,
-        message: 'Current password does not match.'
-      });
-    }
-
-    // Validate new strong password if provided
-    if (newPassword) {
-      const strengthCheck = validatePasswordStrength(newPassword);
-      if (!strengthCheck.valid) {
-        return res.status(400).json({
-          success: false,
-          message: strengthCheck.message
-        });
-      }
-      creds.passwordHash = bcrypt.hashSync(newPassword, 10);
-    }
-
-    if (newName && typeof newName === 'string' && newName.trim()) {
-      creds.name = newName.trim();
-    }
-
-    if (newUsername && typeof newUsername === 'string' && newUsername.trim()) {
-      creds.username = newUsername.trim();
-    }
-
-    creds.updatedAt = new Date().toISOString();
-    saveSuperAdminCredentials(creds);
-
-    // Issue updated token
-    const token = jwt.sign(
-      {
-        id: process.env.SUPER_ADMIN_CLERK_USER_ID || 'user_2superadminowner',
-        username: creds.username,
-        name: creds.name,
-        role: 'SUPER_ADMIN',
-        isSuperAdmin: true
-      },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
-    return res.json({
-      success: true,
-      message: 'Super Admin credentials and strong password updated successfully.',
-      token,
-      user: {
-        id: process.env.SUPER_ADMIN_CLERK_USER_ID || 'user_2superadminowner',
-        username: creds.username,
-        name: creds.name,
-        role: 'SUPER_ADMIN',
-        isSuperAdmin: true
-      }
-    });
-  } catch (err) {
-    console.error('Change Credentials Error:', err);
-    return res.status(500).json({
-      success: false,
-      message: 'Server error while updating Super Admin credentials.'
-    });
-  }
+  return res.status(400).json({
+    success: false,
+    message: 'Super Admin credentials are authenticated via Clerk (SUPER_ADMIN_CLERK_USER_ID) or SUPER_ADMIN_PASSWORD_HASH in environment variables. File-based runtime changes are disabled for production safety.'
+  });
 });
 
 // ─── 1. Verification Endpoint (Used by frontend to check access) ───
 router.get('/verify', (req, res) => {
-  const creds = getSuperAdminCredentials();
   return res.json({
     success: true,
     authorized: true,
     clerkUserId: req.clerkUserId,
-    user: req.superAdmin || {
-      name: creds.name || 'Leonex System Owner',
-      username: creds.username || 'superadmin',
+    user: {
+      id: req.clerkUserId,
+      name: 'Leonex System Owner',
       role: 'SUPER_ADMIN',
       isSuperAdmin: true
     },

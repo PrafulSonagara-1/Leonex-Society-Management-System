@@ -236,16 +236,6 @@ async function handleSecurityGateLogin(event) {
   }
 }
 
-/**
- * 1-Click Fill Default Master Credentials
- */
-function autoFillDefaultCredentials() {
-  const uInput = document.getElementById('gateUsername');
-  const pInput = document.getElementById('gatePassword');
-  if (uInput) uInput.value = 'superadmin';
-  if (pInput) pInput.value = 'SuperAdmin@2026!';
-  showToast('Filled default master credentials: superadmin / SuperAdmin@2026!', 'info');
-}
 
 /**
  * Toggle Password Visibility on any password field
