@@ -126,6 +126,7 @@ function revealDashboard(data) {
   loadSocietiesDropdowns();
   loadContactInquiries();
   loadSubscribers();
+  initRealtimeSuperAdmin();
 }
 
 /**
@@ -1169,7 +1170,7 @@ let allContactInquiries = [];
 
 async function loadContactInquiries() {
   const tbody = document.getElementById('contactsTableBody');
-  if (tbody) {
+  if (tbody && (!allContactInquiries || allContactInquiries.length === 0)) {
     tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-secondary"><i class="fa-solid fa-spinner fa-spin me-2"></i>Loading inquiries...</td></tr>`;
   }
 
@@ -1188,7 +1189,7 @@ async function loadContactInquiries() {
     const todayStr = new Date().toISOString().slice(0, 10);
     const todayCount = allContactInquiries.filter(c => {
       const dt = c.created_at || c.createdAt || '';
-      return dt.startsWith(todayStr);
+      return String(dt).startsWith(todayStr);
     }).length;
     setText('kpiTodayContacts', todayCount);
 
@@ -1196,16 +1197,17 @@ async function loadContactInquiries() {
     const societies = new Set(allContactInquiries.map(c => (c.society_name || c.societyName || '').trim()).filter(Boolean));
     setText('kpiUniqueSocieties', societies.size);
 
+    updateSidebarBadge('nav-sa-contacts', total, 'bg-warning text-dark');
     renderContactInquiries(allContactInquiries);
   } catch (err) {
     console.error('Error loading contacts:', err);
-    if (tbody) {
+    if (tbody && (!allContactInquiries || allContactInquiries.length === 0)) {
       tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i>Failed to load inquiries: ${escapeHtml(err.message)}</td></tr>`;
     }
   }
 }
 
-function renderContactInquiries(contacts) {
+function renderContactInquiries(contacts, highlightId = null) {
   const tbody = document.getElementById('contactsTableBody');
   const countEl = document.getElementById('contactsFilteredCount');
   if (countEl) countEl.textContent = contacts ? contacts.length : 0;
@@ -1215,7 +1217,7 @@ function renderContactInquiries(contacts) {
     tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-secondary">
       <div class="mb-2"><i class="fa-solid fa-inbox fs-3 text-secondary opacity-50"></i></div>
       <div class="fw-semibold">No contact inquiries found</div>
-      <div class="fs-9 text-muted mt-1">Inquiries submitted via the website contact form will appear here with full timestamps.</div>
+      <div class="fs-9 text-muted mt-1">Inquiries submitted via the website contact form will appear here in real time.</div>
     </td></tr>`;
     return;
   }
@@ -1223,19 +1225,21 @@ function renderContactInquiries(contacts) {
   tbody.innerHTML = contacts.map((c, idx) => {
     const dt = formatDateTime(c.created_at || c.createdAt);
     const name = escapeHtml(c.name || 'Anonymous');
-    const society = escapeHtml(c.society_name || c.societyName || 'Not specified');
+    const society = escapeHtml(c.society_name || c.societyName || 'General Inquiry');
     const email = escapeHtml(c.email || '—');
     const phone = escapeHtml(c.phone || '—');
     const message = escapeHtml(c.message || '—');
     const id = c.id;
+    const isHighlighted = highlightId && (String(c.id) === String(highlightId));
 
     return `
-      <tr>
+      <tr class="${isHighlighted ? 'sa-new-entry-highlight' : ''}">
         <td class="text-secondary fs-8">${idx + 1}</td>
         <td>
           <div class="d-flex align-items-center gap-2">
             <i class="fa-regular fa-clock text-warning fs-9"></i>
             <span class="fw-semibold text-white fs-8">${dt}</span>
+            ${isHighlighted ? '<span class="badge bg-warning text-dark fs-9 ms-1 live-pulse-badge"><i class="fa-solid fa-bolt me-1"></i>JUST NOW</span>' : ''}
           </div>
         </td>
         <td>
@@ -1248,7 +1252,7 @@ function renderContactInquiries(contacts) {
         </td>
         <td>
           <div class="fs-8 text-white"><i class="fa-regular fa-envelope me-1 text-secondary"></i><a href="mailto:${email}" class="text-decoration-none text-white hover-gold">${email}</a></div>
-          ${phone !== '—' ? `<div class="fs-9 text-secondary mt-1"><i class="fa-solid fa-phone me-1 text-secondary"></i><a href="tel:${phone}" class="text-decoration-none text-secondary hover-gold">${phone}</a></div>` : ''}
+          ${phone !== '—' && phone ? `<div class="fs-9 text-secondary mt-1"><i class="fa-solid fa-phone me-1 text-secondary"></i><a href="tel:${phone}" class="text-decoration-none text-secondary hover-gold">${phone}</a></div>` : ''}
         </td>
         <td style="max-width: 320px;">
           <div class="text-light fs-8" style="white-space: pre-wrap; word-break: break-word; line-height: 1.4;">${message}</div>
@@ -1297,6 +1301,7 @@ async function deleteContactInquiry(id) {
       renderContactInquiries(allContactInquiries);
       setText('kpiTotalContacts', allContactInquiries.length);
       setText('badgeContactsCount', allContactInquiries.length);
+      updateSidebarBadge('nav-sa-contacts', allContactInquiries.length, 'bg-warning text-dark');
     } else {
       showToast(data.message || 'Failed to delete contact inquiry.', 'danger');
     }
@@ -1328,7 +1333,7 @@ let allSubscribers = [];
 
 async function loadSubscribers() {
   const tbody = document.getElementById('subscribersTableBody');
-  if (tbody) {
+  if (tbody && (!allSubscribers || allSubscribers.length === 0)) {
     tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-secondary"><i class="fa-solid fa-spinner fa-spin me-2"></i>Loading subscribers...</td></tr>`;
   }
 
@@ -1345,20 +1350,21 @@ async function loadSubscribers() {
     const todayStr = new Date().toISOString().slice(0, 10);
     const todayCount = allSubscribers.filter(s => {
       const dt = s.created_at || s.createdAt || '';
-      return dt.startsWith(todayStr);
+      return String(dt).startsWith(todayStr);
     }).length;
     setText('kpiTodaySubscribers', todayCount);
 
+    updateSidebarBadge('nav-sa-subscribers', total, 'bg-success text-white');
     renderSubscribers(allSubscribers);
   } catch (err) {
     console.error('Error loading subscribers:', err);
-    if (tbody) {
+    if (tbody && (!allSubscribers || allSubscribers.length === 0)) {
       tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i>Failed to load subscribers: ${escapeHtml(err.message)}</td></tr>`;
     }
   }
 }
 
-function renderSubscribers(subscribers) {
+function renderSubscribers(subscribers, highlightId = null) {
   const tbody = document.getElementById('subscribersTableBody');
   const countEl = document.getElementById('subscribersFilteredCount');
   if (countEl) countEl.textContent = subscribers ? subscribers.length : 0;
@@ -1368,7 +1374,7 @@ function renderSubscribers(subscribers) {
     tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5 text-secondary">
       <div class="mb-2"><i class="fa-solid fa-envelope-circle-check fs-3 text-secondary opacity-50"></i></div>
       <div class="fw-semibold">No subscribers yet</div>
-      <div class="fs-9 text-muted mt-1">When users enter their email in the footer subscribe box, they will appear here.</div>
+      <div class="fs-9 text-muted mt-1">When users enter their email in the footer subscribe box, they will appear here in real time.</div>
     </td></tr>`;
     return;
   }
@@ -1378,14 +1384,19 @@ function renderSubscribers(subscribers) {
     const email = escapeHtml(s.email || '—');
     const status = escapeHtml(s.status || 'ACTIVE');
     const id = s.id;
+    const isHighlighted = highlightId && (
+      String(s.id) === String(highlightId) ||
+      (s.email && String(highlightId).toLowerCase() === s.email.toLowerCase())
+    );
 
     return `
-      <tr>
+      <tr class="${isHighlighted ? 'sa-new-entry-highlight' : ''}">
         <td class="text-secondary fs-8">${idx + 1}</td>
         <td>
           <div class="d-flex align-items-center gap-2">
             <i class="fa-regular fa-clock text-success fs-9"></i>
             <span class="fw-semibold text-white fs-8">${dt}</span>
+            ${isHighlighted ? '<span class="badge bg-success text-white fs-9 ms-1 live-pulse-badge"><i class="fa-solid fa-bolt me-1"></i>JUST NOW</span>' : ''}
           </div>
         </td>
         <td>
@@ -1439,6 +1450,7 @@ async function deleteSubscriber(id) {
       renderSubscribers(allSubscribers);
       setText('kpiTotalSubscribers', allSubscribers.length);
       setText('badgeSubscribersCount', allSubscribers.length);
+      updateSidebarBadge('nav-sa-subscribers', allSubscribers.length, 'bg-success text-white');
     } else {
       showToast(data.message || 'Failed to delete subscriber.', 'danger');
     }
@@ -1467,11 +1479,298 @@ function exportSubscribersCSV() {
   showToast('Subscribers exported as CSV successfully.', 'success');
 }
 
+// ══════════════════════════════════════════════════════════════
+// REAL-TIME SYNCHRONIZATION ENGINE (BROADCASTCHANNEL + SSE + SNAPSHOT)
+// ══════════════════════════════════════════════════════════════
+let realtimeBroadcastChannel = null;
+let realtimeEventSource = null;
+let realtimeSnapshotInterval = null;
+
+function initRealtimeSuperAdmin() {
+  console.log('[Realtime] Initializing Super Admin triple-layer live engine...');
+  initRealtimeBroadcastChannel();
+  initRealtimeSSE();
+
+  // Polling snapshot fallback every 2.5 seconds to guarantee 100% sync
+  if (realtimeSnapshotInterval) clearInterval(realtimeSnapshotInterval);
+  realtimeSnapshotInterval = setInterval(checkRealtimeSnapshot, 2500);
+}
+
+function initRealtimeBroadcastChannel() {
+  if (typeof window === 'undefined' || !window.BroadcastChannel) return;
+  try {
+    if (realtimeBroadcastChannel) realtimeBroadcastChannel.close();
+    realtimeBroadcastChannel = new BroadcastChannel('ssm_realtime_channel');
+    realtimeBroadcastChannel.onmessage = (event) => {
+      const msg = event.data;
+      if (!msg) return;
+      if (msg.type === 'NEW_CONTACT' && msg.contact) {
+        console.log('[Realtime BroadcastChannel] Received NEW_CONTACT:', msg.contact);
+        handleIncomingRealtimeContact(msg.contact, true);
+      } else if (msg.type === 'NEW_SUBSCRIBER' && msg.subscriber) {
+        console.log('[Realtime BroadcastChannel] Received NEW_SUBSCRIBER:', msg.subscriber);
+        handleIncomingRealtimeSubscriber(msg.subscriber, true);
+      }
+    };
+  } catch (err) {
+    console.warn('[Realtime BroadcastChannel setup error]', err);
+  }
+}
+
+function initRealtimeSSE() {
+  if (typeof window === 'undefined' || !window.EventSource) return;
+  try {
+    if (realtimeEventSource) realtimeEventSource.close();
+    realtimeEventSource = new EventSource('/api/realtime/stream');
+
+    realtimeEventSource.onmessage = (event) => {
+      if (!event.data) return;
+      try {
+        const payload = JSON.parse(event.data);
+        if (payload.type === 'NEW_CONTACT' && payload.data) {
+          console.log('[Realtime SSE] Received NEW_CONTACT:', payload.data);
+          handleIncomingRealtimeContact(payload.data, true);
+        } else if (payload.type === 'NEW_SUBSCRIBER' && payload.data) {
+          console.log('[Realtime SSE] Received NEW_SUBSCRIBER:', payload.data);
+          handleIncomingRealtimeSubscriber(payload.data, true);
+        }
+      } catch (e) {
+        // Heartbeat or text event
+      }
+    };
+
+    realtimeEventSource.onerror = () => {
+      // Automatic browser reconnect handled by EventSource
+    };
+  } catch (err) {
+    console.warn('[Realtime SSE setup error]', err);
+  }
+}
+
+async function checkRealtimeSnapshot() {
+  try {
+    const res = await fetch('/api/realtime/snapshot');
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!data.success) return;
+
+    if (Array.isArray(data.contacts)) {
+      const existingIds = new Set(allContactInquiries.map(c => String(c.id)));
+      const newItems = data.contacts.filter(c => !existingIds.has(String(c.id)));
+      if (newItems.length > 0) {
+        newItems.forEach(c => handleIncomingRealtimeContact(c, true));
+      }
+    }
+
+    if (Array.isArray(data.subscribers)) {
+      const existingEmails = new Set(allSubscribers.map(s => (s.email || '').toLowerCase()));
+      const newSubs = data.subscribers.filter(s => !existingEmails.has((s.email || '').toLowerCase()));
+      if (newSubs.length > 0) {
+        newSubs.forEach(s => handleIncomingRealtimeSubscriber(s, true));
+      }
+    }
+  } catch (err) {
+    // Silent background poll
+  }
+}
+
+function handleIncomingRealtimeContact(contact, triggerNotification = true) {
+  if (!contact || !contact.email) return;
+
+  // Deduplicate by ID
+  const existingIndex = allContactInquiries.findIndex(c => String(c.id) === String(contact.id));
+  if (existingIndex !== -1) {
+    allContactInquiries[existingIndex] = contact;
+  } else {
+    allContactInquiries.unshift(contact);
+  }
+
+  // Update KPI Metrics
+  const total = allContactInquiries.length;
+  setText('kpiTotalContacts', total);
+  setText('badgeContactsCount', total);
+
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayCount = allContactInquiries.filter(c => {
+    const dt = c.created_at || c.createdAt || '';
+    return String(dt).startsWith(todayStr);
+  }).length;
+  setText('kpiTodayContacts', todayCount);
+
+  const societies = new Set(allContactInquiries.map(c => (c.society_name || c.societyName || '').trim()).filter(Boolean));
+  setText('kpiUniqueSocieties', societies.size);
+
+  updateSidebarBadge('nav-sa-contacts', total, 'bg-warning text-dark');
+  renderContactInquiries(allContactInquiries, contact.id);
+
+  if (triggerNotification) {
+    playLiveNotificationSound();
+    showLiveRealtimeAlert({
+      icon: 'fa-envelope-open-text',
+      color: '#D4955A',
+      title: 'New Contact Inquiry Received!',
+      message: `<strong>${escapeHtml(contact.name || 'Anonymous')}</strong> from <em>${escapeHtml(contact.society_name || 'Society')}</em> (${escapeHtml(contact.email)})`,
+      subText: escapeHtml(contact.message ? (contact.message.length > 90 ? contact.message.slice(0, 90) + '...' : contact.message) : 'Website direct inquiry.'),
+      actionLabel: 'View Inquiry',
+      onAction: () => {
+        triggerNavTab('tab-sa-contacts-btn');
+      }
+    });
+  }
+}
+
+function handleIncomingRealtimeSubscriber(subscriber, triggerNotification = true) {
+  if (!subscriber || !subscriber.email) return;
+  const cleanEmail = subscriber.email.trim().toLowerCase();
+
+  // Deduplicate / move to top
+  const existingIndex = allSubscribers.findIndex(s => (s.email || '').toLowerCase() === cleanEmail);
+  if (existingIndex !== -1) {
+    allSubscribers[existingIndex].created_at = subscriber.created_at || new Date().toISOString();
+    allSubscribers[existingIndex].status = 'ACTIVE';
+    const item = allSubscribers.splice(existingIndex, 1)[0];
+    allSubscribers.unshift(item);
+  } else {
+    allSubscribers.unshift(subscriber);
+  }
+
+  // Update KPI Metrics
+  const total = allSubscribers.length;
+  setText('kpiTotalSubscribers', total);
+  setText('badgeSubscribersCount', total);
+
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayCount = allSubscribers.filter(s => {
+    const dt = s.created_at || s.createdAt || '';
+    return String(dt).startsWith(todayStr);
+  }).length;
+  setText('kpiTodaySubscribers', todayCount);
+
+  updateSidebarBadge('nav-sa-subscribers', total, 'bg-success text-white');
+  renderSubscribers(allSubscribers, subscriber.id || cleanEmail);
+
+  if (triggerNotification) {
+    playLiveNotificationSound();
+    showLiveRealtimeAlert({
+      icon: 'fa-bell',
+      color: '#10B981',
+      title: 'New Newsletter Subscriber!',
+      message: `<strong>${escapeHtml(cleanEmail)}</strong> just subscribed to product innovations!`,
+      subText: `Timestamp: ${formatDateTime(subscriber.created_at || new Date())}`,
+      actionLabel: 'View Subscribers',
+      onAction: () => {
+        triggerNavTab('tab-sa-subscribers-btn');
+      }
+    });
+  }
+}
+
+function updateSidebarBadge(navId, count, badgeClass = 'bg-primary') {
+  const navItem = document.getElementById(navId);
+  if (!navItem) return;
+  let badge = navItem.querySelector('.sa-sidebar-live-pill');
+  if (!badge) {
+    badge = document.createElement('span');
+    badge.className = `sa-sidebar-live-pill badge ${badgeClass} rounded-pill ms-auto px-2 py-0 fs-9 live-pulse-badge`;
+    navItem.appendChild(badge);
+  }
+  badge.textContent = count;
+  badge.style.display = count > 0 ? 'inline-flex' : 'none';
+}
+
+function playLiveNotificationSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+    osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15); // A5
+    gain.gain.setValueAtTime(0.08, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.35);
+  } catch (e) {
+    // AudioContext blocked before interaction
+  }
+}
+
+function showLiveRealtimeAlert({ icon, color, title, message, subText, actionLabel, onAction }) {
+  let container = document.getElementById('toastContainer');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toastContainer';
+    container.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:999999;display:flex;flex-direction:column;gap:12px;pointer-events:none;max-width:420px;';
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement('div');
+  toast.style.cssText = `
+    background: #101625;
+    color: #fff;
+    padding: 16px 20px;
+    border-radius: 14px;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.65), 0 0 0 1px ${color}40;
+    border-left: 4px solid ${color};
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 13.5px;
+    pointer-events: auto;
+    animation: liveToastIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  `;
+
+  toast.innerHTML = `
+    <div style="background:${color}20;color:${color};width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;">
+      <i class="fa-solid ${icon}"></i>
+    </div>
+    <div style="flex:1;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:3px;">
+        <div style="font-weight:700;color:#fff;font-size:13.5px;">${title}</div>
+        <span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:${color};background:${color}22;padding:2px 7px;border-radius:99px;letter-spacing:0.04em;">
+          <span style="width:5px;height:5px;border-radius:50%;background:${color};display:inline-block;"></span> LIVE
+        </span>
+      </div>
+      <div style="color:rgba(255,255,255,0.88);font-size:13px;line-height:1.45;margin-bottom:6px;">${message}</div>
+      ${subText ? `<div style="color:rgba(255,255,255,0.5);font-size:11.5px;line-height:1.3;margin-bottom:8px;">${subText}</div>` : ''}
+      ${actionLabel ? `
+        <button type="button" class="btn btn-sm" style="background:${color};color:#000;font-weight:700;font-size:11.5px;padding:3px 12px;border-radius:99px;border:none;cursor:pointer;">
+          ${actionLabel} &rarr;
+        </button>
+      ` : ''}
+    </div>
+    <button type="button" style="background:transparent;border:none;color:rgba(255,255,255,0.4);cursor:pointer;font-size:16px;padding:0;line-height:1;" title="Dismiss">&times;</button>
+  `;
+
+  const closeBtn = toast.querySelector('button[title="Dismiss"]');
+  if (closeBtn) closeBtn.onclick = () => toast.remove();
+
+  const actionBtn = toast.querySelector('button.btn');
+  if (actionBtn && onAction) {
+    actionBtn.onclick = () => {
+      onAction();
+      toast.remove();
+    };
+  }
+
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(10px)';
+    toast.style.transition = 'all 0.3s ease';
+    setTimeout(() => toast.remove(), 350);
+  }, 7000);
+}
+
 function formatDateTime(val) {
   if (!val) return '—';
   try {
-    const d = new Date(val);
-    if (isNaN(d.getTime())) return String(val);
+    const cleanStr = String(val);
+    const d = new Date(cleanStr.includes(' ') && !cleanStr.includes('T') ? cleanStr.replace(' ', 'T') : cleanStr);
+    if (isNaN(d.getTime())) return cleanStr;
     return d.toLocaleString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -1531,6 +1830,9 @@ window.renderSubscribers = renderSubscribers;
 window.filterSubscribers = filterSubscribers;
 window.deleteSubscriber = deleteSubscriber;
 window.exportSubscribersCSV = exportSubscribersCSV;
+window.initRealtimeSuperAdmin = initRealtimeSuperAdmin;
+window.handleIncomingRealtimeContact = handleIncomingRealtimeContact;
+window.handleIncomingRealtimeSubscriber = handleIncomingRealtimeSubscriber;
 window.toggleMaintenanceMode = toggleMaintenanceMode;
 window.handleCreateSociety = handleCreateSociety;
 window.loginAsDevSuperAdmin = loginAsDevSuperAdmin;

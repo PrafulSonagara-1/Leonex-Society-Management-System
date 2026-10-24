@@ -858,7 +858,7 @@
 
             <div>
               <label style="display: block; font-size: 13px; font-weight: 600; color: var(--cosmic-text-head); margin-bottom: 6px;">How can we help? *</label>
-              <textarea id="contactMessage" required rows="3" placeholder="Tell us about your society requirements (number of flats, gate setup, automated billing needs)..." class="cosmic-contact-input" style="width: 100%; padding: 11px 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; color: var(--cosmic-text-head); font-size: 14px; outline: none; resize: vertical; transition: border-color 0.2s;" border-box;></textarea>
+              <textarea id="contactMessage" required rows="3" placeholder="Tell us about your society requirements (number of flats, gate setup, automated billing needs)..." class="cosmic-contact-input" style="width: 100%; padding: 11px 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; color: var(--cosmic-text-head); font-size: 14px; outline: none; resize: vertical; box-sizing: border-box; transition: border-color 0.2s;"></textarea>
             </div>
 
             <div id="contactSuccessMsg" style="display:none; padding: 12px 16px; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; color: #10B981; font-size: 14px;">
@@ -988,15 +988,25 @@
       md.querySelectorAll('a').forEach(a => a.addEventListener('click', () => md.classList.remove('open')));
     }
 
+    // Persistent Real-time Broadcast Channel for instant cross-tab sync
+    const ssmRealtimeBroadcast = (typeof window !== 'undefined' && window.BroadcastChannel)
+      ? new BroadcastChannel('ssm_realtime_channel')
+      : null;
+
     async function handleContactSubmit(e) {
       e.preventDefault();
       const btn = document.getElementById('contactSubmitBtn');
       const success = document.getElementById('contactSuccessMsg');
-      const name = document.getElementById('contactName')?.value;
-      const society = document.getElementById('contactSociety')?.value;
-      const email = document.getElementById('contactEmail')?.value;
-      const phone = document.getElementById('contactPhone')?.value;
-      const message = document.getElementById('contactMessage')?.value;
+      const name = (document.getElementById('contactName')?.value || '').trim();
+      const society = (document.getElementById('contactSociety')?.value || '').trim();
+      const email = (document.getElementById('contactEmail')?.value || '').trim();
+      const phone = (document.getElementById('contactPhone')?.value || '').trim();
+      const message = (document.getElementById('contactMessage')?.value || '').trim();
+
+      if (!email || !email.includes('@')) {
+        alert('Please enter a valid email address.');
+        return;
+      }
 
       if (btn) {
         btn.disabled = true;
@@ -1011,13 +1021,27 @@
         });
         const data = await res.json();
         if (data.success) {
-          if (btn) btn.style.display = 'none';
+          // Instant 0ms broadcast to any open Super Admin tab
+          if (ssmRealtimeBroadcast) {
+            try {
+              ssmRealtimeBroadcast.postMessage({ type: 'NEW_CONTACT', contact: data.contact });
+            } catch (bcErr) {
+              console.warn('[BroadcastChannel error]', bcErr);
+            }
+          }
+
           if (success) {
             success.style.display = 'block';
             success.innerHTML = `<i class="fa-solid fa-circle-check" style="margin-right: 6px;"></i> ${data.message || 'Thank you! Your message has been sent.'}`;
           }
           const form = document.getElementById('contactForm');
           if (form) form.reset();
+          setTimeout(() => {
+            if (btn) {
+              btn.disabled = false;
+              btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Another Message';
+            }
+          }, 2500);
         } else {
           alert(data.message || 'Failed to send message. Please try again.');
           if (btn) {
@@ -1027,10 +1051,10 @@
         }
       } catch (err) {
         console.error('Contact submit error:', err);
-        if (btn) btn.style.display = 'none';
-        if (success) {
-          success.style.display = 'block';
-          success.innerHTML = '<i class="fa-solid fa-circle-check" style="margin-right: 6px;"></i> Thank you! Your message has been sent. Our team will contact you shortly.';
+        alert('Network error. Please try again.');
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Message';
         }
       }
     }
@@ -1040,9 +1064,12 @@
       const btn = document.getElementById('newsletterSubmitBtn');
       const success = document.getElementById('newsletterSuccessMsg');
       const emailInput = document.getElementById('newsletterEmail');
-      const email = emailInput?.value;
+      const email = (emailInput?.value || '').trim();
 
-      if (!email) return;
+      if (!email || !email.includes('@')) {
+        alert('Please enter a valid email address.');
+        return;
+      }
 
       if (btn) {
         btn.disabled = true;
@@ -1057,11 +1084,26 @@
         });
         const data = await res.json();
         if (data.success) {
-          const form = document.getElementById('newsletterForm');
-          if (form) form.style.display = 'none';
+          // Instant 0ms broadcast to any open Super Admin tab
+          if (ssmRealtimeBroadcast) {
+            try {
+              ssmRealtimeBroadcast.postMessage({ type: 'NEW_SUBSCRIBER', subscriber: data.subscriber });
+            } catch (bcErr) {
+              console.warn('[BroadcastChannel error]', bcErr);
+            }
+          }
+
+          if (emailInput) emailInput.value = '';
           if (success) {
             success.style.display = 'block';
             success.innerHTML = `<i class="fa-solid fa-circle-check" style="margin-right: 8px;"></i> ${data.message || 'Subscribed successfully!'}`;
+          }
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-check me-1"></i> Subscribed!';
+            setTimeout(() => {
+              btn.innerHTML = '<span>Subscribe</span> <i class="fa-solid fa-bell" style="margin-left: 6px;"></i>';
+            }, 3000);
           }
         } else {
           alert(data.message || 'Subscription failed. Please check your email.');
@@ -1072,6 +1114,7 @@
         }
       } catch (err) {
         console.error('Newsletter submit error:', err);
+        alert('Network error. Please try again.');
         if (btn) {
           btn.disabled = false;
           btn.innerHTML = '<span>Subscribe</span> <i class="fa-solid fa-bell" style="margin-left: 6px;"></i>';

@@ -140,23 +140,92 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Smart Society Management System API active' });
 });
 
+// Real-time SSE Manager for Super Admin Live Updates
+const sseSubscribers = new Set();
+
+function broadcastRealtime(type, data) {
+  const payload = JSON.stringify({ type, data, timestamp: new Date().toISOString() });
+  const eventMsg = `event: message\ndata: ${payload}\n\n`;
+  for (const client of sseSubscribers) {
+    try {
+      client.write(eventMsg);
+    } catch (e) {
+      sseSubscribers.delete(client);
+    }
+  }
+}
+
+// Server-Sent Events (SSE) Stream Endpoint for Instant Live Updates
+app.get('/api/realtime/stream', (req, res) => {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache, no-transform',
+    'Connection': 'keep-alive',
+    'Access-Control-Allow-Origin': '*'
+  });
+  res.write(': connected\n\n');
+
+  sseSubscribers.add(res);
+
+  const heartbeat = setInterval(() => {
+    try {
+      res.write(': heartbeat\n\n');
+    } catch (e) {
+      clearInterval(heartbeat);
+      sseSubscribers.delete(res);
+    }
+  }, 15000);
+
+  req.on('close', () => {
+    clearInterval(heartbeat);
+    sseSubscribers.delete(res);
+  });
+});
+
+// Realtime Snapshot for Polling Fallback
+app.get('/api/realtime/snapshot', async (req, res) => {
+  try {
+    const contacts = await db.getContactMessages();
+    const subscribers = await db.getSubscribers();
+    res.json({
+      success: true,
+      contacts,
+      subscribers,
+      timestamp: new Date().toISOString()
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // Public Contact Form Submission Endpoint
 app.post('/api/contact', async (req, res) => {
   try {
     const { name, societyName, society, email, phone, message } = req.body;
-    if (!name || !email || !message) {
-      return res.status(400).json({ success: false, message: 'Name, email, and message are required.' });
+    if (!email || typeof email !== 'string' || !email.includes('@')) {
+      return res.status(400).json({ success: false, message: 'A valid email address is required.' });
     }
+
+    const cleanEmail = email.trim();
+    const cleanName = (name && name.trim()) || cleanEmail.split('@')[0] || 'Prospective Client';
+    const cleanSociety = (societyName && societyName.trim()) || (society && society.trim()) || 'Residential Community';
+    const cleanPhone = (phone && phone.trim()) || '';
+    const cleanMessage = (message && message.trim()) || 'Inquiry sent from landing page contact form.';
+
     const saved = await db.saveContactMessage({
-      name,
-      society_name: societyName || society || '',
-      email,
-      phone: phone || '',
-      message
+      name: cleanName,
+      society_name: cleanSociety,
+      email: cleanEmail,
+      phone: cleanPhone,
+      message: cleanMessage
     });
+
+    // Instantly notify connected Super Admin dashboards in real-time
+    broadcastRealtime('NEW_CONTACT', saved);
+
     return res.status(201).json({
       success: true,
-      message: 'Thank you! Your message has been received. Our team will contact you shortly.',
+      message: `Thank you, ${cleanName}! Your message has been received. Our team will contact you shortly.`,
       contact: saved
     });
   } catch (err) {
@@ -169,13 +238,19 @@ app.post('/api/contact', async (req, res) => {
 app.post('/api/subscribe', async (req, res) => {
   try {
     const { email } = req.body;
-    if (!email || !email.includes('@')) {
+    if (!email || typeof email !== 'string' || !email.includes('@')) {
       return res.status(400).json({ success: false, message: 'A valid email address is required.' });
     }
-    const saved = await db.saveSubscriber(email);
+
+    const cleanEmail = email.trim().toLowerCase();
+    const saved = await db.saveSubscriber(cleanEmail);
+
+    // Instantly notify connected Super Admin dashboards in real-time
+    broadcastRealtime('NEW_SUBSCRIBER', saved);
+
     return res.status(201).json({
       success: true,
-      message: 'Successfully subscribed to society updates and announcements!',
+      message: `Successfully subscribed! Updates will be sent to ${cleanEmail}.`,
       subscriber: saved
     });
   } catch (err) {

@@ -1431,7 +1431,15 @@ class DatabaseManager {
 
     if (!this.fallbackStore.subscribers) this.fallbackStore.subscribers = [];
     const exists = this.fallbackStore.subscribers.find(s => s.email.toLowerCase() === cleanEmail);
-    if (!exists) {
+    if (exists) {
+      exists.created_at = subscriber.created_at;
+      exists.status = 'ACTIVE';
+      this.fallbackStore.subscribers = [
+        exists,
+        ...this.fallbackStore.subscribers.filter(s => s.email.toLowerCase() !== cleanEmail)
+      ];
+      this.saveFallbackStore();
+    } else {
       this.fallbackStore.subscribers.unshift(subscriber);
       this.saveFallbackStore();
     }
@@ -1441,8 +1449,8 @@ class DatabaseManager {
         await this.pool.query(
           `INSERT INTO newsletter_subscribers (email, status, created_at)
            VALUES (?, ?, ?)
-           ON DUPLICATE KEY UPDATE status = 'ACTIVE'`,
-          [subscriber.email, subscriber.status, subscriber.created_at]
+           ON DUPLICATE KEY UPDATE status = 'ACTIVE', created_at = ?`,
+          [subscriber.email, subscriber.status, subscriber.created_at, subscriber.created_at]
         );
       } catch (e) {
         console.warn('[MySQL saveSubscriber error]', e.message);
