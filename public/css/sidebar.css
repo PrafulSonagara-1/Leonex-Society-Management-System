@@ -1298,11 +1298,16 @@ body.leonex-collapsed .leonex-submenu {
   font-size: 10px;
   font-weight: 600;
   border-radius: 999px;
-  background: #EF4444;
+  background: rgba(255, 255, 255, 0.16);
   color: #FFFFFF;
   line-height: 1.4;
   margin-left: 6px;
   flex-shrink: 0;
+}
+
+[data-theme="light"] .leonex-nav-badge {
+  background: rgba(15, 23, 42, 0.1);
+  color: #0F172A;
 }
 
 body.leonex-collapsed .leonex-nav-badge {
@@ -1383,7 +1388,7 @@ body.leonex-collapsed .leonex-user-card {
   right: -2px;
   width: 14px;
   height: 14px;
-  background: #6366F1;
+  background: #27272A;
   color: #FFFFFF;
   border-radius: 50%;
   display: flex;
@@ -1396,9 +1401,18 @@ body.leonex-collapsed .leonex-user-card {
   pointer-events: none;
 }
 
+[data-theme="light"] .leonex-avatar-badge {
+  background: #475569;
+  color: #FFFFFF;
+}
+
 .leonex-user-card:hover .leonex-avatar-badge {
   transform: scale(1.18) rotate(45deg);
-  background: #4F46E5;
+  background: #3F3F46;
+}
+
+[data-theme="light"] .leonex-user-card:hover .leonex-avatar-badge {
+  background: #1E293B;
 }
 
 .leonex-user-avatar {
@@ -1553,8 +1567,8 @@ body.leonex-collapsed .leonex-user-info {
 }
 
 .leonex-user-action:hover {
-  background: rgba(239, 68, 68, 0.14);
-  color: #EF4444;
+  background: var(--lx-hover-pill-bg);
+  color: var(--lx-label-hover);
   transform: scale(1.08);
 }
 
@@ -1691,4 +1705,80 @@ body.leonex-collapsed .leonex-main-wrapper {
     opacity: 1;
     pointer-events: auto;
   }
+}
+
+/* =============================================================================
+   CLEAN MONOCHROME OUTLINE ICONS & BADGES (ALL DASHBOARDS & DEMO)
+   Clean, unified slate/zinc monochrome aesthetics without bright colors
+   ============================================================================= */
+
+.lx-anim-icon,
+.lx-icon-layer svg,
+.lx-icon-layer .lx-icon,
+.leonex-nav-icon i,
+.leonex-sidebar i,
+.leonex-sidebar i[class*="fa-"],
+.leonex-sidebar svg {
+  color: var(--lx-icon-color) !important;
+  stroke: currentColor !important;
+  transition: color 0.2s ease, stroke 0.2s ease;
+}
+
+.leonex-nav-item:hover .leonex-nav-icon,
+.leonex-nav-item:hover .lx-anim-icon,
+.leonex-nav-item:hover .lx-icon-layer svg,
+.leonex-nav-item:hover .lx-icon-layer .lx-icon,
+.leonex-nav-item:hover .leonex-nav-icon i,
+.leonex-nav-item:hover i,
+.leonex-sub-item:hover i {
+  color: var(--lx-icon-hover-color) !important;
+  stroke: var(--lx-icon-hover-color) !important;
+}
+
+.leonex-nav-item.active .leonex-nav-icon,
+.leonex-nav-item.active .lx-anim-icon,
+.leonex-nav-item.active .lx-icon-layer svg,
+.leonex-nav-item.active .lx-icon-layer .lx-icon,
+.leonex-nav-item.active .leonex-nav-icon i,
+.leonex-nav-item.active i,
+.leonex-sub-item.active i {
+  color: var(--lx-active-color) !important;
+  stroke: var(--lx-active-color) !important;
+}
+
+/* User Profile Avatar Gear Badge strictly monochrome */
+.leonex-avatar-badge {
+  background: #27272A !important;
+  border: 1.5px solid #141418 !important;
+  color: #E4E4E7 !important;
+}
+
+.leonex-avatar-badge i,
+.leonex-avatar-badge i[class*="fa-"],
+.leonex-avatar-badge i.fa-gear {
+  color: #E4E4E7 !important;
+  font-size: 8px !important;
+}
+
+[data-theme="light"] .leonex-avatar-badge {
+  background: #E2E8F0 !important;
+  border-color: #FFFFFF !important;
+  color: #334155 !important;
+}
+
+[data-theme="light"] .leonex-avatar-badge i,
+[data-theme="light"] .leonex-avatar-badge i[class*="fa-"],
+[data-theme="light"] .leonex-avatar-badge i.fa-gear {
+  color: #334155 !important;
+}
+
+/* Strict Zero Glow across all sidebar icons and badges */
+.lx-anim-icon,
+.lx-icon-layer,
+.leonex-nav-icon,
+.leonex-sidebar i,
+.leonex-avatar-badge {
+  box-shadow: none !important;
+  filter: none !important;
+  text-shadow: none !important;
 }

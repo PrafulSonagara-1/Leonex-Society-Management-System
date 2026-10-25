@@ -460,7 +460,72 @@ const SystemDB = {
   },
 
   getCurrentUser() {
-    const sess = sessionStorage.getItem(SESSION_KEY);
+    let sess = null;
+    try { sess = sessionStorage.getItem(SESSION_KEY); } catch(e) {}
+    if (!sess) {
+      try { sess = localStorage.getItem(SESSION_KEY); } catch(e) {}
+      if (sess) {
+        try { sessionStorage.setItem(SESSION_KEY, sess); } catch(e) {}
+      }
+    }
+    if (!sess) {
+      // Check if we are visiting a portal page in demo context
+      try {
+        const path = (typeof window !== 'undefined' && window.location) ? window.location.pathname.toLowerCase() : '';
+        const isPortal = path.includes('admin') || path.includes('resident') || path.includes('guard') || path.includes('committee') || path.includes('vehicles') || path.includes('demo');
+        const isExplicitDemo = sessionStorage.getItem('ssm_demo_mode') === 'true' || localStorage.getItem('ssm_demo_mode') === 'true';
+
+        if (isPortal || isExplicitDemo) {
+          let role = 'Admin';
+          let defaultUser = {
+            id: 'demo_admin_01', name: 'Jenil Barad', email: 'admin@demo.societyhub',
+            role: 'Admin', status: 'Approved', phone: '+91 98765 43210',
+            flat_no: 'Office', authProvider: 'demo', societyCode: 'DEMO01',
+            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Admin'
+          };
+
+          if (path.includes('resident') || path.includes('vehicles')) {
+            role = 'Resident';
+            defaultUser = {
+              id: 'demo_res_01', name: 'Amit Patel', email: 'resident@demo.societyhub',
+              role: 'Resident', status: 'Approved', phone: '+91 98765 00001',
+              flat: 'A-402', flat_no: 'A-402', authProvider: 'demo', societyCode: 'DEMO01',
+              avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Resident'
+            };
+          } else if (path.includes('guard')) {
+            role = 'Security Guard';
+            defaultUser = {
+              id: 'demo_grd_01', name: 'Ramesh Singh', email: 'guard@demo.societyhub',
+              role: 'Security Guard', status: 'Approved', phone: '+91 98765 00002',
+              flat_no: 'Gate', authProvider: 'demo', societyCode: 'DEMO01',
+              avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Guard'
+            };
+          } else if (path.includes('committee')) {
+            role = 'Committee Member';
+            defaultUser = {
+              id: 'demo_cmt_01', name: 'Suresh Mehta', email: 'committee@demo.societyhub',
+              role: 'Committee Member', status: 'Approved', phone: '+91 98765 00003',
+              flat_no: 'B-101', authProvider: 'demo', societyCode: 'DEMO01',
+              avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Committee'
+            };
+          }
+
+          sess = JSON.stringify(defaultUser);
+          sessionStorage.setItem(SESSION_KEY, sess);
+          localStorage.setItem(SESSION_KEY, sess);
+          sessionStorage.setItem('ssm_auth_token', 'demo-' + defaultUser.id);
+          localStorage.setItem('ssm_auth_token', 'demo-' + defaultUser.id);
+          sessionStorage.setItem('ssm_demo_mode', 'true');
+          localStorage.setItem('ssm_demo_mode', 'true');
+          sessionStorage.setItem('ssm_society_code', 'DEMO01');
+          localStorage.setItem('ssm_society_code', 'DEMO01');
+          sessionStorage.setItem('ssm_society_name', 'SocietyHub Grand Residency (Demo)');
+          localStorage.setItem('ssm_society_name', 'SocietyHub Grand Residency (Demo)');
+        }
+      } catch (fallbackErr) {
+        console.warn('Demo session auto-provision error', fallbackErr);
+      }
+    }
     return sess ? JSON.parse(sess) : null;
   },
 

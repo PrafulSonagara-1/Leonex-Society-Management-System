@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Live Demo Portals | SocietyHub</title>
+  <link rel="icon" type="image/png" href="images/favicon.png">
+  <link rel="apple-touch-icon" href="images/favicon.png">
   <meta name="description" content="Explore live role-based demo portals of SocietyHub — Admin, Resident, Security Guard, and Committee Member with interactive sample data.">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -334,7 +336,7 @@
     <!-- 4 Role Demo Cards -->
     <div class="demo-grid-wrap">
       <!-- 1. Admin -->
-      <div class="demo-card-item" id="card-admin">
+      <div class="demo-card-item" id="card-admin" onclick="enterDemo(event, 'Admin')" style="cursor: pointer;">
         <div>
           <div class="demo-card-top">
             <div class="role-icon-box admin">
@@ -352,13 +354,13 @@
             <li><i class="fa-solid fa-check"></i> Broadcast platform-wide announcements</li>
           </ul>
         </div>
-        <button class="btn-enter-demo" onclick="enterDemo('Admin')">
+        <a href="admin.html" class="btn-enter-demo" onclick="enterDemo(event, 'Admin')">
           Launch Admin Portal <i class="fa-solid fa-arrow-right"></i>
-        </button>
+        </a>
       </div>
 
       <!-- 2. Resident -->
-      <div class="demo-card-item" id="card-resident">
+      <div class="demo-card-item" id="card-resident" onclick="enterDemo(event, 'Resident')" style="cursor: pointer;">
         <div>
           <div class="demo-card-top">
             <div class="role-icon-box resident">
@@ -376,13 +378,13 @@
             <li><i class="fa-solid fa-check"></i> Raise maintenance tickets with photo</li>
           </ul>
         </div>
-        <button class="btn-enter-demo" onclick="enterDemo('Resident')">
+        <a href="resident.html" class="btn-enter-demo" onclick="enterDemo(event, 'Resident')">
           Launch Resident Portal <i class="fa-solid fa-arrow-right"></i>
-        </button>
+        </a>
       </div>
 
       <!-- 3. Security Guard -->
-      <div class="demo-card-item" id="card-guard">
+      <div class="demo-card-item" id="card-guard" onclick="enterDemo(event, 'Security Guard')" style="cursor: pointer;">
         <div>
           <div class="demo-card-top">
             <div class="role-icon-box guard">
@@ -400,13 +402,13 @@
             <li><i class="fa-solid fa-check"></i> Emergency alarm siren & gate log sync</li>
           </ul>
         </div>
-        <button class="btn-enter-demo" onclick="enterDemo('Security Guard')">
+        <a href="guard.html" class="btn-enter-demo" onclick="enterDemo(event, 'Security Guard')">
           Launch Guard Desk <i class="fa-solid fa-arrow-right"></i>
-        </button>
+        </a>
       </div>
 
       <!-- 4. Committee Member -->
-      <div class="demo-card-item" id="card-committee">
+      <div class="demo-card-item" id="card-committee" onclick="enterDemo(event, 'Committee Member')" style="cursor: pointer;">
         <div>
           <div class="demo-card-top">
             <div class="role-icon-box committee">
@@ -424,9 +426,9 @@
             <li><i class="fa-solid fa-check"></i> Read-only governance & SLA tracking</li>
           </ul>
         </div>
-        <button class="btn-enter-demo" onclick="enterDemo('Committee Member')">
+        <a href="committee.html" class="btn-enter-demo" onclick="enterDemo(event, 'Committee Member')">
           Launch Committee Portal <i class="fa-solid fa-arrow-right"></i>
-        </button>
+        </a>
       </div>
     </div>
 
@@ -449,6 +451,7 @@
   <script>
     function showToast(msg, type = 'info') {
       const c = document.getElementById('toast-container');
+      if (!c) return;
       const t = document.createElement('div');
       t.className = 'toast-msg';
       const icon = type === 'success' ? '✓' : 'ℹ';
@@ -491,53 +494,65 @@
       'Committee Member': 'committee.html'
     };
 
-    function enterDemo(role) {
+    function enterDemo(e, role) {
+      if (e) {
+        try {
+          if (typeof e.stopPropagation === 'function') e.stopPropagation();
+          if (typeof e.preventDefault === 'function') e.preventDefault();
+        } catch(err) {}
+      }
+
       const user = DEMO_USERS[role];
       if (!user) return;
 
-      document.querySelectorAll('.btn-enter-demo').forEach(b => {
-        b.disabled = true;
-        b.style.opacity = '0.6';
-        b.style.pointerEvents = 'none';
-      });
+      const userJson = JSON.stringify(user);
+      try {
+        sessionStorage.setItem('ssm_current_user', userJson);
+        localStorage.setItem('ssm_current_user', userJson);
+        sessionStorage.setItem('ssm_auth_token', 'demo-' + user.id);
+        localStorage.setItem('ssm_auth_token', 'demo-' + user.id);
+        sessionStorage.setItem('ssm_demo_mode', 'true');
+        localStorage.setItem('ssm_demo_mode', 'true');
+        sessionStorage.setItem('ssm_society_code', 'DEMO01');
+        localStorage.setItem('ssm_society_code', 'DEMO01');
+        sessionStorage.setItem('ssm_society_name', 'SocietyHub Grand Residency (Demo)');
+        localStorage.setItem('ssm_society_name', 'SocietyHub Grand Residency (Demo)');
+        sessionStorage.removeItem('ssm_clerk_dev_id');
+      } catch (storageErr) {
+        console.warn('Storage write error', storageErr);
+      }
 
-      sessionStorage.setItem('ssm_current_user', JSON.stringify(user));
-      sessionStorage.setItem('ssm_auth_token', 'demo-' + user.id);
-      sessionStorage.setItem('ssm_demo_mode', 'true');
-      sessionStorage.setItem('ssm_society_code', 'DEMO01');
-      sessionStorage.setItem('ssm_society_name', 'SocietyHub Grand Residency (Demo)');
-      sessionStorage.removeItem('ssm_clerk_dev_id');
-
-      showToast(`Launching ${role} Demo…`, 'success');
-      setTimeout(() => {
-        window.location.href = ROLE_URLS[role] || 'index.html';
-      }, 550);
+      const targetUrl = ROLE_URLS[role] || 'index.html';
+      window.location.href = targetUrl;
     }
 
-    // Auto-highlight or focus if ?role=... or ?demo=... is present in URL
+    // Auto-launch or highlight if ?role=... or ?demo=... is present in URL
     document.addEventListener('DOMContentLoaded', async () => {
       sessionStorage.setItem('ssm_demo_mode', 'true');
+      localStorage.setItem('ssm_demo_mode', 'true');
       sessionStorage.setItem('ssm_society_code', 'DEMO01');
+      localStorage.setItem('ssm_society_code', 'DEMO01');
+
       if (typeof SystemDB !== 'undefined' && typeof SystemDB.init === 'function') {
-        await SystemDB.init();
+        try { await SystemDB.init(); } catch (e) {}
       }
       if (typeof updateNotificationBadge === 'function') {
-        updateNotificationBadge();
+        try { updateNotificationBadge(); } catch (e) {}
       }
+
       const params = new URLSearchParams(window.location.search);
       const roleParam = params.get('role') || params.get('demo');
       if (roleParam) {
-        const key = roleParam.toLowerCase().includes('admin') ? 'admin' :
-                    roleParam.toLowerCase().includes('res') ? 'resident' :
-                    roleParam.toLowerCase().includes('guard') ? 'guard' :
-                    roleParam.toLowerCase().includes('comm') ? 'committee' : null;
-        if (key) {
-          const card = document.getElementById('card-' + key);
-          if (card) {
-            card.classList.add('highlighted');
-            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            showToast(`Ready to test ${roleParam} Portal`, 'info');
-          }
+        let matchedRole = null;
+        const lower = roleParam.toLowerCase();
+        if (lower.includes('admin')) matchedRole = 'Admin';
+        else if (lower.includes('res')) matchedRole = 'Resident';
+        else if (lower.includes('guard')) matchedRole = 'Security Guard';
+        else if (lower.includes('comm')) matchedRole = 'Committee Member';
+
+        if (matchedRole) {
+          // Immediately launch the requested demo role
+          enterDemo(null, matchedRole);
         }
       }
     });

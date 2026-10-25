@@ -14,78 +14,52 @@ let currentSelectedSociety = null;
 let currentSocietyFilter = 'ALL';
 
 document.addEventListener('DOMContentLoaded', async () => {
+  const unlockBtn = document.getElementById('gateUnlockBtn');
+  if (unlockBtn) {
+    unlockBtn.addEventListener('click', handleSecurityGateLogin);
+  }
+  const gateForm = document.getElementById('saGateLoginForm');
+  if (gateForm) {
+    gateForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      handleSecurityGateLogin(e);
+    });
+  }
   await initSuperAdminAuth();
 });
 
 /**
  * Initialize Super Admin Authentication & Verification
+ * ALWAYS enforces entering Super Admin Name & Password upon opening the portal.
  */
 async function initSuperAdminAuth() {
   const gate = document.getElementById('saSecurityGate');
   const denied = document.getElementById('accessDeniedOverlay');
   const mainApp = document.getElementById('mainAppLayout');
 
+  // 1. Immediately ensure UI is in locked state
+  if (mainApp) mainApp.style.display = 'none';
+  if (denied) denied.style.display = 'none';
+  if (gate) gate.style.display = 'flex';
+
+  // 2. Wipe previous tokens so credentials are required every time the page is opened
+  currentSuperAdminToken = null;
+  currentSuperAdminUser = null;
+  currentClerkToken = null;
+  currentClerkUserId = null;
+
   try {
-    // 1. Check for stored Super Admin JWT token in session or local storage
-    currentSuperAdminToken =
-      sessionStorage.getItem('ssm_super_admin_token') ||
-      localStorage.getItem('ssm_super_admin_token');
+    sessionStorage.removeItem('ssm_super_admin_token');
+    sessionStorage.removeItem('ssm_super_admin_user');
+    sessionStorage.removeItem('ssm_auth_token');
+    sessionStorage.removeItem('ssm_current_user');
+    sessionStorage.removeItem('ssm_clerk_dev_id');
+    localStorage.removeItem('ssm_super_admin_token');
+    localStorage.removeItem('ssm_super_admin_user');
+  } catch (e) {}
 
-    const storedUser =
-      sessionStorage.getItem('ssm_super_admin_user') ||
-      localStorage.getItem('ssm_super_admin_user');
-
-    if (storedUser) {
-      try { currentSuperAdminUser = JSON.parse(storedUser); } catch (e) {}
-    }
-
-    // 2. Fallback: check Clerk SDK session
-    try {
-      if (window.Clerk && window.Clerk.user) {
-        currentClerkUserId = window.Clerk.user.id;
-        if (window.Clerk.session) {
-          currentClerkToken = await window.Clerk.session.getToken();
-        }
-      }
-    } catch (e) {}
-
-    // 3. Fallback: check stored dev token
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('clerk_id')) {
-      currentClerkUserId = urlParams.get('clerk_id');
-      sessionStorage.setItem('ssm_clerk_dev_id', currentClerkUserId);
-    } else if (sessionStorage.getItem('ssm_clerk_dev_id')) {
-      currentClerkUserId = sessionStorage.getItem('ssm_clerk_dev_id');
-    }
-
-    // 4. Verify credentials with the backend
-    const authHeaders = getAuthHeaders();
-    if (currentSuperAdminToken || currentClerkToken || currentClerkUserId) {
-      const resp = await fetch('/api/super-admin/verify', {
-        method: 'GET',
-        headers: authHeaders
-      });
-
-      if (resp.ok) {
-        const data = await resp.json();
-        if (data.success && data.authorized) {
-          if (data.user) {
-            currentSuperAdminUser = data.user;
-            sessionStorage.setItem('ssm_super_admin_user', JSON.stringify(data.user));
-          }
-          revealDashboard(data);
-          return;
-        }
-      }
-    }
-
-    // If verification was not successful, display the Super Admin Security Gate
-    showSecurityGate();
-
-  } catch (err) {
-    console.error('Super Admin Auth verification error:', err);
-    showSecurityGate();
-  }
+  // 3. Prompt for Super Admin Name and Password
+  showSecurityGate();
 }
 
 /**
@@ -141,24 +115,18 @@ async function showSecurityGate() {
   if (denied) denied.style.display = 'none';
   if (gate) gate.style.display = 'flex';
 
-  const passInput = document.getElementById('gatePassword');
-  if (passInput && !passInput.value && document.activeElement !== passInput) {
-    passInput.focus();
-  }
+  const userField = document.getElementById('gateUsername');
+  const passField = document.getElementById('gatePassword');
+  const errorBox = document.getElementById('gateErrorAlert');
 
-  // Fetch configured username/name for pre-fill
-  try {
-    const res = await fetch('/api/super-admin/auth/status');
-    if (res.ok) {
-      const status = await res.json();
-      if (status.username) {
-        const uInput = document.getElementById('gateUsername');
-        if (uInput && (!uInput.value || uInput.value === 'superadmin')) {
-          uInput.value = status.username;
-        }
-      }
-    }
-  } catch (e) {}
+  if (errorBox) errorBox.classList.add('d-none');
+  if (passField) passField.value = '';
+
+  if (userField && !userField.value) {
+    userField.focus();
+  } else if (passField) {
+    passField.focus();
+  }
 }
 
 /**
@@ -171,7 +139,6 @@ async function handleSecurityGateLogin(event) {
   }
   const username = document.getElementById('gateUsername')?.value.trim();
   const password = document.getElementById('gatePassword')?.value;
-  const remember = document.getElementById('gateRememberMe')?.checked;
   const submitBtn = document.getElementById('gateUnlockBtn');
   const errorBox = document.getElementById('gateErrorAlert');
   const errorMsg = document.getElementById('gateErrorMessage');
@@ -179,7 +146,7 @@ async function handleSecurityGateLogin(event) {
   if (!username || !password) {
     if (errorBox) {
       errorBox.classList.remove('d-none');
-      if (errorMsg) errorMsg.textContent = 'Please enter both your name/username and strong password.';
+      if (errorMsg) errorMsg.textContent = 'Please enter both your Super Admin name and password.';
     }
     return;
   }
@@ -200,7 +167,7 @@ async function handleSecurityGateLogin(event) {
     const data = await resp.json();
 
     if (resp.ok && data.success && data.token) {
-      // Store token & user profile
+      // Store token & user profile in memory and session for this active window
       currentSuperAdminToken = data.token;
       currentSuperAdminUser = data.user;
 
@@ -214,9 +181,13 @@ async function handleSecurityGateLogin(event) {
         authProvider: 'system_owner'
       }));
 
-      // Always persist master session in localStorage and sessionStorage
-      localStorage.setItem('ssm_super_admin_token', data.token);
-      localStorage.setItem('ssm_super_admin_user', JSON.stringify(data.user));
+      // Never keep persistent master token in localStorage
+      localStorage.removeItem('ssm_super_admin_token');
+      localStorage.removeItem('ssm_super_admin_user');
+
+      // Clear password field
+      const passField = document.getElementById('gatePassword');
+      if (passField) passField.value = '';
 
       if (window.location.search) {
         try {
@@ -229,7 +200,7 @@ async function handleSecurityGateLogin(event) {
     } else {
       if (errorBox) {
         errorBox.classList.remove('d-none');
-        if (errorMsg) errorMsg.textContent = data.message || 'Invalid Super Admin credentials. Please check your password.';
+        if (errorMsg) errorMsg.textContent = data.message || 'Invalid Super Admin name or password.';
       }
     }
   } catch (err) {
@@ -246,6 +217,29 @@ async function handleSecurityGateLogin(event) {
   }
 }
 window.handleSecurityGateLogin = handleSecurityGateLogin;
+
+/**
+ * Lock the Super Admin Portal immediately
+ */
+function lockSuperAdminPortal() {
+  currentSuperAdminToken = null;
+  currentSuperAdminUser = null;
+  try {
+    sessionStorage.removeItem('ssm_super_admin_token');
+    sessionStorage.removeItem('ssm_super_admin_user');
+    sessionStorage.removeItem('ssm_auth_token');
+    sessionStorage.removeItem('ssm_current_user');
+    localStorage.removeItem('ssm_super_admin_token');
+    localStorage.removeItem('ssm_super_admin_user');
+  } catch (e) {}
+
+  const passField = document.getElementById('gatePassword');
+  if (passField) passField.value = '';
+
+  showSecurityGate();
+  showToast('Super Admin portal locked.', 'info');
+}
+window.lockSuperAdminPortal = lockSuperAdminPortal;
 
 
 /**
@@ -611,6 +605,7 @@ async function handleSuperAdminLogout() {
   }, 400);
 }
 window.superAdminLogout = handleSuperAdminLogout;
+window.logout = handleSuperAdminLogout;
 
 // ══════════════════════════════════════════════════════════════
 // DASHBOARD VIEW
@@ -1932,7 +1927,6 @@ window.handleIncomingRealtimeContact = handleIncomingRealtimeContact;
 window.handleIncomingRealtimeSubscriber = handleIncomingRealtimeSubscriber;
 window.toggleMaintenanceMode = toggleMaintenanceMode;
 window.handleCreateSociety = handleCreateSociety;
-window.loginAsDevSuperAdmin = loginAsDevSuperAdmin;
-window.triggerClerkSignIn = triggerClerkSignIn;
+
 
 

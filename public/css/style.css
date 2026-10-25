@@ -4772,7 +4772,7 @@ html[data-theme="light"] .clerk-popover-item:hover {
 [data-theme="light"] .sa-table td,
 [data-theme="light"] .table td {
   border-bottom: 1px solid #F1F5F9 !important;
-  color: #1E293B !important;
+  color: #0F172A !important;
 }
 
 [data-theme="light"] .sa-table tr:hover td,
@@ -4780,7 +4780,43 @@ html[data-theme="light"] .clerk-popover-item:hover {
   background: #F8FAFC !important;
 }
 
-/* Light text color handling on light backgrounds */
+[data-theme="light"] .btn-close {
+  filter: none !important;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   UNIVERSAL TEXT VISIBILITY SYSTEM FOR BOTH LIGHT & DARK THEMES
+   Guarantees 100% readability of all letters, words, headers,
+   labels, table rows, and modals in both Light and Dark themes.
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── 1. LIGHT THEME TEXT VISIBILITY ── */
+[data-theme="light"] {
+  color: #0F172A;
+}
+
+[data-theme="light"] h1:not(.btn *):not(.badge *),
+[data-theme="light"] h2:not(.btn *):not(.badge *),
+[data-theme="light"] h3:not(.btn *):not(.badge *),
+[data-theme="light"] h4:not(.btn *):not(.badge *),
+[data-theme="light"] h5:not(.btn *):not(.badge *),
+[data-theme="light"] h6:not(.btn *):not(.badge *),
+[data-theme="light"] .h1,
+[data-theme="light"] .h2,
+[data-theme="light"] .h3,
+[data-theme="light"] .h4,
+[data-theme="light"] .h5,
+[data-theme="light"] .h6,
+[data-theme="light"] .card-title,
+[data-theme="light"] .modal-title,
+[data-theme="light"] .offcanvas-title {
+  color: #0F172A !important;
+}
+
+/* Force elements using .text-white or .text-light to dark readable text in light mode */
+[data-theme="light"] .text-white:not(.btn):not(.btn *):not(.badge):not(.badge *):not(.badge-role):not(.badge-role *),
+[data-theme="light"] .text-light:not(.btn):not(.btn *):not(.badge):not(.badge *):not(.badge-role):not(.badge-role *),
+[data-theme="light"] .text-white-50:not(.btn):not(.btn *):not(.badge):not(.badge *),
 [data-theme="light"] h1.text-white,
 [data-theme="light"] h2.text-white,
 [data-theme="light"] h3.text-white,
@@ -4788,15 +4824,425 @@ html[data-theme="light"] .clerk-popover-item:hover {
 [data-theme="light"] h5.text-white,
 [data-theme="light"] h6.text-white,
 [data-theme="light"] p.text-white,
+[data-theme="light"] span.text-white:not(.btn *):not(.badge *),
+[data-theme="light"] div.text-white:not(.btn *):not(.badge *),
+[data-theme="light"] strong.text-white,
+[data-theme="light"] b.text-white,
+[data-theme="light"] td.text-white,
+[data-theme="light"] th.text-white,
+[data-theme="light"] li.text-white,
+[data-theme="light"] label.text-white,
 [data-theme="light"] .fw-bold.text-white {
   color: #0F172A !important;
 }
 
+/* Light Theme Secondary & Muted Contrast */
 [data-theme="light"] .text-secondary {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .text-muted,
+[data-theme="light"] small.text-muted,
+[data-theme="light"] .fs-8.text-muted,
+[data-theme="light"] .fs-7.text-muted {
   color: #64748B !important;
 }
 
-[data-theme="light"] .btn-close {
+/* Light Theme Form Controls & Inputs */
+[data-theme="light"] label,
+[data-theme="light"] .form-label {
+  color: #1E293B !important;
+  font-weight: 600;
+}
+
+[data-theme="light"] .form-control,
+[data-theme="light"] .form-select {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+  border-color: #CBD5E1 !important;
+}
+
+[data-theme="light"] .form-control::placeholder {
+  color: #94A3B8 !important;
+}
+
+/* Light Theme Modals */
+[data-theme="light"] .modal-content {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+  border: 1px solid #E2E8F0 !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme="light"] .modal-header {
+  border-bottom: 1px solid #E2E8F0 !important;
+}
+
+[data-theme="light"] .modal-footer {
+  border-top: 1px solid #E2E8F0 !important;
+}
+
+[data-theme="light"] .modal-body {
+  color: #1E293B !important;
+}
+
+/* Light Theme Cards & Surfaces */
+[data-theme="light"] .card,
+[data-theme="light"] .hub-card,
+[data-theme="light"] .sa-card,
+[data-theme="light"] .sa-kpi-card {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  color: #0F172A !important;
+}
+
+/* Light Theme Dropdowns */
+[data-theme="light"] .dropdown-menu {
+  background-color: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important;
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .dropdown-item {
+  color: #1E293B !important;
+}
+
+[data-theme="light"] .dropdown-item:hover,
+[data-theme="light"] .dropdown-item:focus {
+  background-color: #F1F5F9 !important;
+  color: #0F172A !important;
+}
+
+/* ── 2. DARK THEME TEXT VISIBILITY ── */
+[data-theme="dark"] body {
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] h5,
+[data-theme="dark"] h6,
+[data-theme="dark"] .h1,
+[data-theme="dark"] .h2,
+[data-theme="dark"] .h3,
+[data-theme="dark"] .h4,
+[data-theme="dark"] .h5,
+[data-theme="dark"] .h6,
+[data-theme="dark"] .card-title,
+[data-theme="dark"] .modal-title,
+[data-theme="dark"] .offcanvas-title {
+  color: #F8FAFC !important;
+}
+
+/* Force dark elements using .text-dark or .text-black to light readable text in dark mode */
+[data-theme="dark"] .text-dark:not(.btn):not(.btn *):not(.badge):not(.badge *),
+[data-theme="dark"] .text-black:not(.btn):not(.btn *):not(.badge):not(.badge *),
+[data-theme="dark"] .text-body:not(.btn):not(.btn *):not(.badge):not(.badge *),
+[data-theme="dark"] span.text-dark:not(.btn *):not(.badge *),
+[data-theme="dark"] div.text-dark:not(.btn *):not(.badge *),
+[data-theme="dark"] p.text-dark,
+[data-theme="dark"] td.text-dark,
+[data-theme="dark"] th.text-dark,
+[data-theme="dark"] li.text-dark,
+[data-theme="dark"] label.text-dark {
+  color: #F8FAFC !important;
+}
+
+/* Dark Theme Secondary & Muted Contrast */
+[data-theme="dark"] .text-secondary {
+  color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .text-muted,
+[data-theme="dark"] small.text-muted,
+[data-theme="dark"] .fs-8.text-muted,
+[data-theme="dark"] .fs-7.text-muted {
+  color: #94A3B8 !important;
+}
+
+/* Dark Theme Form Controls */
+[data-theme="dark"] label,
+[data-theme="dark"] .form-label {
+  color: #E2E8F0 !important;
+}
+
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select {
+  background-color: #141418 !important;
+  color: #F8FAFC !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+[data-theme="dark"] .form-control::placeholder {
+  color: #64748B !important;
+}
+
+/* Dark Theme Modals */
+[data-theme="dark"] .modal-content {
+  background-color: #141418 !important;
+  color: #F8FAFC !important;
+  border: 1px solid rgba(255, 255, 255, 0.10) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7) !important;
+}
+
+[data-theme="dark"] .modal-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .modal-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .modal-body {
+  color: #F8FAFC !important;
+}
+
+/* Dark Theme Dropdowns */
+[data-theme="dark"] .dropdown-menu {
+  background-color: #141418 !important;
+  border: 1px solid rgba(255, 255, 255, 0.10) !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6) !important;
+  color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .dropdown-item {
+  color: #E2E8F0 !important;
+}
+
+[data-theme="dark"] .dropdown-item:hover,
+[data-theme="dark"] .dropdown-item:focus {
+  background-color: #1F1F28 !important;
+  color: #FFFFFF !important;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   COLORFUL EXISTING ICONS ACROSS ALL DASHBOARDS
+   STRICT RULES:
+   1. NO NEW ICONS: Only recolor existing FontAwesome icons.
+   2. ZERO GLOW: No box-shadow glow, filter drop-shadow, or text-shadow.
+   3. DIVERSE PALETTE: Unique, high-contrast, vibrant SaaS colors.
+   ════════════════════════════════════════════════════════════════ */
+
+/* Globally strip all glow from all icons and icon boxes */
+i[class*="fa-"],
+.sa-kpi-icon,
+.metric-icon,
+.role-icon-box,
+.role-features li i,
+.sa-kpi-icon i,
+.metric-icon i {
+  box-shadow: none !important;
+  text-shadow: none !important;
   filter: none !important;
+  -webkit-filter: none !important;
+}
+
+/* 1. Currency, Maintenance, Invoices & Financial Collections — Emerald Green */
+i.fa-indian-rupee-sign,
+i.fa-receipt,
+i.fa-money-bill,
+i.fa-money-bill-wave,
+i.fa-file-invoice-dollar,
+i.fa-wallet,
+i.fa-credit-card,
+i.fa-chart-line {
+  color: #10B981 !important;
+}
+
+/* 2. Residents, Users, Directory, Profiles & Family — Royal Blue */
+i.fa-users,
+i.fa-user-group,
+i.fa-house-user,
+i.fa-user,
+i.fa-id-card,
+i.fa-user-plus,
+i.fa-user-gear,
+i.fa-user-check {
+  color: #3B82F6 !important;
+}
+
+/* 3. Complaints, Grievances, Tickets, Maintenance Tasks — Amber Orange */
+i.fa-list-check,
+i.fa-headset,
+i.fa-wrench,
+i.fa-triangle-exclamation:not(.text-danger),
+i.fa-pen-to-square {
+  color: #F59E0B !important;
+}
+
+/* 4. Gate, Visitors, Check-Ins, Deliveries, Vehicles — Vibrant Cyan */
+i.fa-shield-halved,
+i.fa-shield-cat,
+i.fa-id-card-clip,
+i.fa-box-open,
+i.fa-truck-fast,
+i.fa-clock-rotate-left,
+i.fa-user-clock,
+i.fa-car,
+i.fa-motorcycle {
+  color: #06B6D4 !important;
+}
+
+/* 5. Amenities, Pool, Venues, Club House, Sports — Electric Purple */
+i.fa-swimming-pool,
+i.fa-shapes,
+i.fa-dumbbell,
+i.fa-calendar-check,
+i.fa-calendar-plus,
+i.fa-calendar-star,
+i.fa-calendar-day {
+  color: #8B5CF6 !important;
+}
+
+/* 6. Notices, Announcements, Official Broadcasts, Alerts — Rose Pink */
+i.fa-bullhorn,
+i.fa-envelope-open-text,
+i.fa-bell.text-warning,
+i.fa-bell {
+  color: #EC4899 !important;
+}
+
+/* 7. Documents, Bye-Laws, PDF Files, Audits — Clean Teal */
+i.fa-folder-open,
+i.fa-file-lines,
+i.fa-file-pdf,
+i.fa-file-csv,
+i.fa-file-signature {
+  color: #14B8A6 !important;
+}
+
+/* 8. Polls, AGM Voting, Community Governance — Indigo */
+i.fa-square-poll-vertical,
+i.fa-check-to-slot,
+i.fa-users-gear {
+  color: #6366F1 !important;
+}
+
+/* 9. Towers, Flats, Occupancy, Units — Vivid Sky Blue */
+i.fa-building,
+i.fa-building-circle-check,
+i.fa-city,
+i.fa-house-chimney {
+  color: #0EA5E9 !important;
+}
+
+/* 10. Emergency SOS, Alarm, Danger — Crimson Red */
+i.fa-radiation,
+i.fa-circle-exclamation,
+i.fa-triangle-exclamation.text-danger,
+i.fa-fire,
+i.fa-life-ring {
+  color: #EF4444 !important;
+}
+
+/* 11. System Owner, Platform Master, Super Admin Settings — Rich Violet */
+i.fa-crown,
+i.fa-gear,
+i.fa-sliders,
+i.fa-screwdriver-wrench,
+i.fa-lock {
+  color: #A855F7 !important;
+}
+
+/* ── Metric & KPI Icon Container Zero-Glow & Clean Styling ── */
+.sa-kpi-icon,
+.metric-icon {
+  border-radius: 12px !important;
+  box-shadow: none !important;
+  filter: none !important;
+  text-shadow: none !important;
+}
+
+.metric-icon.bg-icon-success,
+.sa-kpi-icon.icon-emerald {
+  background: rgba(16, 185, 129, 0.12) !important;
+  color: #10B981 !important;
+}
+
+.metric-icon.bg-icon-primary,
+.sa-kpi-icon.icon-blue {
+  background: rgba(59, 130, 246, 0.12) !important;
+  color: #3B82F6 !important;
+}
+
+.metric-icon.bg-icon-warning,
+.sa-kpi-icon.icon-amber {
+  background: rgba(245, 158, 11, 0.12) !important;
+  color: #F59E0B !important;
+}
+
+.metric-icon.bg-icon-info,
+.sa-kpi-icon.icon-cyan {
+  background: rgba(6, 182, 212, 0.12) !important;
+  color: #06B6D4 !important;
+}
+
+.sa-kpi-icon.icon-purple {
+  background: rgba(139, 92, 246, 0.12) !important;
+  color: #8B5CF6 !important;
+}
+
+.sa-kpi-icon.icon-rose {
+  background: rgba(236, 72, 153, 0.12) !important;
+  color: #EC4899 !important;
+}
+
+.sa-kpi-icon.icon-red {
+  background: rgba(239, 68, 68, 0.12) !important;
+  color: #EF4444 !important;
+}
+
+/* ── Universal Badge Text & Background Contrast ── */
+[data-theme="light"] #adminModeBadge,
+[data-theme="light"] .badge.bg-warning {
+  background-color: #FEF3C7 !important;
+  color: #92400E !important;
+  border: 1px solid #FCD34D !important;
+}
+
+[data-theme="dark"] #adminModeBadge,
+[data-theme="dark"] .badge.bg-warning {
+  background-color: rgba(245, 158, 11, 0.18) !important;
+  color: #FBBF24 !important;
+  border: 1px solid rgba(245, 158, 11, 0.35) !important;
+}
+
+[data-theme="light"] .badge.bg-info {
+  background-color: #E0F2FE !important;
+  color: #0369A1 !important;
+  border: 1px solid #BAE6FD !important;
+}
+
+[data-theme="dark"] .badge.bg-info {
+  background-color: rgba(14, 165, 233, 0.18) !important;
+  color: #38BDF8 !important;
+  border: 1px solid rgba(14, 165, 233, 0.35) !important;
+}
+
+[data-theme="light"] .badge.bg-success {
+  background-color: #D1FAE5 !important;
+  color: #065F46 !important;
+  border: 1px solid #A7F3D0 !important;
+}
+
+[data-theme="dark"] .badge.bg-success {
+  background-color: rgba(16, 185, 129, 0.18) !important;
+  color: #34D399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+}
+
+[data-theme="light"] .badge.bg-danger {
+  background-color: #FEE2E2 !important;
+  color: #991B1B !important;
+  border: 1px solid #FECACA !important;
+}
+
+[data-theme="dark"] .badge.bg-danger {
+  background-color: rgba(239, 68, 68, 0.18) !important;
+  color: #F87171 !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
 }
 

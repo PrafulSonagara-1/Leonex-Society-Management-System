@@ -609,12 +609,8 @@
       <!-- Sidebar Header -->
       <div class="leonex-sidebar-header">
         <a href="${brandUrl}" class="leonex-brand" title="Leonex Smart Society Platform">
-          <div class="leonex-brand-logo">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-              <path d="M2 17l10 5 10-5"></path>
-              <path d="M2 12l10 5 10-5"></path>
-            </svg>
+          <div class="leonex-brand-logo" style="overflow: hidden; display: flex; align-items: center; justify-content: center; border-radius: 8px; padding: 2px;">
+            <img src="images/favicon.png" alt="Leonex Logo" style="width: 22px; height: 22px; object-fit: contain;">
           </div>
           <div class="leonex-brand-info">
             <div class="leonex-brand-title">Leonex <span>SSMS</span></div>
