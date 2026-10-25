@@ -297,9 +297,31 @@ app.get('/unauthorized', (req, res) => {
   `);
 });
 
-// Explicitly deny /data route (C6)
-app.use('/data', (req, res) => {
-  res.status(404).json({ error: 'Not found' });
+// Explicitly block private directories, seed files, environment files, and server code
+app.use((req, res, next) => {
+  const normalized = req.path.toLowerCase();
+  if (
+    normalized.startsWith('/data') ||
+    normalized.includes('seed.json') ||
+    normalized.includes('super-admin-credentials') ||
+    normalized.includes('super-admin-db') ||
+    normalized.startsWith('/.env') ||
+    normalized.startsWith('/.git') ||
+    normalized.endsWith('.env') ||
+    normalized.endsWith('.key') ||
+    normalized.endsWith('.pem') ||
+    normalized.endsWith('.db') ||
+    normalized === '/package.json' ||
+    normalized === '/package-lock.json' ||
+    normalized === '/config.js' ||
+    normalized === '/server.js' ||
+    normalized === '/mysql.js' ||
+    normalized === '/auth-routes.js' ||
+    normalized === '/super-admin-routes.js'
+  ) {
+    return res.status(404).json({ error: 'Not found' });
+  }
+  next();
 });
 
 // Serve public static frontend files (data/ directory is intentionally NOT served - C6)

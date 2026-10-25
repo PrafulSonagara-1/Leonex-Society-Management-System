@@ -7,6 +7,10 @@ const config = require('./config');
 
 const JWT_SECRET = config.jwtSecret;
 
+if (!JWT_SECRET) {
+  throw new Error('[SECURITY FATAL] Server cannot start: JWT_SECRET environment variable is missing.');
+}
+
 // Verify JWT token from Authorization header
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
@@ -17,7 +21,7 @@ function authenticateToken(req, res, next) {
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
     req.user = decoded;
     next();
   } catch (err) {

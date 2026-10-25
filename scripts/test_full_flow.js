@@ -1,3 +1,4 @@
+require('dotenv').config();
 const http = require('http');
 
 function post(path, body, headers = {}) {
@@ -71,10 +72,12 @@ async function run() {
   });
   console.log('Subscribe response:', subRes);
 
-  console.log('\n3. Testing Super Admin Login with King / K!ngpr@ful....');
+  const saUsername = process.env.SUPER_ADMIN_USERNAME || 'King';
+  const saPassword = process.env.SUPER_ADMIN_PASSWORD;
+  console.log(`\n3. Testing Super Admin Login with ${saUsername}...`);
   const loginRes = await post('/api/super-admin/auth/login', {
-    username: 'King',
-    password: 'K!ngpr@ful.'
+    username: saUsername,
+    password: saPassword
   });
   console.log('Login response:', loginRes.status, loginRes.data?.success, 'User:', loginRes.data?.user);
 

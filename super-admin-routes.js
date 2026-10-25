@@ -74,51 +74,41 @@ router.post('/auth/login', (req, res) => {
     }
 
     const expectedUsername = (config.superAdminUsername || 'King').toLowerCase();
-    const isMatch =
-      identifier === expectedUsername ||
-      identifier === 'king' ||
-      identifier === 'praful' ||
-      identifier === 'praful sonagara' ||
-      identifier === 'superadmin' ||
-      identifier === 'super admin' ||
-      identifier === 'system owner';
-
-    if (!isMatch) {
+    if (identifier !== expectedUsername) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid Super Admin name. Please check your username or name.'
+        message: 'Invalid Super Admin credentials. Access denied.'
       });
     }
 
     let isPasswordValid = false;
     if (config.superAdminPasswordHash) {
       isPasswordValid = bcrypt.compareSync(password, config.superAdminPasswordHash);
+    } else if (config.superAdminPassword) {
+      isPasswordValid = (password === config.superAdminPassword);
     } else {
-      isPasswordValid = (
-        password === (config.superAdminPassword || 'K!ngpr@ful.') ||
-        password === 'K!ngpr@ful.' ||
-        password === 'K!ngpr@ful' ||
-        password === 'Pr@fulking' ||
-        password === 'superadmin'
-      );
+      return res.status(401).json({
+        success: false,
+        message: 'Super Admin password authentication is not configured. Please use Clerk or configure SUPER_ADMIN_PASSWORD in environment variables.'
+      });
     }
 
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid Super Admin password. Access denied.'
+        message: 'Invalid Super Admin credentials. Access denied.'
       });
     }
 
     const token = jwt.sign(
       {
-        id: config.superAdminClerkUserId,
+        id: config.superAdminClerkUserId || 'superadmin',
         role: 'SUPER_ADMIN',
         isSuperAdmin: true,
         name: config.superAdminUsername || 'King'
       },
       config.jwtSecret,
-      { expiresIn: '7d' }
+      { algorithm: 'HS256', expiresIn: '7d' }
     );
 
     return res.json({
@@ -171,7 +161,7 @@ async function requireSuperAdmin(req, res, next) {
       if (token) {
         // A. Verify if it's an app-signed JWT (e.g., from password login)
         try {
-          const decoded = jwt.verify(token, config.jwtSecret);
+          const decoded = jwt.verify(token, config.jwtSecret, { algorithms: ['HS256'] });
           if (decoded && (decoded.role === 'SUPER_ADMIN' || decoded.isSuperAdmin)) {
             // FIX C4: Explicitly enforce that decoded.id equals configuredSuperAdminId!
             if (decoded.id === configuredSuperAdminId) {

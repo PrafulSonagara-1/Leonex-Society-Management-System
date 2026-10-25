@@ -6,55 +6,151 @@ service cloud.firestore {
     function isAuthenticated() {
       return request.auth != null;
     }
-    
-    function isAdmin() {
+
+    function getUserDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isSocietyAdmin() {
       return isAuthenticated() && (
-        request.auth.token.email == 'jenilbarad089@gmail.com' ||
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Admin'
+        request.auth.token.role == 'Admin' ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && getUserDoc().role == 'Admin')
       );
     }
 
-    // Users Collection
+    function isSecurityGuard() {
+      return isAuthenticated() && (
+        request.auth.token.role == 'Security Guard' ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && getUserDoc().role == 'Security Guard')
+      );
+    }
+
+    function isCommitteeMember() {
+      return isAuthenticated() && (
+        request.auth.token.role == 'Committee Member' ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && getUserDoc().role == 'Committee Member')
+      );
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // ─── Users Collection ───
+    // Residents can only read and update their own profile.
+    // Privileged fields (role, status, approvedAt, approvedBy) can only be updated by Admins.
     match /users/{userId} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin() || request.auth.uid == userId;
+      allow read: if isSocietyAdmin() || isCommitteeMember() || isOwner(userId);
+      
+      // Self registration is restricted to Resident role
+      allow create: if isOwner(userId) && request.resource.data.role in ['Resident', 'Security Guard'];
+      
+      // Admins can update any field (e.g. approve/reject, assign flat);
+      // Users can only update their own non-privileged profile fields
+      allow update: if isSocietyAdmin() || (
+        isOwner(userId) &&
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'status', 'approvedAt', 'approvedBy', 'id', 'uid'])
+      );
+      
+      allow delete: if isSocietyAdmin();
     }
 
-    // Complaints Collection
+    // ─── Complaints Collection ───
+    // Residents can read and create their own complaints; Admins/Committee manage all.
     match /complaints/{complaintId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
-      allow update, delete: if isAdmin();
+      allow read: if isSocietyAdmin() || isCommitteeMember() || (
+        isAuthenticated() && (
+          resource.data.userId == request.auth.uid ||
+          resource.data.residentId == request.auth.uid
+        )
+      );
+      allow create: if isAuthenticated() && (
+        request.resource.data.userId == request.auth.uid ||
+        request.resource.data.residentId == request.auth.uid
+      );
+      allow update: if isSocietyAdmin() || isCommitteeMember() || (
+        isAuthenticated() &&
+        (resource.data.userId == request.auth.uid || resource.data.residentId == request.auth.uid) &&
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['status', 'assignedTo'])
+      );
+      allow delete: if isSocietyAdmin();
     }
 
-    // Maintenance Bills Collection
+    // ─── Maintenance Bills Collection ───
+    // Residents can only view their own bills; Admins manage billing.
     match /maintenance/{billId} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin() || (isAuthenticated() && request.resource.data.status == 'Paid');
+      allow read: if isSocietyAdmin() || isCommitteeMember() || (
+        isAuthenticated() && (
+          resource.data.userId == request.auth.uid ||
+          (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+           resource.data.flat == getUserDoc().flat)
+        )
+      );
+      allow create: if isSocietyAdmin();
+      allow update: if isSocietyAdmin() || (
+        isAuthenticated() &&
+        (resource.data.userId == request.auth.uid || resource.data.flat == getUserDoc().flat) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'paidAt', 'paymentMethod', 'transactionId']) &&
+        request.resource.data.status == 'Paid'
+      );
+      allow delete: if isSocietyAdmin();
     }
 
-    // Visitor Gate Pass Collection
+    // ─── Visitor Gate Pass Collection ───
+    // Guards & Admins can manage all passes; Residents see only their flat's visitors.
     match /visitors/{visitorId} {
-      allow read, create, update: if isAuthenticated();
-      allow delete: if isAdmin();
+      allow read: if isSocietyAdmin() || isSecurityGuard() || (
+        isAuthenticated() && (
+          resource.data.userId == request.auth.uid ||
+          (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+           resource.data.flat == getUserDoc().flat)
+        )
+      );
+      allow create: if isSocietyAdmin() || isSecurityGuard() || (
+        isAuthenticated() && (
+          request.resource.data.userId == request.auth.uid ||
+          (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+           request.resource.data.flat == getUserDoc().flat)
+        )
+      );
+      allow update: if isSocietyAdmin() || isSecurityGuard() || (
+        isAuthenticated() &&
+        (resource.data.userId == request.auth.uid || resource.data.flat == getUserDoc().flat)
+      );
+      allow delete: if isSocietyAdmin();
     }
 
-    // Notices Collection
+    // ─── Notices Collection ───
+    // Society-wide broadcast notices are readable by all authenticated residents.
     match /notices/{noticeId} {
       allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      allow write: if isSocietyAdmin() || isCommitteeMember();
     }
 
-    // Amenities & Bookings Collection
+    // ─── Amenities Collection ───
+    // Amenity details are readable by all authenticated users; edited by Admin.
     match /amenities/{amenityId} {
       allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      allow write: if isSocietyAdmin();
     }
 
+    // ─── Bookings Collection ───
+    // Residents can read and create their own bookings; Admins manage all.
     match /bookings/{bookingId} {
+      allow read: if isSocietyAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isSocietyAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+    }
+
+    // ─── Polls Collection ───
+    // Polls can be read by all authenticated residents; managed by Admins and Committee.
+    match /polls/{pollId} {
       allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
-      allow update, delete: if isAdmin() || request.auth.uid == resource.data.userId;
+      allow create, delete: if isSocietyAdmin() || isCommitteeMember();
+      allow update: if isSocietyAdmin() || isCommitteeMember() || (
+        isAuthenticated() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasAny(['options', 'totalVotes', 'voters'])
+      );
     }
   }
 }

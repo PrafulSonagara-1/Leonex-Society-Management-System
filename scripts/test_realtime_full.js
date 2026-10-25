@@ -1,3 +1,4 @@
+require('dotenv').config();
 const http = require('http');
 
 function request(method, path, body, headers = {}) {
@@ -98,10 +99,12 @@ async function runTest() {
   console.log(`  - Subscriber in snapshot: ${subFoundInSnap ? 'YES (PASSED)' : 'NO (FAILED)'}`);
 
   // 6. Login as Super Admin and fetch protected tables
-  console.log(`\n6. Authenticating Super Admin King...`);
+  const saUsername = process.env.SUPER_ADMIN_USERNAME || 'King';
+  const saPassword = process.env.SUPER_ADMIN_PASSWORD;
+  console.log(`\n6. Authenticating Super Admin ${saUsername}...`);
   const loginRes = await request('POST', '/api/super-admin/auth/login', {
-    username: 'King',
-    password: 'K!ngpr@ful.'
+    username: saUsername,
+    password: saPassword
   });
   const token = loginRes.data?.token;
   console.log(`  - Super Admin Login: ${loginRes.status === 200 && token ? 'SUCCESS' : 'FAILED'}`);

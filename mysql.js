@@ -485,43 +485,64 @@ class DatabaseManager {
     }
   }
 
+  assertPersistedWrite(err, operation) {
+    const isProd = process.env.NODE_ENV === 'production' || !!process.env.VERCEL;
+    if (isProd) {
+      const detail = err ? `: ${err.message}` : ' (database is offline or unreachable)';
+      throw new Error(`[Database Error] Cannot persist ${operation}${detail}. Production requires an active persistent SQL database.`);
+    }
+  }
+
   async init() {
-    const host = process.env.DB_HOST || 'localhost';
-    const port = parseInt(process.env.DB_PORT || '3306', 10);
-    const user = process.env.DB_USER || 'root';
-    const password = process.env.DB_PASSWORD || '';
-    const database = process.env.DB_NAME || 'society_hub';
+    const isProd = process.env.NODE_ENV === 'production' || !!process.env.VERCEL;
+    const dbUrl = process.env.DATABASE_URL;
 
     try {
-      // Connect to MySQL server and ensure target database exists
-      const initialConn = await mysql.createConnection({
-        host,
-        port,
-        user,
-        password,
-        connectTimeout: 2500
-      });
+      if (dbUrl) {
+        this.pool = mysql.createPool(dbUrl);
+        await this.pool.query('SELECT 1 + 1 AS test');
+        this.isOnline = true;
+        console.log(`\x1b[32m✔ [MySQL] Connected via DATABASE_URL\x1b[0m`);
+      } else {
+        const host = process.env.DB_HOST || 'localhost';
+        const port = parseInt(process.env.DB_PORT || '3306', 10);
+        const user = process.env.DB_USER || 'root';
+        const password = process.env.DB_PASSWORD || '';
+        const database = process.env.DB_NAME || 'society_hub';
 
-      await initialConn.query(`CREATE DATABASE IF NOT EXISTS \`${database}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`);
-      await initialConn.end();
+        // Connect to MySQL server and ensure target database exists if privileges permit
+        try {
+          const initialConn = await mysql.createConnection({
+            host,
+            port,
+            user,
+            password,
+            connectTimeout: 2500
+          });
+          await initialConn.query(`CREATE DATABASE IF NOT EXISTS \`${database}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`);
+          await initialConn.end();
+        } catch (dbCreateErr) {
+          // If user lacks CREATE DATABASE privilege (e.g. managed DB), proceed to connect directly
+        }
 
-      // Create pool with target database
-      this.pool = mysql.createPool({
-        host,
-        port,
-        user,
-        password,
-        database,
-        waitForConnections: true,
-        connectionLimit: 10,
-        queueLimit: 0,
-        enableKeepAlive: true,
-        keepAliveInitialDelay: 0
-      });
+        // Create pool with target database
+        this.pool = mysql.createPool({
+          host,
+          port,
+          user,
+          password,
+          database,
+          waitForConnections: true,
+          connectionLimit: 10,
+          queueLimit: 0,
+          enableKeepAlive: true,
+          keepAliveInitialDelay: 0
+        });
 
-      await this.pool.query('SELECT 1 + 1 AS test');
-      this.isOnline = true;
-      console.log(`\x1b[32m✔ [MySQL] Connected to database: ${database} at ${host}:${port}\x1b[0m`);
+        await this.pool.query('SELECT 1 + 1 AS test');
+        this.isOnline = true;
+        console.log(`\x1b[32m✔ [MySQL] Connected to database: ${database} at ${host}:${port}\x1b[0m`);
+      }
 
       // Initialize normalized tables
       await this.initTables();
@@ -532,7 +553,11 @@ class DatabaseManager {
       this.isOnline = false;
       this.pool = null;
       console.log(`\x1b[33m⚠ [MySQL] Service offline or unreachable (${err.message}).`);
-      console.log(`  Operating with resilient local fallback store for Super Admin & auth APIs.\x1b[0m`);
+      if (isProd) {
+        console.error(`\x1b[31m[CRITICAL] Running in production without a persistent SQL database! Writes will fail safely.\x1b[0m`);
+      } else {
+        console.log(`  Operating with resilient local fallback store for local development.\x1b[0m`);
+      }
     }
   }
 
@@ -798,7 +823,10 @@ class DatabaseManager {
         newRecord.id = result.insertId;
       } catch (err) {
         console.warn('[MySQL createSociety error]', err.message);
+        this.assertPersistedWrite(err, 'createSociety');
       }
+    } else {
+      this.assertPersistedWrite(null, 'createSociety');
     }
 
     newRecord.id = newRecord.id || Date.now();
@@ -822,7 +850,10 @@ class DatabaseManager {
         );
       } catch (err) {
         console.warn('[MySQL updateSocietyStatus error]', err.message);
+        this.assertPersistedWrite(err, 'updateSocietyStatus');
       }
+    } else {
+      this.assertPersistedWrite(null, 'updateSocietyStatus');
     }
 
     const soc = this.fallbackStore.societies.find(s => s.society_id === societyId);
@@ -1382,7 +1413,10 @@ class DatabaseManager {
         );
       } catch (e) {
         console.warn('[MySQL saveContactMessage error]', e.message);
+        this.assertPersistedWrite(e, 'saveContactMessage');
       }
+    } else {
+      this.assertPersistedWrite(null, 'saveContactMessage');
     }
 
     return contact;
@@ -1454,7 +1488,10 @@ class DatabaseManager {
         );
       } catch (e) {
         console.warn('[MySQL saveSubscriber error]', e.message);
+        this.assertPersistedWrite(e, 'saveSubscriber');
       }
+    } else {
+      this.assertPersistedWrite(null, 'saveSubscriber');
     }
 
     return exists || subscriber;

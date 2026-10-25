@@ -14,6 +14,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
+const config = require('./config');
 const { authenticateToken, requireRole, JWT_SECRET } = require('./auth-middleware');
 const db = require('./mysql');
 
@@ -32,7 +33,7 @@ function generateToken(user) {
   return jwt.sign(
     { id: user.id, email: user.email, name: user.name, role: user.role, flat: user.flat, status: user.status || 'Approved' },
     JWT_SECRET,
-    { expiresIn: TOKEN_EXPIRY }
+    { algorithm: 'HS256', expiresIn: TOKEN_EXPIRY }
   );
 }
 function safeUser(user) {
@@ -219,15 +220,23 @@ router.post('/send-otp', async (req, res) => {
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
     await db.saveOTP(clean, otpCode, 5); // Valid for 5 minutes
 
-    console.log(`\x1b[36m[OTP Service] Generated OTP [${otpCode}] for ${clean} (Valid for 5 minutes)\x1b[0m`);
+    if (!config.isProduction) {
+      console.log(`\x1b[36m[OTP Service] Generated OTP for ${clean} (Valid for 5 minutes)\x1b[0m`);
+    }
 
-    return res.json({
+    const resPayload = {
       success: true,
       message: `Verification code sent to your ${isEmail ? 'email address' : 'mobile number'}.`,
       identifier: clean,
-      targetType: isEmail ? 'email' : 'mobile',
-      devOtp: otpCode // Provided for quick testing in dev/demo
-    });
+      targetType: isEmail ? 'email' : 'mobile'
+    };
+
+    // Never leak OTP in production. Only attach devOtp if explicitly enabled in local dev
+    if (config.allowDevOtp) {
+      resPayload.devOtp = otpCode;
+    }
+
+    return res.json(resPayload);
   } catch (err) {
     console.error('Send OTP error:', err);
     return res.status(500).json({ success: false, message: 'Failed to generate OTP. Please try again.' });
@@ -270,7 +279,7 @@ router.post('/verify-otp', async (req, res) => {
         username: isEmail ? clean.split('@')[0] : `user_${clean}`,
         password: '',
         name: displayName,
-        role: role || 'Resident',
+        role: 'Resident', // Strictly enforce Resident role on self-service OTP verification to prevent privilege escalation
         flat: '',
         email: isEmail ? clean : '',
         phone: isEmail ? '' : clean,
@@ -418,6 +427,11 @@ router.post('/reject', authenticateToken, requireRole('Admin'), (req, res) => {
 router.post('/update-status', authenticateToken, requireRole('Admin'), (req, res) => {
   try {
     const { userId, status } = req.body;
+    const validStatuses = ['Pending', 'Approved', 'Rejected', 'Suspended'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ success: false, message: 'Invalid status value.' });
+    }
+
     const seed = readSeed();
     const user = seed.users.find(u => u.id === userId);
     if (!user) {
@@ -425,8 +439,9 @@ router.post('/update-status', authenticateToken, requireRole('Admin'), (req, res
     }
     user.status = status;
     writeSeed(seed);
+    return res.json({ success: true, message: `Status updated to ${status}.`, user: safeUser(user) });
   } catch (err) {
-    return res.status(500).json({ success: false, message: 'Server error.' });
+    return res.status(500).json({ success: false, message: 'Server error during status update.' });
   }
 });
 
